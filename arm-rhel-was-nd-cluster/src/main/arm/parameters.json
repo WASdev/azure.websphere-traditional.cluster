@@ -1,0 +1,69 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "value": "${artifactsLocationBase}/${git.proj}/${git.tag}/${project.artifactId}/src/main/"
+        },
+        "dynamic": {
+            "value": "${dynamic}"
+        },
+        "numberOfNodes": {
+            "value": "${numberOfNodes}"
+        },
+        "dmgrVMPrefix": {
+            "value": "${dmgrVMPrefix}"
+        },
+        "managedVMPrefix": {
+            "value": "${managedVMPrefix}"
+        },
+        "dnsLabelPrefix":{
+            "value": "${dnsLabelPrefix}"
+        },
+        "vmAdminId": {
+            "value": "${vmAdminId}"
+        },
+        "vmAdminPwd": {
+            "value": "${vmAdminPwd}"
+        },
+        "adminUser": {
+            "value": "${adminUser}"
+        },
+        "adminPwd": {
+            "value": "${adminPwd}"
+        },
+        "connectToDB2Server": {
+            "value": "${connectToDB2Server}"
+        },
+        "db2ServerName": {
+            "value": "${db2ServerName}"
+        },
+        "db2ServerPortNumber": {
+            "value": "${db2ServerPortNumber}"
+        },
+        "db2DBName": {
+            "value": "${db2DBName}"
+        },
+        "db2DBUserName": {
+            "value": "${db2DBUserName}"
+        },
+        "db2DBUserPwd": {
+            "value": "${db2DBUserPwd}"
+        },
+        "db2DSJndiName": {
+            "value": "${db2DSJndiName}"
+        },
+        "connectToELK": {
+            "value": "${connectToELK}"
+        },
+        "cloudId": {
+            "value": "${cloudId}"
+        },
+        "cloudAuthUser": {
+            "value": "${cloudAuthUser}"
+        },
+        "cloudAuthPwd": {
+            "value": "${cloudAuthPwd}"
+        }
+    }
+}

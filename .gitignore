@@ -1,0 +1,15 @@
+test-files
+target
+.project
+.settings
+.classpath
+*.versionsBackup
+.vscode
+
+**/test-files
+**/target
+**/.project
+**/.settings
+**/.classpath
+**/*.versionsBackup
+.DS_Store

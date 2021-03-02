@@ -1,0 +1,10 @@
+{
+  "$schema": "https://aka.ms/azure-quickstart-templates-metadata-schema#",
+  "type": "QuickStart",
+  "itemDisplayName": "Deploy RHEL VMs to existing WebSphere Server cluster.",
+  "icon": "blankTemplate",
+  "description": "This template allows you to deploy RedHat Enterprise Linux VMs and add them to the existing cluster of WebSphere Application Server ND Traditional V9.",
+  "summary": "This template takes a minimum amount of parameters to deploy RedHat Enterprise Linux VMs and add them to the existing cluster of WebSphere Application Server ND Traditional V9.",
+  "githubUsername": "majguo",
+  "dateUpdated": "2019-12-26"
+}
