@@ -4,107 +4,106 @@
     "parameters": {
         "_artifactsLocation": {
             "type": "string",
-            "defaultValue": "[deployment().properties.templateLink.uri]"
+            "defaultValue": "[deployment().properties.templateLink.uri]",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            }
         },
         "_artifactsLocationSasToken": {
             "type": "securestring",
-            "defaultValue": ""
+            "defaultValue": "",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            }
         },
         "location": {
             "type": "string",
-            "defaultValue": "[resourceGroup().location]"
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "ibmUserId": {
+            "type": "string",
+            "metadata": {
+                "description": "Username of your IBMid account."
+            }
+        },
+        "ibmUserPwd": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password of your IBMid account."
+            }
         },
         "dynamic": {
-            "defaultValue": false,
-            "type": "bool"
+            "type": "bool",
+            "metadata": {
+                "description": "Boolean value indicating, if the cluster is a dynamic one or not."
+            }
         },
         "numberOfNodes": {
-            "type": "int"
-        },
-        "dmgrVMPrefix": {
-            "type": "string"
-        },
-        "managedVMPrefix": {
-            "type": "string"
-        },
-        "dnsLabelPrefix": {
-            "type": "string"
+            "type": "int",
+            "metadata": {
+                "description": "The number of VMs to create, with one deployment manager and multiple worker nodes for the remainings."
+            }
         },
         "vmSize": {
-            "defaultValue": "Standard_D2_v3",
-            "type": "string"
+            "type": "string",
+            "metadata": {
+                "description": "The size of virtual machine to provision for each node of the cluster."
+            }            
         },
-        "osDiskType": {
-            "defaultValue": "StandardSSD_LRS",
-            "type": "string"
+        "dmgrVMPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "The string to prepend to the name of the deployment manager server."
+            }
         },
-        "addressPrefix": {
-            "defaultValue": "10.0.0.0/16",
-            "type": "string"
+        "managedVMPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "The string to prepend to the name of the managed server."
+            }
         },
-        "subnetName": {
-            "defaultValue": "subnet01",
-            "type": "string"
+        "dnsLabelPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "The string to prepend to the DNS label."
+            }
         },
-        "subnetAddressPrefix": {
-            "defaultValue": "10.0.1.0/24",
-            "type": "string"
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for the Virtual Machine."
+            }
         },
-        "vmAdminId": {
-            "type": "string"
+        "adminPasswordOrKey": {
+            "type": "securestring",
+            "metadata": {
+                "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+            }
         },
-        "vmAdminPwd": {
-            "type": "securestring"
+        "authenticationType": {
+            "type": "string",
+            "allowedValues": [
+                "sshPublicKey",
+                "password"
+            ],
+            "metadata": {
+                "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+            }
         },
-        "adminUser": {
-            "type": "string"
+        "wasUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for WebSphere admin."
+            }
         },
-        "adminPwd": {
-            "type": "securestring"
-        },
-        "connectToDB2Server": {
-            "defaultValue": false,
-            "type": "bool"
-        },
-        "db2ServerName": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "db2ServerPortNumber": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "db2DBName": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "db2DBUserName": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "db2DBUserPwd": {
-            "defaultValue": "",
-            "type": "securestring"
-        },
-        "db2DSJndiName": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "connectToELK": {
-            "defaultValue": false,
-            "type": "bool"
-        },
-        "cloudId": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "cloudAuthUser": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "cloudAuthPwd": {
-            "defaultValue": "",
-            "type": "securestring"
+        "wasPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for WebSphere admin."
+            }
         },
         "guidValue": {
             "defaultValue": "[newGuid()]",
@@ -112,12 +111,24 @@
         }
     },
     "variables": {
-        "const_arguments1": "[concat(' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',variables('name_dmgrVM'),' -r ',sub(parameters('numberOfNodes'),1),' -x ',parameters('dynamic'))]",
-        "const_arguments2": "[if(parameters('connectToDB2Server'),concat(' -n \"',parameters('db2ServerName'),'\" -t ',parameters('db2ServerPortNumber'),' -d ',parameters('db2DBName'),' -i ',parameters('db2DBUserName'),' -s ',parameters('db2DBUserPwd'),' -j ',parameters('db2DSJndiName')),' -n  -t  -d  -i  -s  -j ')]",
-        "const_arguments3": "[if(parameters('connectToELK'),concat(' -g ',parameters('cloudId'),' -o ',parameters('cloudAuthUser'),' -k ',parameters('cloudAuthPwd')),' -g  -o  -k ')]",
+        "const_addressPrefix": "10.0.0.0/16",
+        "const_arguments": "[concat(' -m ',parameters('wasUsername'),' -c ',parameters('wasPassword'),' -h ',variables('name_dmgrVM'),' -r ',sub(parameters('numberOfNodes'),1),' -x ',parameters('dynamic'))]",
         "const_dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
+        "const_linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('adminPasswordOrKey')]"
+                    }
+                ]
+            }
+        },
         "const_managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
         "const_scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
+        "const_subnetAddressPrefix": "10.0.1.0/24",
+        "const_subnetName": "subnet01",
         "name_dmgrVM": "[concat(parameters('dmgrVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
         "name_networkSecurityGroup": "[concat(variables('const_dnsLabelPrefix'), '-nsg')]",
         "name_publicIPAddress": "[concat(variables('name_dmgrVM'), '-ip')]",
@@ -125,18 +136,18 @@
         "name_virtualNetwork": "[concat(variables('const_dnsLabelPrefix'), '-vnet')]",
         "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
-        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), parameters('subnetName'))]",
+        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('const_subnetName'))]",
         "ref_virtualNetwork": "[resourceId('Microsoft.Network/virtualNetworks', variables('name_virtualNetwork'))]"
     },
     "resources": [
         {
-            "apiVersion": "2019-09-01",
-            "name": "${tracking.pid}",
             "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.start}",
             "properties": {
                 "mode": "Incremental",
                 "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "resources": [
                     ]
@@ -145,7 +156,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion2}",
             "name": "[variables('name_storageAccount')]",
             "location": "[parameters('location')]",
             "sku": {
@@ -157,7 +168,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_networkSecurityGroup')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -185,7 +196,7 @@
         },
         {
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_virtualNetwork')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -194,7 +205,7 @@
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
-                        "[parameters('addressPrefix')]"
+                        "[variables('const_addressPrefix')]"
                     ]
                 },
                 "enableDdosProtection": false,
@@ -203,14 +214,14 @@
         },
         {
             "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "2019-06-01",
-            "name": "[concat(variables('name_virtualNetwork'), '/', parameters('subnetName'))]",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('name_virtualNetwork'), '/', variables('const_subnetName'))]",
             "dependsOn": [
                 "[variables('ref_virtualNetwork')]",
                 "[variables('ref_networkSecurityGroup')]"
             ],
             "properties": {
-                "addressPrefix": "[parameters('subnetAddressPrefix')]",
+                "addressPrefix": "[variables('const_subnetAddressPrefix')]",
                 "networkSecurityGroup": {
                     "id": "[variables('ref_networkSecurityGroup')]"
                 }
@@ -218,7 +229,7 @@
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-ip')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -234,7 +245,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-if')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -264,7 +275,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex()))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -280,23 +291,25 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "microsoft_javaeeonazure_test",
-                        "offer": "rhel74-was-jdk-preview",
-                        "sku": "905",
-                        "version": "9.0.5"
+                        "publisher": "${image.publisher}",
+                        "offer": "${image.offer}",
+                        "sku": "${image.sku}",
+                        "version": "latest"
                     },
                     "osDisk": {
                         "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-disk')]",
                         "createOption": "FromImage",
                         "managedDisk": {
-                            "storageAccountType": "[parameters('osDiskType')]"
+                            "storageAccountType": "Standard_LRS"
                         }
                     }
                 },
                 "osProfile": {
                     "computerName": "[if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex()))]",
-                    "adminUsername": "[parameters('vmAdminId')]",
-                    "adminPassword": "[parameters('vmAdminPwd')]"
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPasswordOrKey')]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]",
+                    "customData": "[base64(concat(parameters('ibmUserId'), ',', parameters('ibmUserPwd')))]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -308,19 +321,19 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[reference(variables('ref_storage'), '2019-06-01').primaryEndpoints.blob]"
+                        "storageUri": "[reference(variables('ref_storage'), '${azure.apiVersion2}').primaryEndpoints.blob]"
                     }
                 }
             },
             "plan": {
-                "name": "905",
-                "publisher": "microsoft_javaeeonazure_test",
-                "product": "rhel74-was-jdk-preview"
+                "name": "${image.sku}",
+                "publisher": "${image.publisher}",
+                "product": "${image.offer}"
             }
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '/install')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -339,13 +352,26 @@
                     "fileUris": [
                         "[uri(variables('const_scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]",
                         "[uri(variables('const_scriptLocation'), concat('create-cluster.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('create-dcluster.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('create-ds.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('enable-hpel.template', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('get_custom_property.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('set_custom_property.py', parameters('_artifactsLocationSasToken')))]"
+                        "[uri(variables('const_scriptLocation'), concat('create-dcluster.py', parameters('_artifactsLocationSasToken')))]"
                     ],
-                    "commandToExecute": "[concat('sh install.sh -f ', equals(copyIndex(), 0), variables('const_arguments1'), variables('const_arguments2'), variables('const_arguments3'))]"
+                    "commandToExecute": "[concat('sh install.sh -f ', equals(copyIndex(), 0), variables('const_arguments'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.end}",
+            "dependsOn": [
+                "virtualMachineExtensionLoop"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
                 }
             }
         }
@@ -385,7 +411,7 @@
         },
         "subnetName": {
             "type": "string",
-            "value": "[parameters('subnetName')]"
+            "value": "[variables('const_subnetName')]"
         },
         "adminSecuredConsole": {
             "type": "string",
