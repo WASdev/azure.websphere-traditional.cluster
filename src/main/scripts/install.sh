@@ -191,9 +191,6 @@ if [ ${result} = Unentitled ]; then
     exit 1
 fi
 
-# Update applications installed on the system
-yum update -y
-
 # Turn off firewall
 systemctl stop firewalld
 systemctl disable firewalld
