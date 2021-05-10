@@ -15,6 +15,21 @@
 #  limitations under the License.
 
 create_dmgr_profile() {
+    # Open ports for deployment manager
+    firewall-cmd --zone=public --add-port=9060/tcp --permanent
+    firewall-cmd --zone=public --add-port=9043/tcp --permanent
+    firewall-cmd --zone=public --add-port=9809/tcp --permanent
+    firewall-cmd --zone=public --add-port=7277/tcp --permanent
+    firewall-cmd --zone=public --add-port=9402/tcp --permanent
+    firewall-cmd --zone=public --add-port=9403/tcp --permanent
+    firewall-cmd --zone=public --add-port=9352/tcp --permanent
+    firewall-cmd --zone=public --add-port=9632/tcp --permanent
+    firewall-cmd --zone=public --add-port=9100/tcp --permanent
+    firewall-cmd --zone=public --add-port=9401/tcp --permanent
+    firewall-cmd --zone=public --add-port=8879/tcp --permanent
+    
+    firewall-cmd --reload
+
     profileName=$1
     hostName=$2
     nodeName=$3
@@ -109,6 +124,42 @@ create_cluster() {
 }
 
 create_custom_profile() {
+    # Open ports for federated application server
+    firewall-cmd --zone=public --add-port=9080/tcp --permanent
+    firewall-cmd --zone=public --add-port=9443/tcp --permanent
+    firewall-cmd --zone=public --add-port=2809/tcp --permanent
+    firewall-cmd --zone=public --add-port=9405/tcp --permanent
+    firewall-cmd --zone=public --add-port=9406/tcp --permanent
+    firewall-cmd --zone=public --add-port=9353/tcp --permanent
+    firewall-cmd --zone=public --add-port=9633/tcp --permanent
+    firewall-cmd --zone=public --add-port=5558/tcp --permanent
+    firewall-cmd --zone=public --add-port=5578/tcp --permanent
+    firewall-cmd --zone=public --add-port=9100/tcp --permanent
+    firewall-cmd --zone=public --add-port=9404/tcp --permanent
+    firewall-cmd --zone=public --add-port=7276/tcp --permanent
+    firewall-cmd --zone=public --add-port=7286/tcp --permanent
+    firewall-cmd --zone=public --add-port=5060/tcp --permanent
+    firewall-cmd --zone=public --add-port=5061/tcp --permanent
+    firewall-cmd --zone=public --add-port=8880/tcp --permanent
+
+    # Open ports for node agent server
+    firewall-cmd --zone=public --add-port=2810/tcp --permanent
+    firewall-cmd --zone=public --add-port=9201/tcp --permanent
+    firewall-cmd --zone=public --add-port=9202/tcp --permanent
+    firewall-cmd --zone=public --add-port=9354/tcp --permanent
+    firewall-cmd --zone=public --add-port=9626/tcp --permanent
+    firewall-cmd --zone=public --add-port=7272/tcp --permanent
+    firewall-cmd --zone=public --add-port=5001/tcp --permanent
+    firewall-cmd --zone=public --add-port=5000/tcp --permanent
+    firewall-cmd --zone=public --add-port=9900/tcp --permanent
+    firewall-cmd --zone=public --add-port=9901/tcp --permanent
+    firewall-cmd --zone=public --add-port=8878/tcp --permanent
+    firewall-cmd --zone=public --add-port=7061/tcp --permanent
+    firewall-cmd --zone=public --add-port=11001/tcp --permanent
+    firewall-cmd --zone=public --add-port=11002/tcp --permanent
+
+    firewall-cmd --reload
+
     profileName=$1
     hostName=$2
     nodeName=$3
@@ -190,10 +241,6 @@ cloud-init clean --logs
 if [ ${result} = Unentitled ]; then
     exit 1
 fi
-
-# Turn off firewall
-systemctl stop firewalld
-systemctl disable firewalld
 
 # Get tWAS installation properties
 source /datadrive/virtualimage.properties
