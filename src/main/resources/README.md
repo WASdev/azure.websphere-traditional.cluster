@@ -2,7 +2,7 @@
 
 - Content that required to create an Azure applicatoin offer from [Commerical Marketplace Overview](https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/overview) -> New Offer > Azure Application
 - See [Azure applicatoin offer](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/azure-applications/cpp-azure-app-offer) for details
-- When submitting the offer, use content from [this directory](https://github.com/majguo/arm-rhel-was-nd-cluster/tree/master/arm-rhel-was-nd-cluster/src/main/resources) (To-Be-Changed), but apply the changes in this file on top
+- When submitting the offer, use content from [this directory](https://github.com/WASdev/azure.websphere-traditional.cluster/tree/master/src/main/resources) (To-Be-Changed), but apply the changes in this file on top
 
 ## New offer
 
@@ -48,9 +48,9 @@
 - Summary
   - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Long Summary
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 7.4
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.3
 - Description
-  - IBM WebSphere Application Server Network Deployment provides a flexible, secure server runtime environment for large-scale and mission critical application deployments. This offer provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 7.4. ???
+  - IBM WebSphere Application Server Network Deployment provides a flexible, secure server runtime environment for large-scale and mission critical application deployments. This offer provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.3. ???
 
 ### Legal Links
 
@@ -61,7 +61,7 @@
 
 - [Overview](https://www.ibm.com/support/knowledgecenter/en/SSAW57_9.0.5/com.ibm.websphere.nd.multiplatform.doc/ae/welc6productov.html)
 - [Learn more](https://www.ibm.com/cloud/websphere-application-platform)
-- [Documentation](https://github.com/majguo/arm-rhel-was-nd-cluster) ???
+- [Documentation](https://github.com/WASdev/azure.websphere-traditional.cluster) ???
 - [Pricing (Bring Your Own WebSphere Server License, pay as you go for Azure resources)](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/) ???
 - [IBM Pricing Policy](http://www-01.ibm.com/software/passportadvantage/eligible_public_cloud_BYOSL_policy.html) ???
 
@@ -104,7 +104,7 @@
 
 #### Store logos
 
-- [marketing-artifacts](https://github.com/majguo/arm-rhel-was-nd-cluster/tree/master/arm-rhel-was-nd-cluster/src/main/resources/marketing-artifacts)
+- [marketing-artifacts](https://github.com/WASdev/azure.websphere-traditional.cluster/tree/master/src/main/resources/marketing-artifacts)
   - Small: 48*48
   - Medium: 90*90
   - Large: 216*216
@@ -155,7 +155,7 @@
 - Summary
   - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Description
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 7.4 VMs
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.3 VMs
 
 ### Availability
 
@@ -172,7 +172,7 @@
   - <version_number>
 - Package file (.zip)
   - Run `mvn -Dtest.args="-Test All" -Ptemplate-validation-tests clean install`
-  - Find `arm-rhel-was-nd-cluster-<version_number>-arm-assembly.zip` in the `target` directory
+  - Find `azure.websphere-traditional.cluster-<version_number>-arm-assembly.zip` in the `target` directory
 
 ## CSP Reseller audience
 

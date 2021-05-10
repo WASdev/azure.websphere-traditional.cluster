@@ -128,6 +128,8 @@ resourceGroupLocation=$( az group show --name $resourceGroupName | jq -r '.locat
 parametersJson=$( cat $parametersFilePath | jq '.parameters' )
 numberOfNodes=$( echo $parametersJson | jq '.numberOfNodes.value' | sed 's/"//g' )
 parametersJson=$( echo $parametersJson | jq --argjson cnt "$numberOfNodes" '.numberOfNodes.value = $cnt' )
+dynamic=$( echo $parametersJson | jq '.dynamic.value' | sed 's/"//g' )
+parametersJson=$( echo $parametersJson | jq --argjson dynamic "$dynamic" '.dynamic.value = $dynamic' )
 parametersJson=$( echo "$parametersJson" | jq -c '.' )
 
 #Start deployment
