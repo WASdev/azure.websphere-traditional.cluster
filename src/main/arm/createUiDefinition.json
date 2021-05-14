@@ -199,9 +199,7 @@
                             "sshPublicKey": "SSH key for admin account of VMs."
                         },
                         "constraints": {
-                            "required": true,
-                            "customPasswordRegex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
-                            "customValidationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character."
+                            "required": true
                         },
                         "options": {
                             "hideConfirmation": false,

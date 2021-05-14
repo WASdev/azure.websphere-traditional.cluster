@@ -135,6 +135,7 @@
         "name_storageAccount": "[concat('storage',take(replace(parameters('guidValue'),'-',''),6))]",
         "name_virtualNetwork": "[concat(variables('const_dnsLabelPrefix'), '-vnet')]",
         "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
+        "ref_publicIPAddress": "[resourceId('Microsoft.Network/publicIPAddresses', variables('name_publicIPAddress'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
         "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('const_subnetName'))]",
         "ref_virtualNetwork": "[resourceId('Microsoft.Network/virtualNetworks', variables('name_virtualNetwork'))]"
@@ -230,30 +231,22 @@
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "${azure.apiVersion}",
-            "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-ip')]",
+            "name": "[variables('name_publicIPAddress')]",
             "location": "[parameters('location')]",
-            "copy": {
-                "name": "publicIPLoop",
-                "count": "[parameters('numberOfNodes')]"
-            },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(variables('const_dnsLabelPrefix')), if(equals(copyIndex(), 0), '', concat('-mn', copyIndex())))]"
+                    "domainNameLabel": "[concat(toLower(variables('const_dnsLabelPrefix')))]"
                 }
             }
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "${azure.apiVersion}",
-            "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-if')]",
+            "name": "[concat(variables('name_dmgrVM'), '-if')]",
             "location": "[parameters('location')]",
-            "copy": {
-                "name": "nicLoop",
-                "count": "[parameters('numberOfNodes')]"
-            },
             "dependsOn": [
-                "publicIPLoop",
+                "[variables('ref_publicIPAddress')]",
                 "[variables('ref_subnet')]"
             ],
             "properties": {
@@ -263,8 +256,34 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-ip'))]"
+                                "id": "[variables('ref_publicIPAddress')]"
                             },
+                            "subnet": {
+                                "id": "[variables('ref_subnet')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1), '-if')]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "nicLoop",
+                "count": "[sub(parameters('numberOfNodes'), 1)]"
+            },
+            "dependsOn": [
+                "[variables('ref_subnet')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('ref_subnet')]"
                             }
@@ -283,6 +302,7 @@
                 "count": "[parameters('numberOfNodes')]"
             },
             "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('name_dmgrVM'), '-if'))]",
                 "nicLoop"
             ],
             "properties": {
