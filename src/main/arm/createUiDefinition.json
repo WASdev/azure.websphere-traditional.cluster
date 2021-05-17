@@ -9,29 +9,28 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "You must provide an entitled IBMid account to provision the WebSphere cluster. Select here for more details.",
-                    "uri": "https://www.ibm.com/ibmid/myibm/help/us/helpdesk.html"
+                    "text": "Provide an entitled IBMid to provision the WebSphere cluster. <a href='https://www.ibm.com/ibmid/myibm/help/us/helpdesk.html' target='_blank'>Learn more</a>"
                 }
             },
             {
                 "name": "ibmUserId",
                 "type": "Microsoft.Common.TextBox",
-                "label": "Username for IBMid",
-                "toolTip": "Username of IBMid account.",
+                "label": "IBMid",
+                "toolTip": "Your IBMid.",
                 "constraints": {
                     "required": true,
                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
-                    "validationMessage": "The value must be valid IBMid username."
+                    "validationMessage": "The value must be valid IBMid."
                 }
             },
             {
                 "name": "ibmUserPwd",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": {
-                    "password": "Password for IBMid account",
+                    "password": "Password for IBMid",
                     "confirmPassword": "Confirm password"
                 },
-                "toolTip": "Password of IBMid account.",
+                "toolTip": "Password for your IBMid.",
                 "constraints": {
                     "required": true
                 }
@@ -41,20 +40,17 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "You must accept the IBM License Agreement to proceed the deployment. Select here for more details.",
-                    "uri": "https://www.ibm.com/software/sla/sladb.nsf/searchlis/?searchview&searchorder=4&searchmax=0&query=%225724-H88%22"
+                    "text": "Accept the IBM License Agreement to proceed with the deployment. <a href='https://www.ibm.com/software/sla/sladb.nsf/searchlis/?searchview&searchorder=4&searchmax=0&query=%225724-H88%22' target='_blank'>Learn more</a>"
                 }
             },
             {
                 "name": "acceptIBMLicenseAgreement",
-                "label": "Accept IBM License Agreement",
-                "type": "Microsoft.Common.TextBox",
-                "toolTip": "A value not equal to Y/y indicates you do not accept the IBM License Agreement. In that case the deployment will not proceed.",
-                "defaultValue": "Y",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "I accept the IBM License Agreement.",
+                "toolTip": "Select to accept the IBM License Agreement.",
                 "constraints": {
                     "required": true,
-                    "regex": "^[Yy]$",
-                    "validationMessage": "The value must be Y/y to proceed with deployment."
+                    "validationMessage": "The deployment will not proceed unless you accept the IBM License Agreement."
                 }
             }
         ],
@@ -73,7 +69,7 @@
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Dynamic cluster?",
                         "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to create a dynamic cluster which enables WebSphere to start/stop nodes on-demand dynamically.",
+                        "toolTip": "Create a dynamic cluster that dynamically starts nodes when workload increases and stops nodes when workload decreases.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -93,17 +89,17 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "Number of VMs",
                         "defaultValue": "4",
-                        "toolTip": "The number of VMs to create, with one deployment manager and multiple worker nodes for the remainings.",
+                        "toolTip": "The number of virtual machines to create, with 1 deployment manager and 1 to 4 worker nodes.",
                         "constraints": {
                             "required": true,
                             "regex": "^(2|3|4|5)$",
-                            "validationMessage": "Number of VMs to deploy, limit 5."
+                            "validationMessage": "Number of virtual machines to deploy, limit 5 because this offer uses a single storage account."
                         }
                     },
                     {
                         "name": "vmSizeSelect",
                         "type": "Microsoft.Compute.SizeSelector",
-                        "label": "Virtual machine size",
+                        "label": "VM size",
                         "toolTip": "The size of virtual machine to provision.",
                         "recommendedSizes": [
                             "Standard_D2_v3",
@@ -129,7 +125,7 @@
                         "name": "dmgrVMPrefix",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Deployment manager server prefix",
-                        "toolTip": "The string to prepend to the name of the deployment manager server.",
+                        "toolTip": "The string to prepend to the name of the deployment manager server, default is 'dmgr'.",
                         "defaultValue": "dmgr",
                         "constraints": {
                             "required": true,
@@ -141,7 +137,7 @@
                         "name": "managedVMPrefix",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Managed server prefix",
-                        "toolTip": "The string to prepend to the name of the managed server.",
+                        "toolTip": "The string to prepend to the name of the managed server, default is 'managed'.",
                         "defaultValue": "managed",
                         "constraints": {
                             "required": true,
@@ -153,7 +149,7 @@
                         "name": "dnsLabelPrefix",
                         "type": "Microsoft.Common.TextBox",
                         "label": "DNS label prefix",
-                        "toolTip": "The string to prepend to the DNS label.",
+                        "toolTip": "The string to prepend to the DNS label, default is 'wasndcluster'.",
                         "defaultValue": "wasndcluster",
                         "constraints": {
                             "required": true,
@@ -175,7 +171,7 @@
                     {
                         "name": "adminUsername",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Username for admin account of VMs",
+                        "label": "VM administrator",
                         "defaultValue": "websphere",
                         "toolTip": "Use only letters and numbers.",
                         "constraints": {
@@ -189,14 +185,12 @@
                         "type": "Microsoft.Compute.CredentialsCombo",
                         "label": {
                             "authenticationType": "Authentication type",
-                            "password": "Password",
+                            "password": "Password for VM administrator",
                             "confirmPassword": "Confirm password",
-                            "sshPublicKey": "SSH public key"
+                            "sshPublicKey": "SSH Public Key for VM administrator"
                         },
                         "toolTip": {
-                            "authenticationType": "Use username and password or SSH public key for authentication to the VM.",
-                            "password": "Password for admin account of VMs.",
-                            "sshPublicKey": "SSH key for admin account of VMs."
+                            "authenticationType": "Use user and password or SSH Public Key for authentication to the virtual machine."
                         },
                         "constraints": {
                             "required": true
@@ -210,7 +204,7 @@
                     {
                         "name": "wasUsername",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Username for WebSphere admin",
+                        "label": "WebSphere administrator",
                         "defaultValue": "wasadmin",
                         "toolTip": "Use only allowed characters.",
                         "constraints": {
@@ -223,10 +217,10 @@
                         "name": "wasPassword",
                         "type": "Microsoft.Common.PasswordBox",
                         "label": {
-                            "password": "Password for WebSphere admin",
+                            "password": "Password for WebSphere administrator",
                             "confirmPassword": "Confirm password"
                         },
-                        "toolTip": "Password for WebSphere admin.",
+                        "toolTip": "Password for WebSphere administrator.",
                         "constraints": {
                             "required": true
                         }
