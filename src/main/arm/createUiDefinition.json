@@ -16,6 +16,7 @@
                 "name": "ibmUserId",
                 "type": "Microsoft.Common.TextBox",
                 "label": "IBMid",
+                "toolTip": "Your IBMid.",
                 "constraints": {
                     "required": true,
                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
@@ -29,6 +30,7 @@
                     "password": "Password for IBMid",
                     "confirmPassword": "Confirm password"
                 },
+                "toolTip": "Password for your IBMid.",
                 "constraints": {
                     "required": true
                 }
@@ -45,6 +47,7 @@
                 "name": "acceptIBMLicenseAgreement",
                 "type": "Microsoft.Common.CheckBox",
                 "label": "I accept the IBM License Agreement.",
+                "toolTip": "Select to accept the IBM License Agreement.",
                 "constraints": {
                     "required": true,
                     "validationMessage": "The deployment will not proceed unless you accept the IBM License Agreement."
@@ -90,7 +93,7 @@
                         "constraints": {
                             "required": true,
                             "regex": "^(2|3|4|5)$",
-                            "validationMessage": "Number of virtual machines to deploy, limit 5 since this offer is using a single storage account."
+                            "validationMessage": "Number of virtual machines to deploy, limit 5 because this offer uses a single storage account."
                         }
                     },
                     {
@@ -217,6 +220,7 @@
                             "password": "Password for WebSphere administrator",
                             "confirmPassword": "Confirm password"
                         },
+                        "toolTip": "Password for WebSphere administrator.",
                         "constraints": {
                             "required": true
                         }
