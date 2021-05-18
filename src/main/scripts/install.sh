@@ -27,6 +27,11 @@ create_dmgr_profile() {
     firewall-cmd --zone=public --add-port=9100/tcp --permanent
     firewall-cmd --zone=public --add-port=9401/tcp --permanent
     firewall-cmd --zone=public --add-port=8879/tcp --permanent
+    firewall-cmd --zone=public --add-port=5555/tcp --permanent
+    firewall-cmd --zone=public --add-port=7060/tcp --permanent
+    firewall-cmd --zone=public --add-port=11005/tcp --permanent
+    firewall-cmd --zone=public --add-port=11006/tcp --permanent
+    firewall-cmd --zone=public --add-port=9420/tcp --permanent
     
     firewall-cmd --reload
 
@@ -141,6 +146,8 @@ create_custom_profile() {
     firewall-cmd --zone=public --add-port=5060/tcp --permanent
     firewall-cmd --zone=public --add-port=5061/tcp --permanent
     firewall-cmd --zone=public --add-port=8880/tcp --permanent
+    firewall-cmd --zone=public --add-port=11003/tcp --permanent
+    firewall-cmd --zone=public --add-port=11004/tcp --permanent
 
     # Open ports for node agent server
     firewall-cmd --zone=public --add-port=2810/tcp --permanent
@@ -148,6 +155,7 @@ create_custom_profile() {
     firewall-cmd --zone=public --add-port=9202/tcp --permanent
     firewall-cmd --zone=public --add-port=9354/tcp --permanent
     firewall-cmd --zone=public --add-port=9626/tcp --permanent
+    firewall-cmd --zone=public --add-port=9629/tcp --permanent
     firewall-cmd --zone=public --add-port=7272/tcp --permanent
     firewall-cmd --zone=public --add-port=5001/tcp --permanent
     firewall-cmd --zone=public --add-port=5000/tcp --permanent
@@ -155,8 +163,22 @@ create_custom_profile() {
     firewall-cmd --zone=public --add-port=9901/tcp --permanent
     firewall-cmd --zone=public --add-port=8878/tcp --permanent
     firewall-cmd --zone=public --add-port=7061/tcp --permanent
+    firewall-cmd --zone=public --add-port=7062/tcp --permanent
     firewall-cmd --zone=public --add-port=11001/tcp --permanent
     firewall-cmd --zone=public --add-port=11002/tcp --permanent
+
+    # Open ports for cluster member
+    firewall-cmd --zone=public --add-port=9809/tcp --permanent
+    firewall-cmd --zone=public --add-port=9402/tcp --permanent
+    firewall-cmd --zone=public --add-port=9403/tcp --permanent
+    firewall-cmd --zone=public --add-port=9352/tcp --permanent
+    firewall-cmd --zone=public --add-port=9632/tcp --permanent
+    firewall-cmd --zone=public --add-port=9401/tcp --permanent
+    firewall-cmd --zone=public --add-port=11005/tcp --permanent
+    firewall-cmd --zone=public --add-port=11006/tcp --permanent
+    firewall-cmd --zone=public --add-port=8879/tcp --permanent
+    firewall-cmd --zone=public --add-port=9060/tcp --permanent
+    firewall-cmd --zone=public --add-port=9043/tcp --permanent
 
     firewall-cmd --reload
 
