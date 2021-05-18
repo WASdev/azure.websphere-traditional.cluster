@@ -205,7 +205,7 @@
                         "name": "wasUsername",
                         "type": "Microsoft.Common.TextBox",
                         "label": "WebSphere administrator",
-                        "defaultValue": "wasadmin",
+                        "defaultValue": "wsadmin",
                         "toolTip": "Use only allowed characters.",
                         "constraints": {
                             "required": true,
