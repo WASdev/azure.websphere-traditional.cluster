@@ -180,6 +180,14 @@ create_custom_profile() {
     firewall-cmd --zone=public --add-port=9060/tcp --permanent
     firewall-cmd --zone=public --add-port=9043/tcp --permanent
 
+    # Open ports for dynamic cluster member
+    firewall-cmd --zone=public --add-port=9810/tcp --permanent
+    firewall-cmd --zone=public --add-port=9101/tcp --permanent
+    firewall-cmd --zone=public --add-port=11007/tcp --permanent
+    firewall-cmd --zone=public --add-port=11008/tcp --permanent
+    firewall-cmd --zone=public --add-port=9061/tcp --permanent
+    firewall-cmd --zone=public --add-port=9044/tcp --permanent
+
     firewall-cmd --reload
 
     profileName=$1
