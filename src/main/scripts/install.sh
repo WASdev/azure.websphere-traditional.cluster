@@ -29,7 +29,7 @@ create_dmgr_profile() {
     firewall-cmd --zone=public --add-port=8879/tcp --permanent
     firewall-cmd --zone=public --add-port=5555/tcp --permanent
     firewall-cmd --zone=public --add-port=7060/tcp --permanent
-    firewall-cmd --zone=public --add-port=11005/tcp --permanent
+    firewall-cmd --zone=public --add-port=11005/udp --permanent
     firewall-cmd --zone=public --add-port=11006/tcp --permanent
     firewall-cmd --zone=public --add-port=9420/tcp --permanent
     
@@ -146,7 +146,7 @@ create_custom_profile() {
     firewall-cmd --zone=public --add-port=5060/tcp --permanent
     firewall-cmd --zone=public --add-port=5061/tcp --permanent
     firewall-cmd --zone=public --add-port=8880/tcp --permanent
-    firewall-cmd --zone=public --add-port=11003/tcp --permanent
+    firewall-cmd --zone=public --add-port=11003/udp --permanent
     firewall-cmd --zone=public --add-port=11004/tcp --permanent
 
     # Open ports for node agent server
@@ -164,7 +164,7 @@ create_custom_profile() {
     firewall-cmd --zone=public --add-port=8878/tcp --permanent
     firewall-cmd --zone=public --add-port=7061/tcp --permanent
     firewall-cmd --zone=public --add-port=7062/tcp --permanent
-    firewall-cmd --zone=public --add-port=11001/tcp --permanent
+    firewall-cmd --zone=public --add-port=11001/udp --permanent
     firewall-cmd --zone=public --add-port=11002/tcp --permanent
 
     # Open ports for cluster member
@@ -174,7 +174,7 @@ create_custom_profile() {
     firewall-cmd --zone=public --add-port=9352/tcp --permanent
     firewall-cmd --zone=public --add-port=9632/tcp --permanent
     firewall-cmd --zone=public --add-port=9401/tcp --permanent
-    firewall-cmd --zone=public --add-port=11005/tcp --permanent
+    firewall-cmd --zone=public --add-port=11005/udp --permanent
     firewall-cmd --zone=public --add-port=11006/tcp --permanent
     firewall-cmd --zone=public --add-port=8879/tcp --permanent
     firewall-cmd --zone=public --add-port=9060/tcp --permanent
@@ -183,7 +183,7 @@ create_custom_profile() {
     # Open ports for dynamic cluster member
     firewall-cmd --zone=public --add-port=9810/tcp --permanent
     firewall-cmd --zone=public --add-port=9101/tcp --permanent
-    firewall-cmd --zone=public --add-port=11007/tcp --permanent
+    firewall-cmd --zone=public --add-port=11007/udp --permanent
     firewall-cmd --zone=public --add-port=11008/tcp --permanent
     firewall-cmd --zone=public --add-port=9061/tcp --permanent
     firewall-cmd --zone=public --add-port=9044/tcp --permanent
