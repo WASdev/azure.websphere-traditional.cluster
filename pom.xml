@@ -20,7 +20,7 @@
 
     <groupId>com.ibm.websphere.azure</groupId>
     <artifactId>azure.websphere-traditional.cluster</artifactId>
-    <version>1.3.8</version>
+    <version>1.3.12</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
@@ -38,8 +38,11 @@
         <azure.apiVersion2>2019-06-01</azure.apiVersion2>
         <cluster.start>c2efe274-0dc2-50f3-b51f-338a3fe01afb</cluster.start>
         <cluster.end>9c5dbfce-a6b9-5659-96bc-ca0cf429122a</cluster.end>
-        <image.publisher>microsoft_javaeeonazure_test</image.publisher>
-        <image.offer>2021-zheng-image-offer-preview</image.offer>
-        <image.sku>2021-zheng-rhel-with-websphere</image.sku>
+        <!-- This is the "Partner ID" in Partner Center" -->
+        <image.publisher>ibm-usa-ny-armonk-hq-6275750-ibmcloud-aiops</image.publisher>
+        <!-- This is the "Offer ID" of the "Azure Virtual Machine" offer type -->
+        <image.offer>2021-04-27-twas-cluster-base-image</image.offer>
+        <!-- This is the "Plan ID" of the plan within the "Azure Virtual Machine" offer -->
+        <image.sku>2021-04-27-twas-cluster-base-image</image.sku>
     </properties>
 </project>

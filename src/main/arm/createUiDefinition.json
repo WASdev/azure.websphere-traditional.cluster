@@ -40,7 +40,7 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "Accept the IBM License Agreement to proceed with the deployment. <a href='https://www.ibm.com/software/sla/sladb.nsf/searchlis/?searchview&searchorder=4&searchmax=0&query=%225724-H88%22' target='_blank'>Learn more</a>"
+                    "text": "Accept the IBM License Agreement to proceed with the deployment. <a href='https://ibm.biz/tWASNDLicenseAzureVMs' target='_blank'>IBM WebSphere Application Server Network Deployment</a>."
                 }
             },
             {
@@ -52,6 +52,15 @@
                     "required": true,
                     "validationMessage": "The deployment will not proceed unless you accept the IBM License Agreement."
                 }
+            },
+            {
+                "name": "About",
+                "type": "Microsoft.Common.InfoBox",
+                "options": {
+                    "icon": "None",
+                    "text": "Template version ${project.version}"
+                },
+                "visible": "[bool('${template.version.visible}')]"
             }
         ],
         "steps": [
@@ -89,11 +98,11 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "Number of VMs",
                         "defaultValue": "4",
-                        "toolTip": "The number of virtual machines to create, with 1 deployment manager and 1 to 4 worker nodes.",
+                        "toolTip": "The number of virtual machines to create, with one deployment manager and one to four worker nodes.",
                         "constraints": {
                             "required": true,
                             "regex": "^(2|3|4|5)$",
-                            "validationMessage": "Number of virtual machines to deploy, limit 5 because this offer uses a single storage account."
+                            "validationMessage": "Please pick a value between 2 and 5. You need at least two virtual machines: one deployment manager and at least one worker node. The upper limit is five because this offer uses a single storage account."
                         }
                     },
                     {
@@ -222,7 +231,9 @@
                         },
                         "toolTip": "Password for WebSphere administrator.",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
                         }
                     }
                 ]
