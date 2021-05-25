@@ -40,7 +40,7 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "Accept the IBM License Agreement to proceed with the deployment. <a href='https://www.ibm.com/software/sla/sladb.nsf/searchlis/?searchview&searchorder=4&searchmax=0&query=%225724-H88%22' target='_blank'>Learn more</a>"
+                    "text": "Accept the IBM License Agreements to proceed with the deployment. <a href='https://aka.ms/tWASNDLicenseAzureVMs' target='_blank'>IBM WebSphere Application Server Network Deployment</a> <a href='https://aka.ms/tWASBaseLicenseAzureVMs' target='_blank'>IBM WebSphere Application Server</a>"
                 }
             },
             {
@@ -52,6 +52,15 @@
                     "required": true,
                     "validationMessage": "The deployment will not proceed unless you accept the IBM License Agreement."
                 }
+            },
+            {
+                "name": "About",
+                "type": "Microsoft.Common.InfoBox",
+                "options": {
+                    "icon": "None",
+                    "text": "Template version ${project.version}"
+                },
+                "visible": "[bool('${template.version.visible}')]"
             }
         ],
         "steps": [
