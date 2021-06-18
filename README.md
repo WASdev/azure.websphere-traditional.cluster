@@ -1,3 +1,5 @@
+# [Related: Base images deployed by this Azure application](https://github.com/WASdev/azure.websphere-traditional.image)
+
 # Deploy RHEL 8.3 VMs on Azure with IBM WebSphere Application Server ND Traditional V9.0.5 cluster pre-installed
 
 ## Prerequisites
