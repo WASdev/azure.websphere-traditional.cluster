@@ -314,7 +314,7 @@
                         "publisher": "${image.publisher}",
                         "offer": "${image.offer}",
                         "sku": "${image.sku}",
-                        "version": "latest"
+                        "version": "${image.version}"
                     },
                     "osDisk": {
                         "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-disk')]",
