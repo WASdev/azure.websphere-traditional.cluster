@@ -329,7 +329,7 @@
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPasswordOrKey')]",
                     "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]",
-                    "customData": "[base64(concat(parameters('ibmUserId'), ',', parameters('ibmUserPwd')))]"
+                    "customData": "[base64(concat(parameters('ibmUserId'), ' ', parameters('ibmUserPwd')))]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
