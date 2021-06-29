@@ -44,6 +44,7 @@
         <image.offer>2021-04-27-twas-cluster-base-image</image.offer>
         <!-- This is the "Plan ID" of the plan within the "Azure Virtual Machine" offer -->
         <image.sku>2021-04-27-twas-cluster-base-image</image.sku>
-        <image.version>9.0.2021052001</image.version>
+        <!-- This is the "Disk version" of the VM image of the plan within the "Azure Virtual Machine" offer -->
+        <image.version>9.0.20210624</image.version>
     </properties>
 </project>
