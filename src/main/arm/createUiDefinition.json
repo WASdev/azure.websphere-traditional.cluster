@@ -165,18 +165,7 @@
                             "regex": "^[a-z0-9A-Z]{3,24}$",
                             "validationMessage": "The prefix must be between 3 and 24 characters long and contain letters, numbers only."
                         }
-                    }
-                ]
-            },
-            {
-                "name": "Credentials",
-                "label": "Credentials",
-                "subLabel": {
-                    "preValidation": "Provide Credentials to manage WebSphere cluster",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Credentials",
-                "elements": [
+                    },
                     {
                         "name": "adminUsername",
                         "type": "Microsoft.Common.TextBox",
@@ -237,6 +226,153 @@
                         }
                     }
                 ]
+            },
+            {
+                "name": "IHSConfig",
+                "label": "IBM HTTP Server Load Balancer",
+                "subLabel": {
+                    "preValidation": "Configure the IBM HTTP Server load balancer that routes client requests to IBM WebSphere cluster.",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "IHS configuration",
+                "elements": [
+                    {
+                        "name": "configIHS",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Configure an IBM HTTP Server?",
+                        "defaultValue": "Yes",
+                        "toolTip": "Select 'Yes' and provide required info to configure an IBM HTTP Server.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "ihsInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "IBM HTTP Server settings",
+                        "elements": [
+                            {
+                                "name": "ihsVmSize",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "label": "VM size",
+                                "toolTip": "The size of virtual machine to provision.",
+                                "recommendedSizes": [
+                                    "Standard_D2_v3",
+                                    "Standard_A4_v2",
+                                    "Standard_A2_v2",
+                                    "Standard_A1_v2",
+                                    "Standard_B2ms",
+                                    "Standard_B2s",
+                                    "Standard_B1ms"
+                                ],
+                                "constraints": {
+                                    "excludedSizes": [
+                                        "Standard_B1ls",
+                                        "Standard_A0",
+                                        "Basic_A0",
+                                        "Standard_B1s"
+                                    ]
+                                },
+                                "osPlatform": "Linux",
+                                "count": "1"
+                            },
+                            {
+                                "name": "ihsVMPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "IBM HTTP Server prefix",
+                                "toolTip": "The string to prepend to the name of the IBM HTTP Server, default is 'ihs'.",
+                                "defaultValue": "ihs",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,14}$",
+                                    "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
+                                }
+                            },
+                            {
+                                "name": "ihsDnsLabelPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DNS label prefix",
+                                "toolTip": "The string to prepend to the DNS label, default is 'ihs'.",
+                                "defaultValue": "ihs",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,24}$",
+                                    "validationMessage": "The prefix must be between 3 and 24 characters long and contain letters, numbers only."
+                                }
+                            },
+                            {
+                                "name": "ihsUnixUsername",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "VM administrator",
+                                "defaultValue": "ihsadmin",
+                                "toolTip": "Use only letters and numbers.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "ihsUnixPasswordOrKey",
+                                "type": "Microsoft.Compute.CredentialsCombo",
+                                "label": {
+                                    "authenticationType": "Authentication type",
+                                    "password": "Password for VM administrator",
+                                    "confirmPassword": "Confirm password",
+                                    "sshPublicKey": "SSH Public Key for VM administrator"
+                                },
+                                "toolTip": {
+                                    "authenticationType": "Use user and password or SSH Public Key for authentication to the virtual machine."
+                                },
+                                "constraints": {
+                                    "required": true
+                                },
+                                "options": {
+                                    "hideConfirmation": false,
+                                    "hidePassword": false
+                                },
+                                "osPlatform": "Linux"
+                            },
+                            {
+                                "name": "ihsAdminUsername",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "IBM HTTP Server administrator",
+                                "defaultValue": "ihsdmin",
+                                "toolTip": "Use only allowed characters.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "ihsAdminPassword",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password for IBM HTTP Server administrator",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "Password for IBM HTTP Server administrator.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                                    "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
+                                }
+                            }
+                        ],
+                        "visible": "[bool(steps('IHSConfig').configIHS)]"
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -249,11 +385,20 @@
             "dmgrVMPrefix": "[steps('ClusterConfig').dmgrVMPrefix]",
             "managedVMPrefix": "[steps('ClusterConfig').managedVMPrefix]",
             "dnsLabelPrefix": "[steps('ClusterConfig').dnsLabelPrefix]",
-            "adminUsername": "[steps('Credentials').adminUsername]",
-            "adminPasswordOrKey": "[if(equals(steps('Credentials').adminPasswordOrKey.authenticationType, 'password'), steps('Credentials').adminPasswordOrKey.password, steps('Credentials').adminPasswordOrKey.sshPublicKey)]",
-            "authenticationType": "[steps('Credentials').adminPasswordOrKey.authenticationType]",
-            "wasUsername": "[steps('Credentials').wasUsername]",
-            "wasPassword": "[steps('Credentials').wasPassword]"
+            "adminUsername": "[steps('ClusterConfig').adminUsername]",
+            "adminPasswordOrKey": "[if(equals(steps('ClusterConfig').adminPasswordOrKey.authenticationType, 'password'), steps('ClusterConfig').adminPasswordOrKey.password, steps('ClusterConfig').adminPasswordOrKey.sshPublicKey)]",
+            "authenticationType": "[steps('ClusterConfig').adminPasswordOrKey.authenticationType]",
+            "wasUsername": "[steps('ClusterConfig').wasUsername]",
+            "wasPassword": "[steps('ClusterConfig').wasPassword]",
+            "configureIHS": "[bool(steps('IHSConfig').configIHS)]",
+            "ihsVmSize": "[steps('IHSConfig').ihsInfo.ihsVmSize]",
+            "ihsVMPrefix": "[steps('IHSConfig').ihsInfo.ihsVMPrefix]",
+            "ihsDnsLabelPrefix": "[steps('IHSConfig').ihsInfo.ihsDnsLabelPrefix]",
+            "ihsUnixUsername": "[steps('IHSConfig').ihsInfo.ihsUnixUsername]",
+            "ihsUnixPasswordOrKey": "[if(equals(steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType, 'password'), steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.password, steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.sshPublicKey)]",
+            "ihsAuthenticationType": "[steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType]",
+            "ihsAdminUsername": "[steps('IHSConfig').ihsInfo.ihsAdminUsername]",
+            "ihsAdminPassword": "[steps('IHSConfig').ihsInfo.ihsAdminPassword]"
         }
     }
 }
