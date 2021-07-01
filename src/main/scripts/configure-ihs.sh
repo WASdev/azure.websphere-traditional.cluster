@@ -61,6 +61,8 @@ echo "webServerType=IHS" >> $responseFile
 
 # Configure IHS using WCT
 $WCT_INSTALL_DIRECTORY/WCT/wctcmd.sh -tool pct -importDefinitionLocation -defLocPathname $PLUGIN_INSTALL_DIRECTORY -defLocName WS1 -response $responseFile
+rm -rf $responseFile
+
 # Start IHS admin server
 $IHS_INSTALL_DIRECTORY/bin/adminctl start
 
