@@ -46,6 +46,11 @@ if [[ $? != 0 ]]; then
 fi
 
 # Move the IHS confguration script from Azure File Share system to $WAS_ND_INSTALL_DIRECTORY/bin
+while [ ! -f "$mountpointPath/configurewebserver1.sh" ]
+do
+  echo "$mountpointPath/configurewebserver1.sh is not accessible"
+  sleep 5
+done
 mv $mountpointPath/configurewebserver1.sh $WAS_ND_INSTALL_DIRECTORY/bin
 if [[ $? != 0 ]]; then
   echo "Failed to move $mountpointPath/configurewebserver1.sh to $WAS_ND_INSTALL_DIRECTORY/bin"
