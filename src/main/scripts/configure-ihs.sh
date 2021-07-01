@@ -14,9 +14,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# parameters needed:
-#   - dmgrHostname, ihsUnixUsername, ihsAdminUsername, ihsAdminPassword, storageAccountName, storageAccountKey, fileShareName, mountpointPath
-if [ "$3" == "" ]; then 
+# Check required parameters
+if [ "$8" == "" ]; then 
   echo "Usage:"
   echo "  ./configure-ihs.sh [dmgrHostname] [ihsUnixUsername] [ihsAdminUsername] [ihsAdminPassword] [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath]"
   exit 1
@@ -30,6 +29,7 @@ storageAccountKey=$6
 fileShareName=$7
 mountpointPath=$8
 
+# Open ports
 firewall-cmd --zone=public --add-port=80/tcp --permanent
 firewall-cmd --zone=public --add-port=8008/tcp --permanent
 firewall-cmd --reload
@@ -38,6 +38,7 @@ source /datadrive/virtualimage.properties
 hostname=`hostname`
 responseFile="pct.response.txt"
 
+# Create response file
 echo "configType=remote" > $responseFile
 echo "enableAdminServerSupport=true" >> $responseFile
 echo "enableUserAndPass=true" >> $responseFile
@@ -58,9 +59,12 @@ echo "webServerPortNumber=80" >> $responseFile
 echo "webServerSelected=ihs" >> $responseFile
 echo "webServerType=IHS" >> $responseFile
 
+# Configure IHS using WCT
 $WCT_INSTALL_DIRECTORY/WCT/wctcmd.sh -tool pct -importDefinitionLocation -defLocPathname $PLUGIN_INSTALL_DIRECTORY -defLocName WS1 -response $responseFile
+# Start IHS admin server
 $IHS_INSTALL_DIRECTORY/bin/adminctl start
 
+# Mount Azure File Share system
 mkdir -p $mountpointPath
 mkdir /etc/smbcredentials
 echo "username=$storageAccountName" > /etc/smbcredentials/${storageAccountName}.cred
@@ -75,6 +79,7 @@ if [[ $? != 0 ]]; then
   exit 1
 fi
 
+# Move the IHS confguration script to Azure File Share system
 mv $PLUGIN_INSTALL_DIRECTORY/bin/configurewebserver1.sh $mountpointPath
 if [[ $? != 0 ]]; then
   echo "Failed to move $PLUGIN_INSTALL_DIRECTORY/bin/configurewebserver1.sh to $mountpointPath"
