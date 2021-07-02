@@ -14,6 +14,32 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+create_systemd_service() {
+  srvName=$1
+  srvDescription=$2
+  serverName=$3
+
+  # Add systemd unit file
+  cat <<EOF > /etc/systemd/system/${srvName}.service
+[Unit]
+Description=${srvDescription}
+RequiresMountsFor=/datadrive
+After=network.target
+[Service]
+Type=forking
+ExecStart=/bin/sh -c "${IHS_INSTALL_DIRECTORY}/bin/${serverName} start"
+ExecStop=/bin/sh -c "${IHS_INSTALL_DIRECTORY}/bin/${serverName} stop"
+SuccessExitStatus=0
+TimeoutStartSec=900
+[Install]
+WantedBy=default.target
+EOF
+
+  # Enable service
+  systemctl daemon-reload
+  systemctl enable "$srvName"
+}
+
 # Check required parameters
 if [ "$8" == "" ]; then 
   echo "Usage:"
@@ -65,6 +91,10 @@ rm -rf $responseFile
 
 # Start IHS admin server
 $IHS_INSTALL_DIRECTORY/bin/adminctl start
+
+# Create systemd services to automatically starting IHS admin server when system is rebooted
+create_systemd_service ihs_web_server "IBM HTTP Server" apachectl
+create_systemd_service ihs_admin_server "IBM HTTP Server admin server" adminctl
 
 # Mount Azure File Share system
 mkdir -p $mountpointPath
