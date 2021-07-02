@@ -347,7 +347,7 @@
                                 "name": "ihsAdminUsername",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "IBM HTTP Server administrator",
-                                "defaultValue": "ihsdmin",
+                                "defaultValue": "ihsadmin",
                                 "toolTip": "Use only allowed characters.",
                                 "constraints": {
                                     "required": true,

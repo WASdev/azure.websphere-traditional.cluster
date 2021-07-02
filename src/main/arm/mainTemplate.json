@@ -51,7 +51,7 @@
             "type": "string",
             "metadata": {
                 "description": "The size of virtual machine to provision for each node of the cluster."
-            }            
+            }
         },
         "dmgrVMPrefix": {
             "type": "string",
@@ -105,6 +105,72 @@
                 "description": "Password for WebSphere admin."
             }
         },
+        "configureIHS": {
+            "type": "bool",
+            "metadata": {
+                "description": "Boolean value indicating, if an IBM HTTP Server load balancer will be configured."
+            }
+        },
+        "ihsVmSize": {
+            "type": "string",
+            "defaultValue": "Standard_D2_v3",
+            "metadata": {
+                "description": "The size of virtual machine to provision for each node of the cluster."
+            }
+        },
+        "ihsVMPrefix": {
+            "type": "string",
+            "defaultValue": "ihs",
+            "metadata": {
+                "description": "The string to prepend to the name of the IBM HTTP Server."
+            }
+        },
+        "ihsDnsLabelPrefix": {
+            "type": "string",
+            "defaultValue": "ihs",
+            "metadata": {
+                "description": "The string to prepend to the DNS label of the IBM HTTP Server."
+            }
+        },
+        "ihsUnixUsername": {
+            "type": "string",
+            "defaultValue": "ihsadmin",
+            "metadata": {
+                "description": "Username for the Virtual Machine of IBM HTTP Server."
+            }
+        },
+        "ihsUnixPasswordOrKey": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "SSH Key or password for the Virtual Machine of IBM HTTP Server. SSH key is recommended."
+            }
+        },
+        "ihsAuthenticationType": {
+            "type": "string",
+            "defaultValue": "password",
+            "allowedValues": [
+                "sshPublicKey",
+                "password"
+            ],
+            "metadata": {
+                "description": "Type of authentication to use on the Virtual Machine of IBM HTTP Server. SSH key is recommended."
+            }
+        },
+        "ihsAdminUsername": {
+            "type": "string",
+            "defaultValue": "ihsadmin",
+            "metadata": {
+                "description": "Username for IBM HTTP Server admin."
+            }
+        },
+        "ihsAdminPassword": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Password for IBM HTTP Server admin."
+            }
+        },
         "guidValue": {
             "defaultValue": "[newGuid()]",
             "type": "string"
@@ -112,8 +178,11 @@
     },
     "variables": {
         "const_addressPrefix": "10.0.0.0/16",
-        "const_arguments": "[concat(' -m ',parameters('wasUsername'),' -c ',parameters('wasPassword'),' -h ',variables('name_dmgrVM'),' -r ',sub(parameters('numberOfNodes'),1),' -x ',parameters('dynamic'))]",
+        "const_arguments": "[concat(' ',parameters('wasUsername'),' ',parameters('wasPassword'),' ',variables('name_dmgrVM'),' ',sub(parameters('numberOfNodes'),1),' ',parameters('dynamic'),' ',parameters('configureIHS'))]",
         "const_dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
+        "const_ihsArguments1": "[concat(' ',variables('name_dmgrVM'),' ',parameters('ihsUnixUsername'),' ',parameters('ihsAdminUsername'),' ',parameters('ihsAdminPassword'),' ',variables('name_storageAccount'))]",
+        "const_ihsArguments2": "[concat(' ',variables('name_share'),' ',variables('const_mountPointPath'))]",
+        "const_ihsDnsLabelPrefix": "[concat(parameters('ihsDnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
         "const_linuxConfiguration": {
             "disablePasswordAuthentication": true,
             "ssh": {
@@ -126,17 +195,25 @@
             }
         },
         "const_managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
+        "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
         "const_scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
         "const_subnetAddressPrefix": "10.0.1.0/24",
         "const_subnetName": "subnet01",
         "name_dmgrVM": "[concat(parameters('dmgrVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
+        "name_ihsPublicIPAddress": "[concat(variables('name_ihsVM'), '-ip')]",
+        "name_ihsVM": "[concat(parameters('ihsVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
         "name_networkSecurityGroup": "[concat(variables('const_dnsLabelPrefix'), '-nsg')]",
         "name_publicIPAddress": "[concat(variables('name_dmgrVM'), '-ip')]",
+        "name_share": "wasshare",
         "name_storageAccount": "[concat('storage',take(replace(parameters('guidValue'),'-',''),6))]",
         "name_virtualNetwork": "[concat(variables('const_dnsLabelPrefix'), '-vnet')]",
+        "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
+        "ref_fileShare": "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('name_storageAccount'), 'default', variables('name_share'))]",
+        "ref_ihsPublicIPAddress": "[resourceId('Microsoft.Network/publicIPAddresses', variables('name_ihsPublicIPAddress'))]",
         "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
         "ref_publicIPAddress": "[resourceId('Microsoft.Network/publicIPAddresses', variables('name_publicIPAddress'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
+        "ref_storageOrFileShare": "[if(parameters('configureIHS'), variables('ref_fileShare'), variables('ref_storage'))]",
         "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('const_subnetName'))]",
         "ref_virtualNetwork": "[resourceId('Microsoft.Network/virtualNetworks', variables('name_virtualNetwork'))]"
     },
@@ -165,6 +242,33 @@
             },
             "kind": "Storage",
             "properties": {
+                "supportsHttpsTrafficOnly": false
+            }
+        },
+        {
+            "condition": "[parameters('configureIHS')]",
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "${azure.apiVersion2}",
+            "name": "[concat(variables('name_storageAccount'), '/default')]",
+            "dependsOn": [
+                "[variables('ref_storage')]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            }
+        },
+        {
+            "condition": "[parameters('configureIHS')]",
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "${azure.apiVersion2}",
+            "name": "[concat(variables('name_storageAccount'), '/default/', variables('name_share'))]",
+            "dependsOn": [
+                "[variables('ref_fileService')]",
+                "[variables('ref_storage')]"
+            ],
+            "properties": {
+                "shareQuota": 1
             }
         },
         {
@@ -188,7 +292,8 @@
                                 "9060",
                                 "9080",
                                 "9043",
-                                "9443"
+                                "9443",
+                                "80"
                             ]
                         }
                     }
@@ -263,7 +368,10 @@
                             }
                         }
                     }
-                ]
+                ],
+                "dnsSettings": {
+                    "internalDnsNameLabel": "[variables('name_dmgrVM')]"
+                }
             }
         },
         {
@@ -289,7 +397,10 @@
                             }
                         }
                     }
-                ]
+                ],
+                "dnsSettings": {
+                    "internalDnsNameLabel": "[concat(variables('const_managedVMPrefix'), copyIndex(1))]"
+                }
             }
         },
         {
@@ -312,9 +423,9 @@
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "${image.publisher}",
-                        "offer": "${image.offer}",
-                        "sku": "${image.sku}",
-                        "version": "${image.version}"
+                        "offer": "${twasnd.image.offer}",
+                        "sku": "${twasnd.image.sku}",
+                        "version": "${twasnd.image.version}"
                     },
                     "osDisk": {
                         "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-disk')]",
@@ -346,9 +457,9 @@
                 }
             },
             "plan": {
-                "name": "${image.sku}",
+                "name": "${twasnd.image.sku}",
                 "publisher": "${image.publisher}",
-                "product": "${image.offer}"
+                "product": "${twasnd.image.offer}"
             }
         },
         {
@@ -361,6 +472,7 @@
                 "count": "[parameters('numberOfNodes')]"
             },
             "dependsOn": [
+                "[variables('ref_storageOrFileShare')]",
                 "virtualMachineLoop"
             ],
             "properties": {
@@ -372,9 +484,14 @@
                     "fileUris": [
                         "[uri(variables('const_scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]",
                         "[uri(variables('const_scriptLocation'), concat('create-cluster.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('create-dcluster.py', parameters('_artifactsLocationSasToken')))]"
-                    ],
-                    "commandToExecute": "[concat('sh install.sh -f ', equals(copyIndex(), 0), variables('const_arguments'))]"
+                        "[uri(variables('const_scriptLocation'), concat('create-dcluster.py', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('const_scriptLocation'), concat('configure-ihs-on-dmgr.sh', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('const_scriptLocation'), concat('configure-im.py', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('const_scriptLocation'), concat('pluginutil.sh', parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh install.sh ', equals(copyIndex(), 0), variables('const_arguments'), if(parameters('configureIHS'), concat(' ', variables('name_storageAccount'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value, variables('const_ihsArguments2')), ''))]"
                 }
             }
         },
@@ -384,6 +501,162 @@
             "name": "${cluster.end}",
             "dependsOn": [
                 "virtualMachineExtensionLoop"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "condition": "[parameters('configureIHS')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${ihs.start}",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "condition": "[parameters('configureIHS')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[variables('name_ihsPublicIPAddress')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(toLower(variables('const_ihsDnsLabelPrefix')))]"
+                }
+            }
+        },
+        {
+            "condition": "[parameters('configureIHS')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('name_ihsVM'), '-if')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('ref_ihsPublicIPAddress')]",
+                "[variables('ref_subnet')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[variables('ref_ihsPublicIPAddress')]"
+                            },
+                            "subnet": {
+                                "id": "[variables('ref_subnet')]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "internalDnsNameLabel": "[variables('name_ihsVM')]"
+                }
+            }
+        },
+        {
+            "condition": "[parameters('configureIHS')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[variables('name_ihsVM')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('name_ihsVM'), '-if'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('ihsVmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "${image.publisher}",
+                        "offer": "${ihs.image.offer}",
+                        "sku": "${ihs.image.sku}",
+                        "version": "${ihs.image.version}"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('name_ihsVM'), '-disk')]",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    }
+                },
+                "osProfile": {
+                    "computerName": "[variables('name_ihsVM')]",
+                    "adminUsername": "[parameters('ihsUnixUsername')]",
+                    "adminPassword": "[parameters('ihsUnixPasswordOrKey')]",
+                    "linuxConfiguration": "[if(equals(parameters('ihsAuthenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]",
+                    "customData": "[base64(concat(parameters('ibmUserId'), ' ', parameters('ibmUserPwd')))]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('name_ihsVM'), '-if'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(variables('ref_storage'), '${azure.apiVersion2}').primaryEndpoints.blob]"
+                    }
+                }
+            },
+            "plan": {
+                "name": "${ihs.image.sku}",
+                "publisher": "${image.publisher}",
+                "product": "${ihs.image.offer}"
+            }
+        },
+        {
+            "condition": "[parameters('configureIHS')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('name_ihsVM'), '/install')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('ref_fileShare')]",
+                "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_ihsVM'))]"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "settings": {
+                    "fileUris": [
+                        "[uri(variables('const_scriptLocation'), concat('configure-ihs.sh', parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh configure-ihs.sh', variables('const_ihsArguments1'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value, variables('const_ihsArguments2'))]"
+                }
+            }
+        },
+        {
+            "condition": "[parameters('configureIHS')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${ihs.end}",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('name_ihsVM'), 'install')]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -436,6 +709,10 @@
         "adminSecuredConsole": {
             "type": "string",
             "value": "[concat('https://',reference(variables('name_publicIPAddress')).dnsSettings.fqdn,':9043/ibm/console')]"
+        },
+        "ihsConsole": {
+            "type": "string",
+            "value": "[if(parameters('configureIHS'), concat('http://',reference(variables('name_ihsPublicIPAddress')).dnsSettings.fqdn), 'N/A')]"
         }
     }
 }
