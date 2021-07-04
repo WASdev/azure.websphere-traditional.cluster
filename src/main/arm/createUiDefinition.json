@@ -9,7 +9,7 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "Provide an entitled IBMid to provision the WebSphere cluster. <a href='https://www.ibm.com/ibmid/myibm/help/us/helpdesk.html' target='_blank'>Learn more</a>"
+                    "text": "This offer is Bring-Your-Own-License. You will be required to enter your registered IBM ID prior to successfully deploying this offer and your IBM ID must have active WebSphere entitlements associated with it. If you find that provisioning fails due to lack of entitlements, please contact the primary or secondary contacts for your IBM Passport Advantage Site who should be able to grant you access or follow steps at <a href='https://www-112.ibm.com/software/howtobuy/passportadvantage/homepage/ecarec' target='_blank'>IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure."
                 }
             },
             {
