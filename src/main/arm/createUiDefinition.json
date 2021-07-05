@@ -15,22 +15,22 @@
             {
                 "name": "ibmUserId",
                 "type": "Microsoft.Common.TextBox",
-                "label": "IBMid",
-                "toolTip": "Your IBMid.",
+                "label": "IBM ID",
+                "toolTip": "Your IBM ID.",
                 "constraints": {
                     "required": true,
                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
-                    "validationMessage": "The value must be valid IBMid."
+                    "validationMessage": "The value must be valid IBM ID."
                 }
             },
             {
                 "name": "ibmUserPwd",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": {
-                    "password": "Password for IBMid",
+                    "password": "Password for IBM ID",
                     "confirmPassword": "Confirm password"
                 },
-                "toolTip": "Password for your IBMid.",
+                "toolTip": "Password for your IBM ID.",
                 "constraints": {
                     "required": true
                 }

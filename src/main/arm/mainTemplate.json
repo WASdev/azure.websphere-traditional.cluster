@@ -26,13 +26,13 @@
         "ibmUserId": {
             "type": "string",
             "metadata": {
-                "description": "Username of your IBMid account."
+                "description": "Username of your IBM ID account."
             }
         },
         "ibmUserPwd": {
             "type": "securestring",
             "metadata": {
-                "description": "Password of your IBMid account."
+                "description": "Password of your IBM ID account."
             }
         },
         "dynamic": {
