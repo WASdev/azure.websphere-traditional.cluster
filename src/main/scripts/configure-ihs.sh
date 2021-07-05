@@ -40,6 +40,32 @@ EOF
   systemctl enable "$srvName"
 }
 
+# Check whether the user is entitled or not
+while [ ! -f "/var/log/cloud-init-was.log" ]
+do
+    sleep 5
+done
+
+isDone=false
+while [ $isDone = false ]
+do
+    result=`(tail -n1) </var/log/cloud-init-was.log`
+    if [[ $result = Unentitled ]] || [[ $result = Entitled ]]; then
+        isDone=true
+    else
+        sleep 5
+    fi
+done
+echo "The input IBMid account is ${result}."
+
+# Remove cloud-init artifacts and logs
+cloud-init clean --logs
+
+# Terminate the process for the un-entitled user
+if [ ${result} = Unentitled ]; then
+    exit 1
+fi
+
 # Check required parameters
 if [ "$8" == "" ]; then 
   echo "Usage:"
@@ -55,12 +81,14 @@ storageAccountKey=$6
 fileShareName=$7
 mountpointPath=$8
 
+# Get IHS installation properties
+source /datadrive/virtualimage.properties
+
 # Open ports
 firewall-cmd --zone=public --add-port=80/tcp --permanent
 firewall-cmd --zone=public --add-port=8008/tcp --permanent
 firewall-cmd --reload
 
-source /datadrive/virtualimage.properties
 hostname=`hostname`
 responseFile="pct.response.txt"
 
