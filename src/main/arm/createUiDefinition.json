@@ -9,7 +9,7 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "This offer is Bring-Your-Own-License. You will be required to enter your registered IBM ID prior to successfully deploying this offer and your IBM ID must have active WebSphere entitlements associated with it. If you find that provisioning fails due to lack of entitlements, please contact the primary or secondary contacts for your IBM Passport Advantage Site who should be able to grant you access or follow steps at <a href='https://www-112.ibm.com/software/howtobuy/passportadvantage/homepage/ecarec' target='_blank'>IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure."
+                    "text": "This offer is Bring-Your-Own-License. To deploy this offer, you must enter your registered IBM ID and your IBM ID must have active WebSphere entitlements associated with it. If provisioning fails due to lack of entitlements, ask the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at <a href='https://www-112.ibm.com/software/howtobuy/passportadvantage/homepage/ecarec' target='_blank'>IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure."
                 }
             },
             {
@@ -241,7 +241,7 @@
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Configure an IBM HTTP Server?",
                         "defaultValue": "Yes",
-                        "toolTip": "Select 'Yes' and provide required info to configure an IBM HTTP Server.",
+                        "toolTip": "Select 'Yes' and provide the required information to configure an IBM HTTP Server. If you select 'No', you will not be able to use this offer to add IBM HTTP Server later to an existing cluster. You either must set up a new cluster or add IBM HTTP Server manually.",
                         "constraints": {
                             "allowedValues": [
                                 {
