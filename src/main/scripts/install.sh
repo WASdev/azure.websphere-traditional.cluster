@@ -223,29 +223,6 @@ create_custom_profile() {
     echo $output
 }
 
-while getopts "m:c:f:h:r:x:" opt; do
-    case $opt in
-        m)
-            adminUserName=$OPTARG #User id for admimistrating WebSphere Admin Console
-        ;;
-        c)
-            adminPassword=$OPTARG #Password for administrating WebSphere Admin Console
-        ;;
-        f)
-            dmgr=$OPTARG #Flag indicating whether to install deployment manager
-        ;;
-        h)
-            dmgrHostName=$OPTARG #Host name of deployment manager server
-        ;;
-        r)
-            members=$OPTARG #Number of cluster members
-        ;;
-        x)
-            dynamic=$OPTARG #Flag indicating whether to create a dynamic cluster or not
-        ;;
-    esac
-done
-
 # Check whether the user is entitled or not
 while [ ! -f "/var/log/cloud-init-was.log" ]
 do
@@ -272,6 +249,28 @@ if [ ${result} = Unentitled ]; then
     exit 1
 fi
 
+# Check required parameters
+if [ "$7" = True ] && [ "${11}" == "" ]; then 
+  echo "Usage:"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath]"
+  exit 1
+elif [ "$7" == "" ]; then 
+  echo "Usage:"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] False"
+  exit 1
+fi
+dmgr=$1
+adminUserName=$2
+adminPassword=$3
+dmgrHostName=$4
+members=$5
+dynamic=$6
+configureIHS=$7
+storageAccountName=$8
+storageAccountKey=$9
+fileShareName=${10}
+mountpointPath=${11}
+
 # Get tWAS installation properties
 source /datadrive/virtualimage.properties
 
@@ -282,6 +281,11 @@ if [ "$dmgr" = True ]; then
     create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
     ${WAS_ND_INSTALL_DIRECTORY}/profiles/Dmgr001/bin/startServer.sh dmgr
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members $dynamic
+
+    # Configure IHS if required
+    if [ "$configureIHS" = True ]; then
+        ./configure-ihs-on-dmgr.sh Dmgr001 "$adminUserName" "$adminPassword" "$storageAccountName" "$storageAccountKey" "$fileShareName" "$mountpointPath"
+    fi
 else
     create_custom_profile Custom $(hostname) $(hostname)Node01 $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"

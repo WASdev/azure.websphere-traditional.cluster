@@ -43,6 +43,33 @@
         },
         "wasPassword": {
             "value": "${wasPassword}"
+        },
+        "configureIHS": {
+            "value": "${configureIHS}"
+        },
+        "ihsVmSize": {
+            "value": "${ihsVmSize}"
+        },
+        "ihsVMPrefix": {
+            "value": "${ihsVMPrefix}"
+        },
+        "ihsDnsLabelPrefix":{
+            "value": "${ihsDnsLabelPrefix}"
+        },
+        "ihsUnixUsername": {
+            "value": "${ihsUnixUsername}"
+        },
+        "ihsUnixPasswordOrKey": {
+            "value": "${ihsUnixPasswordOrKey}"
+        },
+        "ihsAuthenticationType": {
+            "value": "${ihsAuthenticationType}"
+        },
+        "ihsAdminUsername": {
+            "value": "${ihsAdminUsername}"
+        },
+        "ihsAdminPassword": {
+            "value": "${ihsAdminPassword}"
         }
     }
 }

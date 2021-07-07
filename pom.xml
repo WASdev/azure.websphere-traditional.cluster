@@ -20,7 +20,7 @@
 
     <groupId>com.ibm.websphere.azure</groupId>
     <artifactId>azure.websphere-traditional.cluster</artifactId>
-    <version>1.3.14</version>
+    <version>1.3.15</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
@@ -38,13 +38,21 @@
         <azure.apiVersion2>2019-06-01</azure.apiVersion2>
         <cluster.start>c2efe274-0dc2-50f3-b51f-338a3fe01afb</cluster.start>
         <cluster.end>9c5dbfce-a6b9-5659-96bc-ca0cf429122a</cluster.end>
+        <ihs.start>5526bacf-3c35-57b7-8b22-337d78b4f478</ihs.start>
+        <ihs.end>3720d7ef-c2dc-5ad4-83bc-96e54bd2bd13</ihs.end>
         <!-- This is the "Partner ID" in Partner Center" -->
         <image.publisher>ibm-usa-ny-armonk-hq-6275750-ibmcloud-aiops</image.publisher>
-        <!-- This is the "Offer ID" of the "Azure Virtual Machine" offer type -->
-        <image.offer>2021-04-27-twas-cluster-base-image</image.offer>
-        <!-- This is the "Plan ID" of the plan within the "Azure Virtual Machine" offer -->
-        <image.sku>2021-04-27-twas-cluster-base-image</image.sku>
-        <!-- This is the "Disk version" of the VM image of the plan within the "Azure Virtual Machine" offer -->
-        <image.version>9.0.20210624</image.version>
+        <!-- This is the twas-nd "Offer ID" of the "Azure Virtual Machine" offer type -->
+        <twasnd.image.offer>2021-04-27-twas-cluster-base-image</twasnd.image.offer>
+        <!-- This is the twas-nd "Plan ID" of the plan within the "Azure Virtual Machine" offer -->
+        <twasnd.image.sku>2021-04-27-twas-cluster-base-image</twasnd.image.sku>
+        <!-- This is the twas-nd "Disk version" of the VM image of the plan within the "Azure Virtual Machine" offer -->
+        <twasnd.image.version>9.0.20210630</twasnd.image.version>
+        <!-- This is the ihs "Offer ID" of the "Azure Virtual Machine" offer type -->
+        <ihs.image.offer>2021-06-03-ihs-base-image</ihs.image.offer>
+        <!-- This is the ihs "Plan ID" of the plan within the "Azure Virtual Machine" offer -->
+        <ihs.image.sku>2021-06-03-ihs-base-image</ihs.image.sku>
+        <!-- This is the ihs "Disk version" of the VM image of the plan within the "Azure Virtual Machine" offer -->
+        <ihs.image.version>9.0.20210630</ihs.image.version>
     </properties>
 </project>
