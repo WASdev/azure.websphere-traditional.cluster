@@ -136,7 +136,6 @@ echo "password=$storageAccountKey" >> /etc/smbcredentials/${storageAccountName}.
 chmod 600 /etc/smbcredentials/${storageAccountName}.cred
 echo "//${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino" >> /etc/fstab
 
-yum install cifs-utils -y
 mount -t cifs //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
 if [[ $? != 0 ]]; then
   echo "Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath"
