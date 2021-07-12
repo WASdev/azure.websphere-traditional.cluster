@@ -95,14 +95,15 @@
                     },
                     {
                         "name": "numberOfNodes",
-                        "type": "Microsoft.Common.TextBox",
+                        "type": "Microsoft.Common.Slider",
+                        "min": 2,
+                        "max": 21,
                         "label": "Number of VMs",
-                        "defaultValue": "4",
-                        "toolTip": "The number of virtual machines to create, with one deployment manager and one to four worker nodes.",
+                        "defaultValue": 4,
+                        "showStepMarkers": false,
+                        "toolTip": "The number of virtual machines to create, with one deployment manager and one to twenty worker nodes. More worker nodes usually need longer time to deploy.",
                         "constraints": {
-                            "required": true,
-                            "regex": "^(2|3|4|5)$",
-                            "validationMessage": "Please pick a value between 2 and 5. You need at least two virtual machines: one deployment manager and at least one worker node. The upper limit is five because this offer uses a single storage account."
+                            "required": true
                         }
                     },
                     {
