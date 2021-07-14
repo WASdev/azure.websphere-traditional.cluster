@@ -246,7 +246,7 @@ cloud-init clean --logs
 # Terminate the process for the un-entitled or undefined user
 if [ ${result} != Entitled ]; then
     if [ ${result} = Unentitled ]; then
-        echo "The provided IBM ID does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://www-112.ibm.com/software/howtobuy/passportadvantage/homepage/ecarec) for further assistance."
+        echo "The provided IBM ID does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://ibm.biz/IBMidEntitlement) for further assistance."
     else
         echo "No WebSphere Application Server installation packages were found. This is likely due to a temporary issue with the installation repository. Try again and open an IBM Support issue if the problem persists."
     fi
