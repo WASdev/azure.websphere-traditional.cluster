@@ -50,19 +50,23 @@ isDone=false
 while [ $isDone = false ]
 do
     result=`(tail -n1) </var/log/cloud-init-was.log`
-    if [[ $result = Unentitled ]] || [[ $result = Entitled ]]; then
+    if [[ $result = Entitled ]] || [[ $result = Unentitled ]] || [[ $result = Undefined ]]; then
         isDone=true
     else
         sleep 5
     fi
 done
-echo "The input IBMid account is ${result}."
 
 # Remove cloud-init artifacts and logs
 cloud-init clean --logs
 
-# Terminate the process for the un-entitled user
-if [ ${result} = Unentitled ]; then
+# Terminate the process for the un-entitled or undefined user
+if [ ${result} != Entitled ]; then
+    if [ ${result} = Unentitled ]; then
+        echo "The provided IBM ID does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://ibm.biz/IBMidEntitlement) for further assistance."
+    else
+        echo "No WebSphere Application Server installation packages were found. This is likely due to a temporary issue with the installation repository. Try again and open an IBM Support issue if the problem persists."
+    fi
     exit 1
 fi
 
@@ -132,7 +136,6 @@ echo "password=$storageAccountKey" >> /etc/smbcredentials/${storageAccountName}.
 chmod 600 /etc/smbcredentials/${storageAccountName}.cred
 echo "//${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino" >> /etc/fstab
 
-yum install cifs-utils -y
 mount -t cifs //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
 if [[ $? != 0 ]]; then
   echo "Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath"

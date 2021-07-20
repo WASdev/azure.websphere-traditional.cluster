@@ -1,6 +1,6 @@
 # [Related: Base images deployed by this Azure application](https://github.com/WASdev/azure.websphere-traditional.image)
 
-# Deploy RHEL 8.3 VMs on Azure with IBM WebSphere Application Server ND Traditional V9.0.5 cluster pre-installed
+# Deploy RHEL 8.3 VMs on Azure with IBM WebSphere Application Server ND Traditional V9.0.5 cluster and IBM HTTP Server V9.0 pre-installed
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@
 1. Build the project by replacing all placeholder `${<place_holder>}` with valid values
 
    ```bash
-   mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DvmSize=<vmSize> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DadminUsername=<adminUsername> -DadminPasswordOrKey=<adminPassword|adminSSHPublicKey> -DauthenticationType=<password|sshPublicKey> -DwasUsername=<wasUsername> -DwasPassword=<wasPassword> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
+   mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DvmSize=<vmSize> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DadminUsername=<adminUsername> -DadminPasswordOrKey=<adminPassword|adminSSHPublicKey> -DauthenticationType=<password|sshPublicKey> -DwasUsername=<wasUsername> -DwasPassword=<wasPassword> -DconfigureIHS=<true|false> -DihsVmSize=<ihsVmSize> -DihsVMPrefix=<ihsVMPrefix> -DihsDnsLabelPrefix=<ihsDnsLabelPrefix> -DihsUnixUsername=<ihsUnixUsername> -DihsUnixPasswordOrKey=<ihsUnixPassword|ihsUnixSSHPublicKey> -DihsAuthenticationType=<password|sshPublicKey> -DihsAdminUsername=<ihsAdminUsername> -DihsAdminPassword=<ihsAdminPassword> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
    ```
 
 1. Change to `./target/arm` directory
@@ -38,3 +38,4 @@
    1. Open the resource group you specified to deploy WebSphere Cluster
    1. Navigate to "Deployments > specified_deployment_name > Outputs"
    1. Copy value of property `adminSecuredConsole` and browse it with credentials you specified in cluster creation
+   1. Copy value of property `ihsConsole` and open it in your browser if you selected to deploy IBM HTTP Server before
