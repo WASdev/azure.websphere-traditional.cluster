@@ -1,11 +1,11 @@
 # [Related: Base images deployed by this Azure application](https://github.com/WASdev/azure.websphere-traditional.image)
 
-# Deploy RHEL 8.3 VMs on Azure with IBM WebSphere Application Server ND Traditional V9.0.5 cluster and IBM HTTP Server V9.0 pre-installed
+# Deploy RHEL 8.4 VMs on Azure with IBM WebSphere Application Server ND Traditional V9.0.5 cluster and IBM HTTP Server V9.0 pre-installed
 
 ## Prerequisites
 
 1. Register an [Azure subscription](https://azure.microsoft.com/).
-1. The virtual machine offer which includes the image of RHEL8.3 with IBM WebSphere and JDK pre-installed is used as image reference to deploy virtual machine on Azure. Before the offer goes live in Azure Marketplace, your Azure subscription needs to be added into white list to successfully deploy VM using ARM template of this repo.
+1. The virtual machine offer which includes the image of RHEL 8.4 with IBM WebSphere and JDK pre-installed is used as image reference to deploy virtual machine on Azure. Before the offer goes live in Azure Marketplace, your Azure subscription needs to be added into white list to successfully deploy VM using ARM template of this repo.
 1. Install [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest).
 1. Install [PowerShell Core](https://docs.microsoft.com/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-7.1).
 1. Install [Maven](https://maven.apache.org/download.cgi).
