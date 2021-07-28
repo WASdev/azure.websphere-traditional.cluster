@@ -48,9 +48,9 @@
 - Summary
   - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Long Summary
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.3
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.4
 - Description
-  - IBM WebSphere Application Server Network Deployment provides a flexible, secure server runtime environment for large-scale and mission critical application deployments. This offer provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.3. ???
+  - IBM WebSphere Application Server Network Deployment provides a flexible, secure server runtime environment for large-scale and mission critical application deployments. This offer provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.4. ???
 
 ### Legal Links
 
@@ -155,7 +155,7 @@
 - Summary
   - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Description
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.3 VMs
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 8.4 VMs
 
 ### Availability
 
