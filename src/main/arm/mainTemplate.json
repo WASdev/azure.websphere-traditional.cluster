@@ -183,6 +183,17 @@
         "const_ihsArguments1": "[concat(' ',variables('name_dmgrVM'),' ',parameters('ihsUnixUsername'),' ',parameters('ihsAdminUsername'),' ',parameters('ihsAdminPassword'),' ',variables('name_storageAccount'))]",
         "const_ihsArguments2": "[concat(' ',variables('name_share'),' ',variables('const_mountPointPath'))]",
         "const_ihsDnsLabelPrefix": "[concat(parameters('ihsDnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
+        "const_ihsLinuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('ihsUnixUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('ihsUnixPasswordOrKey')]"
+                    }
+                ]
+            }
+        },
         "const_linuxConfiguration": {
             "disablePasswordAuthentication": true,
             "ssh": {
@@ -604,7 +615,7 @@
                     "computerName": "[variables('name_ihsVM')]",
                     "adminUsername": "[parameters('ihsUnixUsername')]",
                     "adminPassword": "[parameters('ihsUnixPasswordOrKey')]",
-                    "linuxConfiguration": "[if(equals(parameters('ihsAuthenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]",
+                    "linuxConfiguration": "[if(equals(parameters('ihsAuthenticationType'), 'password'), json('null'), variables('const_ihsLinuxConfiguration'))]",
                     "customData": "[base64(concat(parameters('ibmUserId'), ' ', parameters('ibmUserPwd')))]"
                 },
                 "networkProfile": {
