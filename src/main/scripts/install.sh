@@ -62,31 +62,18 @@ add_admin_credentials_to_soap_client_props() {
     ${WAS_ND_INSTALL_DIRECTORY}/profiles/${profileName}/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
 }
 
-create_systemd_service() {
-    srvName=$1
-    srvDescription=$2
-    profileName=$3
-    serverName=$4
+create_was_service() {
+    serverName=$1
+    serviceName=${serverName}
+    profileName=$2
+    profilePath=${WAS_ND_INSTALL_DIRECTORY}/profiles/${profileName}
+    
+    # Configure SELinux so systemctl has access on server start/stop script files 
+    semanage fcontext -a -t bin_t "${profilePath}/bin(/.*)?"
+    restorecon -r -v ${profilePath}/bin
 
-    # Add systemd unit file
-    cat <<EOF > /etc/systemd/system/${srvName}.service
-[Unit]
-Description=${srvDescription}
-RequiresMountsFor=/datadrive
-[Service]
-Type=forking
-ExecStart=/bin/sh -c "${WAS_ND_INSTALL_DIRECTORY}/profiles/${profileName}/bin/startServer.sh ${serverName}"
-ExecStop=/bin/sh -c "${WAS_ND_INSTALL_DIRECTORY}/profiles/${profileName}/bin/stopServer.sh ${serverName}"
-PIDFile=${WAS_ND_INSTALL_DIRECTORY}/profiles/${profileName}/logs/${serverName}/${serverName}.pid
-SuccessExitStatus=143 0
-TimeoutStartSec=900
-[Install]
-WantedBy=default.target
-EOF
-
-    # Enable service
-    systemctl daemon-reload
-    systemctl enable "$srvName"
+    # Add service
+    ${profilePath}/bin/wasservice.sh -add ${serviceName} -serverName ${serverName} -profilePath ${profilePath}
 }
 
 create_cluster() {
@@ -282,7 +269,7 @@ source /datadrive/virtualimage.properties
 if [ "$dmgr" = True ]; then
     create_dmgr_profile Dmgr001 $(hostname) Dmgr001Node Dmgr001NodeCell "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Dmgr001 "$adminUserName" "$adminPassword"
-    create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
+    create_was_service dmgr Dmgr001
     ${WAS_ND_INSTALL_DIRECTORY}/profiles/Dmgr001/bin/startServer.sh dmgr
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members $dynamic
 
@@ -293,5 +280,5 @@ if [ "$dmgr" = True ]; then
 else
     create_custom_profile Custom $(hostname) $(hostname)Node01 $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
-    create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
+    create_was_service nodeagent Custom
 fi
