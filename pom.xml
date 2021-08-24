@@ -36,6 +36,7 @@
         <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
         <azure.apiVersion>2020-06-01</azure.apiVersion>
         <azure.apiVersion2>2019-06-01</azure.apiVersion2>
+        <customer.usage.attribution.id>pid-fb16aee1-039d-45dc-a476-806224793a6c-partnercenter</customer.usage.attribution.id>
         <cluster.start>c2efe274-0dc2-50f3-b51f-338a3fe01afb</cluster.start>
         <cluster.end>9c5dbfce-a6b9-5659-96bc-ca0cf429122a</cluster.end>
         <ihs.start>5526bacf-3c35-57b7-8b22-337d78b4f478</ihs.start>
