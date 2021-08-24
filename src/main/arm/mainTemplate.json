@@ -265,10 +265,7 @@
             "sku": {
                 "name": "Standard_LRS"
             },
-            "kind": "Storage",
-            "properties": {
-                "supportsHttpsTrafficOnly": false
-            }
+            "kind": "Storage"
         },
         {
             "condition": "[parameters('configureIHS')]",
