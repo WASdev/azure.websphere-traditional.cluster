@@ -40,8 +40,11 @@ EOF
   systemctl enable "$srvName"
 }
 
+# Get IHS installation properties
+source /datadrive/virtualimage.properties
+
 # Check whether the user is entitled or not
-while [ ! -f "/var/log/cloud-init-was.log" ]
+while [ ! -f "$WAS_LOG_PATH" ]
 do
     sleep 5
 done
@@ -49,8 +52,8 @@ done
 isDone=false
 while [ $isDone = false ]
 do
-    result=`(tail -n1) </var/log/cloud-init-was.log`
-    if [[ $result = Entitled ]] || [[ $result = Unentitled ]] || [[ $result = Undefined ]]; then
+    result=`(tail -n1) <$WAS_LOG_PATH`
+    if [[ $result = $ENTITLED ]] || [[ $result = $UNENTITLED ]] || [[ $result = $UNDEFINED ]]; then
         isDone=true
     else
         sleep 5
@@ -61,8 +64,8 @@ done
 cloud-init clean --logs
 
 # Terminate the process for the un-entitled or undefined user
-if [ ${result} != Entitled ]; then
-    if [ ${result} = Unentitled ]; then
+if [ ${result} != $ENTITLED ]; then
+    if [ ${result} = $UNENTITLED ]; then
         echo "The provided IBM ID does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://ibm.biz/IBMidEntitlement) for further assistance."
     else
         echo "No WebSphere Application Server installation packages were found. This is likely due to a temporary issue with the installation repository. Try again and open an IBM Support issue if the problem persists."
@@ -86,9 +89,6 @@ fileShareName=$7
 mountpointPath=$8
 
 echo "$(date): Start to configure IHS."
-
-# Get IHS installation properties
-source /datadrive/virtualimage.properties
 
 # Open ports
 firewall-cmd --zone=public --add-port=80/tcp --permanent
