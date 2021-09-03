@@ -85,6 +85,8 @@ storageAccountKey=$6
 fileShareName=$7
 mountpointPath=$8
 
+echo "$(date): Start to configure IHS."
+
 # Get IHS installation properties
 source /datadrive/virtualimage.properties
 
@@ -138,13 +140,15 @@ echo "//${storageAccountName}.file.core.windows.net/${fileShareName} $mountpoint
 
 mount -t cifs //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath -o credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
 if [[ $? != 0 ]]; then
-  echo "Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath"
+  echo "$(date): Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath."
   exit 1
 fi
 
 # Move the IHS confguration script to Azure File Share system
 mv $PLUGIN_INSTALL_DIRECTORY/bin/configurewebserver1.sh $mountpointPath
 if [[ $? != 0 ]]; then
-  echo "Failed to move $PLUGIN_INSTALL_DIRECTORY/bin/configurewebserver1.sh to $mountpointPath"
+  echo "$(date): Failed to move $PLUGIN_INSTALL_DIRECTORY/bin/configurewebserver1.sh to $mountpointPath."
   exit 1
 fi
+
+echo "$(date): Complete to configure IHS."

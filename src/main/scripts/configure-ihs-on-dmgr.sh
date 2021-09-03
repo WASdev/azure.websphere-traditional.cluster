@@ -28,6 +28,8 @@ storageAccountKey=$5
 fileShareName=$6
 mountpointPath=$7
 
+echo "$(date): Start to configure IHS on dmgr."
+
 source /datadrive/virtualimage.properties
 
 # Mount Azure File Share system
@@ -40,7 +42,7 @@ echo "//${storageAccountName}.file.core.windows.net/${fileShareName} $mountpoint
 
 mount -t cifs //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath -o credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
 if [[ $? != 0 ]]; then
-  echo "Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath"
+  echo "$(date): Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath."
   exit 1
 fi
 
@@ -52,7 +54,7 @@ do
 done
 mv $mountpointPath/configurewebserver1.sh $WAS_ND_INSTALL_DIRECTORY/bin
 if [[ $? != 0 ]]; then
-  echo "Failed to move $mountpointPath/configurewebserver1.sh to $WAS_ND_INSTALL_DIRECTORY/bin"
+  echo "$(date): Failed to move $mountpointPath/configurewebserver1.sh to $WAS_ND_INSTALL_DIRECTORY/bin."
   exit 1
 fi
 
@@ -60,7 +62,6 @@ fi
 read -r -a cmds <<<`(tail -n1) <$WAS_ND_INSTALL_DIRECTORY/bin/configurewebserver1.sh`
 nodeName=${cmds[14]}
 
-echo "Configure IHS on the DMgr"
 $WAS_ND_INSTALL_DIRECTORY/bin/configurewebserver1.sh -profileName $profile -user $wasUser -password $wasPassword >/dev/null 2>&1
 rm -rf $WAS_ND_INSTALL_DIRECTORY/bin/configurewebserver1.sh
 
@@ -73,3 +74,5 @@ $WAS_ND_INSTALL_DIRECTORY/bin/pluginutil.sh generate webserver1 $nodeName
 $WAS_ND_INSTALL_DIRECTORY/bin/pluginutil.sh propagate webserver1 $nodeName
 $WAS_ND_INSTALL_DIRECTORY/bin/pluginutil.sh propagateKeyring webserver1 $nodeName
 $WAS_ND_INSTALL_DIRECTORY/bin/pluginutil.sh restart webserver1 $nodeName
+
+echo "$(date): Complete to configure IHS on dmgr."
