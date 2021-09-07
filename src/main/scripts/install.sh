@@ -42,9 +42,11 @@ create_dmgr_profile() {
     adminUserName=$5
     adminPassword=$6
 
+    echo "$(date): Start to create deployment manager profile."
     ${WAS_ND_INSTALL_DIRECTORY}/bin/manageprofiles.sh -create -profileName ${profileName} -hostName $hostName \
         -templatePath ${WAS_ND_INSTALL_DIRECTORY}/profileTemplates/management -serverType DEPLOYMENT_MANAGER \
         -nodeName ${nodeName} -cellName ${cellName} -enableAdminSecurity true -adminUserName ${adminUserName} -adminPassword ${adminPassword}
+    echo "$(date): Deployment manager profile created."
 }
 
 add_admin_credentials_to_soap_client_props() {
@@ -84,6 +86,7 @@ create_cluster() {
     members=$5
     dynamic=$6
 
+    echo "$(date): Check if all nodes are managed."
     nodes=( $(${WAS_ND_INSTALL_DIRECTORY}/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.list('Node')" \
         | grep -Po "(?<=\/nodes\/)[^|]*(?=|.*)" | grep -v $dmgrNode | sed 's/^/"/;s/$/"/') )
     while [ ${#nodes[@]} -ne $members ]
@@ -96,14 +99,14 @@ create_cluster() {
     sleep 60
 
     if [ "$dynamic" = True ]; then
-        echo "all nodes are managed, creating dynamic cluster..."
+        echo "$(date): All nodes are managed, start to create dynamic cluster."
         cp create-dcluster.py create-dcluster.py.bak
         sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" create-dcluster.py
         sed -i "s/\${NODE_GROUP_NAME}/DefaultNodeGroup/g" create-dcluster.py
         sed -i "s/\${CORE_GROUP_NAME}/DefaultCoreGroup/g" create-dcluster.py
         ${WAS_ND_INSTALL_DIRECTORY}/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-dcluster.py
     else
-        echo "all nodes are managed, creating cluster..."
+        echo "$(date): All nodes are managed, start to create cluster."
         nodes_string=$( IFS=,; echo "${nodes[*]}" )
         cp create-cluster.py create-cluster.py.bak
         sed -i "s/\${CELL_NAME}/${cellName}/g" create-cluster.py
@@ -112,7 +115,7 @@ create_cluster() {
         ${WAS_ND_INSTALL_DIRECTORY}/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-cluster.py
     fi
 
-    echo "cluster \"${clusterName}\" is successfully created!"
+    echo "$(date): Cluster \"${clusterName}\" is successfully created."
 }
 
 create_custom_profile() {
@@ -185,6 +188,7 @@ create_custom_profile() {
     dmgrAdminUserName=$6
     dmgrAdminPassword=$7
     
+    echo "$(date): Check if dmgr is ready."
     curl $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
     while [ $? -ne 56 ]
     do
@@ -193,7 +197,7 @@ create_custom_profile() {
         curl $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
     done
     sleep 60
-    echo "dmgr is ready to add nodes"
+    echo "$(date): Dmgr is ready, start to create custom profile."
 
     output=$(${WAS_ND_INSTALL_DIRECTORY}/bin/manageprofiles.sh -create -profileName $profileName -hostName $hostName -nodeName $nodeName \
         -profilePath ${WAS_ND_INSTALL_DIRECTORY}/profiles/$profileName -templatePath ${WAS_ND_INSTALL_DIRECTORY}/profileTemplates/managed \
@@ -208,10 +212,14 @@ create_custom_profile() {
             -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
     done
     echo $output
+    echo "$(date): Custom profile created."
 }
 
+# Get tWAS installation properties
+source /datadrive/virtualimage.properties
+
 # Check whether the user is entitled or not
-while [ ! -f "/var/log/cloud-init-was.log" ]
+while [ ! -f "$WAS_LOG_PATH" ]
 do
     sleep 5
 done
@@ -219,8 +227,8 @@ done
 isDone=false
 while [ $isDone = false ]
 do
-    result=`(tail -n1) </var/log/cloud-init-was.log`
-    if [[ $result = Entitled ]] || [[ $result = Unentitled ]] || [[ $result = Undefined ]]; then
+    result=`(tail -n1) <$WAS_LOG_PATH`
+    if [[ $result = $ENTITLED ]] || [[ $result = $UNENTITLED ]] || [[ $result = $UNDEFINED ]]; then
         isDone=true
     else
         sleep 5
@@ -231,8 +239,8 @@ done
 cloud-init clean --logs
 
 # Terminate the process for the un-entitled or undefined user
-if [ ${result} != Entitled ]; then
-    if [ ${result} = Unentitled ]; then
+if [ ${result} != $ENTITLED ]; then
+    if [ ${result} = $UNENTITLED ]; then
         echo "The provided IBM ID does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://ibm.biz/IBMidEntitlement) for further assistance."
     else
         echo "No WebSphere Application Server installation packages were found. This is likely due to a temporary issue with the installation repository. Try again and open an IBM Support issue if the problem persists."
@@ -261,9 +269,6 @@ storageAccountName=$8
 storageAccountKey=$9
 fileShareName=${10}
 mountpointPath=${11}
-
-# Get tWAS installation properties
-source /datadrive/virtualimage.properties
 
 # Create cluster by creating deployment manager, node agent & add nodes to be managed
 if [ "$dmgr" = True ]; then

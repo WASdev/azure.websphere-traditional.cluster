@@ -40,8 +40,11 @@ EOF
   systemctl enable "$srvName"
 }
 
+# Get IHS installation properties
+source /datadrive/virtualimage.properties
+
 # Check whether the user is entitled or not
-while [ ! -f "/var/log/cloud-init-was.log" ]
+while [ ! -f "$WAS_LOG_PATH" ]
 do
     sleep 5
 done
@@ -49,8 +52,8 @@ done
 isDone=false
 while [ $isDone = false ]
 do
-    result=`(tail -n1) </var/log/cloud-init-was.log`
-    if [[ $result = Entitled ]] || [[ $result = Unentitled ]] || [[ $result = Undefined ]]; then
+    result=`(tail -n1) <$WAS_LOG_PATH`
+    if [[ $result = $ENTITLED ]] || [[ $result = $UNENTITLED ]] || [[ $result = $UNDEFINED ]]; then
         isDone=true
     else
         sleep 5
@@ -61,8 +64,8 @@ done
 cloud-init clean --logs
 
 # Terminate the process for the un-entitled or undefined user
-if [ ${result} != Entitled ]; then
-    if [ ${result} = Unentitled ]; then
+if [ ${result} != $ENTITLED ]; then
+    if [ ${result} = $UNENTITLED ]; then
         echo "The provided IBM ID does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://ibm.biz/IBMidEntitlement) for further assistance."
     else
         echo "No WebSphere Application Server installation packages were found. This is likely due to a temporary issue with the installation repository. Try again and open an IBM Support issue if the problem persists."
@@ -85,8 +88,7 @@ storageAccountKey=$6
 fileShareName=$7
 mountpointPath=$8
 
-# Get IHS installation properties
-source /datadrive/virtualimage.properties
+echo "$(date): Start to configure IHS."
 
 # Open ports
 firewall-cmd --zone=public --add-port=80/tcp --permanent
@@ -138,13 +140,15 @@ echo "//${storageAccountName}.file.core.windows.net/${fileShareName} $mountpoint
 
 mount -t cifs //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath -o credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
 if [[ $? != 0 ]]; then
-  echo "Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath"
+  echo "$(date): Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath."
   exit 1
 fi
 
 # Move the IHS confguration script to Azure File Share system
 mv $PLUGIN_INSTALL_DIRECTORY/bin/configurewebserver1.sh $mountpointPath
 if [[ $? != 0 ]]; then
-  echo "Failed to move $PLUGIN_INSTALL_DIRECTORY/bin/configurewebserver1.sh to $mountpointPath"
+  echo "$(date): Failed to move $PLUGIN_INSTALL_DIRECTORY/bin/configurewebserver1.sh to $mountpointPath."
   exit 1
 fi
+
+echo "$(date): Complete to configure IHS."
