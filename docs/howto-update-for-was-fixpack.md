@@ -12,7 +12,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
      IBM_JAVA_SDK=com.ibm.java.jdk.v8
      ```
 
-     Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minior version.
+     Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minor version.
 
    * For `ihs` image, update the following properties in file [`virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/master/ihs/src/main/scripts/virtualimage.properties#L22-L25), e.g.:
 
@@ -23,7 +23,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
      IBM_JAVA_SDK=com.ibm.java.jdk.v8
      ```
 
-     Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minior version.
+     Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minor version.
 
 1. How to run CI/CD?
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `twas-nd CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
@@ -35,10 +35,10 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 1. How to publish the image in marketplace and who can do it?
    1. For `twas-nd` image: Wait until the CI/CD workflow for `twas-nd CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
    1. For `ihs` image: Wait until the CI/CD workflow for `ihs CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
-   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) > Click to open the offer for `twas-nd` base image > Clic `Plan overview` > Click to open the plan > Clic `Technical configuration` > Click `+ Add VM image` > Specify a new value for `Disk version` and write it down > Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `twas-nd` to textbox `SAS URI` > Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` to textbox `Data disk VHD link` > Scroll to the bottom of the page > Click `Save draft` > Click `Review and publish` > Click `Publish`;
-   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) > Click to open the offer for `ihs` base image > Clic `Plan overview` > Click to open the plan > Clic `Technical configuration` > Click `+ Add VM image` > Specify a new value for `Disk version` and write it down > Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `ihs` to textbox `SAS URI` > Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `ihs` to textbox `Data disk VHD link` > Scroll to the bottom of the page > Click `Save draft` > Click `Review and publish` > Click `Publish`;
+   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) > Click to open the offer for `twas-nd` base image > Click `Plan overview` > Click to open the plan > Click `Technical configuration` > Click `+ Add VM image` > Specify a new value for `Disk version` and write it down > Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `twas-nd` to textbox `SAS URI` > Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` to textbox `Data disk VHD link` > Scroll to the bottom of the page > Click `Save draft` > Click `Review and publish` > Click `Publish`;
+   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) > Click to open the offer for `ihs` base image > Click `Plan overview` > Click to open the plan > Click `Technical configuration` > Click `+ Add VM image` > Specify a new value for `Disk version` and write it down > Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `ihs` to textbox `SAS URI` > Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `ihs` to textbox `Data disk VHD link` > Scroll to the bottom of the page > Click `Save draft` > Click `Review and publish` > Click `Publish`;
 
-   Note: Currently Graham Charters has privilidge to update the image in marketplace, contact him for more information.
+   Note: Currently Graham Charters has privilege to update the image in marketplace, contact him for more information.
 
 1. Do we need to update the solution every time we do the image update?
    * Yes. That's because image versions of [`twas-nd`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/master/pom.xml#L51) and [`ihs`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/master/pom.xml#L57) are explicitely referenced in the tWAS solutoin. Make sure correct image versions are specified in the `pom.xml` of the solution code.
@@ -55,17 +55,17 @@ Note: The steps included in this section are also applied to release new feature
 
 1. How to publish the solution in marketplace and who can do it?
    1. Wait until the CI/CD workflow for `Package ARM` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `azure.websphere-traditional.cluster-<version>-arm-assembly` to download the zip file `azure.websphere-traditional.cluster-<version>-arm-assembly.zip`;
-   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) > Click to open the offer for the solution > Clic `Plan overview` > Click to open the plan > Clic `Technical configuration` > Specify the increased version number for `Version` > Click `Remove` to remove the previous package file > Click `browse your file(s)` to upload the downloaded zip package generated by the CI/CD pipeline before > Scroll to the bottom of the page > Click `Save draft` > Click `Review and publish` > Click `Publish`;
+   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) > Click to open the offer for the solution > Click `Plan overview` > Click to open the plan > Click `Technical configuration` > Specify the increased version number for `Version` > Click `Remove` to remove the previous package file > Click `browse your file(s)` to upload the downloaded zip package generated by the CI/CD pipeline before > Scroll to the bottom of the page > Click `Save draft` > Click `Review and publish` > Click `Publish`;
 
-   Note: Currently Graham Charters has privilidge to update the image in marketplace, contact him for more information.
+   Note: Currently Graham Charters has privilege to update the image in marketplace, contact him for more information.
 
 1. How to test the solution, what testcases to run?
    1. Wait until the soluton offer is in `Publisher signoff` (aka "preview") stage;
-   1. Run test cases defined in [twas-solutoin-test-cases.pdf](twas-solutoin-test-cases.pdf). Note: use "preview link" for each test case.
+   1. Run test cases defined in [twas-solution-test-cases.pdf](twas-solution-test-cases.pdf). Note: use "preview link" for each test case.
 
 ## What needs to be cleaned up from test env and how to clean them up?
 
-Azure marketplance is responsible for managing different stages during the offer publishing, just follow its process to make it Go-Live and no additional clean-ups are neeed.
+Azure marketplace is responsible for managing different stages during the offer publishing, just follow its process to make it Go-Live and no additional clean-ups are needed.
 
 ## Do we delete/archive previous version of the solution?
 
