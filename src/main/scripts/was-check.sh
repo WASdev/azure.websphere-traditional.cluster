@@ -19,9 +19,10 @@ WAS_ND_VERSION_ENTITLED=ND.v90_9.0.5007
 NO_PACKAGES_FOUND="No packages were found"
 IM_INSTALL_KIT=agent.installer.linux.gtk.x86_64.zip
 IM_INSTALL_KIT_URL=https://public.dhe.ibm.com/ibmdl/export/pub/software/im/zips/${IM_INSTALL_KIT}
-IM_INSTALL_DIRECTORY=IBM/InstallationManager/V1.9
-logFile=deployment.log
+IM_INSTALL_DIRECTORY=/tmp/IBM/InstallationManager/V1.9
+logFile=/tmp/deployment.log
 
+cd /tmp
 echo "$(date): Start to install IBM Installation Manager." > $logFile
 
 # Create installation directories
