@@ -82,10 +82,10 @@ else
     result=1
     if echo $output | grep -q "$NO_PACKAGES_FOUND"; then
         echo "Undefined" >> ${LOG_FILE}
-        echo "No WebSphere Application Server installation packages were found. This is likely due to a temporary issue with the installation repository. Try again and open an IBM Support issue if the problem persists."
+        echo "No WebSphere Application Server installation packages were found. This is likely due to a temporary issue with the installation repository. Try again and open an IBM Support issue if the problem persists" >&2
     else
         echo "Unentitled" >> ${LOG_FILE}
-        echo "The provided IBM ID does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://ibm.biz/IBMidEntitlement) for further assistance."
+        echo "The provided IBM ID does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://ibm.biz/IBMidEntitlement) for further assistance" >&2
     fi
 fi
 
@@ -93,10 +93,6 @@ fi
 rm -rf storage_file && rm -rf im_install_log
 
 echo "$(date): Entitlement check completed." >> ${LOG_FILE}
-
-# Output outputs
-errInfo="Unentitled user"
-outputJson=$(jq -n -c --arg errInfo $errInfo '{test: $errInfo}')
-echo $outputJson > $AZ_SCRIPTS_OUTPUT_PATH
-
-[ $result -eq 1 ] && exit 1
+if [ $result -eq 1 ]; then
+    exit 1
+fi
