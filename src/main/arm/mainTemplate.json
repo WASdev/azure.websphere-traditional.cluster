@@ -218,6 +218,8 @@
         "name_share": "wasshare",
         "name_storageAccount": "[concat('storage',take(replace(parameters('guidValue'),'-',''),6))]",
         "name_virtualNetwork": "[concat(variables('const_dnsLabelPrefix'), '-vnet')]",
+        "name_deploymentScript": "[concat('script', take(replace(parameters('guidValue'), '-', ''), 6))]",
+        "ref_deploymentScript": "[resourceId('Microsoft.Resources/deploymentScripts', variables('name_deploymentScript'))]",
         "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
         "ref_fileShare": "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('name_storageAccount'), 'default', variables('name_share'))]",
         "ref_ihsPublicIPAddress": "[resourceId('Microsoft.Network/publicIPAddresses', variables('name_ihsPublicIPAddress'))]",
@@ -258,10 +260,36 @@
             }
         },
         {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "${azure.apiVersion.deploymentScript}",
+            "name": "[variables('name_deploymentScript')]",
+            "location": "[parameters('location')]",
+            "kind": "AzureCLI",
+            "properties": {
+                "AzCliVersion": "2.15.0",
+                "environmentVariables": [
+                    {
+                        "name": "IBM_USER_ID",
+                        "value": "[parameters('ibmUserId')]"
+                    },
+                    {
+                        "name": "IBM_USER_PWD",
+                        "secureValue": "[parameters('ibmUserPwd')]"
+                    }
+                ],
+                "primaryScriptUri": "[uri(variables('const_scriptLocation'), concat('was-check.sh', parameters('_artifactsLocationSasToken')))]",
+                "cleanupPreference": "OnSuccess",
+                "retentionInterval": "P1D"
+            }
+        },
+        {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "${azure.apiVersion2}",
             "name": "[variables('name_storageAccount')]",
             "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('ref_deploymentScript')]"
+            ],
             "sku": {
                 "name": "Standard_LRS"
             },
@@ -298,6 +326,9 @@
             "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_networkSecurityGroup')]",
             "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('ref_deploymentScript')]"
+            ],
             "properties": {
                 "securityRules": [
                     {
@@ -360,6 +391,9 @@
             "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_publicIPAddress')]",
             "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('ref_deploymentScript')]"
+            ],
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
@@ -574,6 +608,9 @@
             "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_ihsPublicIPAddress')]",
             "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('ref_deploymentScript')]"
+            ],
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
