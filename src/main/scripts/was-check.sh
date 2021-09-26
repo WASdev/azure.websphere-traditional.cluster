@@ -14,11 +14,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+LOG_FILE=/tmp/deployment.log
+
 # Remove musl libc as IBM Java binaries only run on glibc
-apk del libc6-compat
+echo "$(date): Start to uninstall musl libc." > ${LOG_FILE}
+output=$(apk del libc6-compat)
+echo $output >> ${LOG_FILE}
 
 # Install glibc by referencing to https://github.com/ibmruntimes/ci.docker/blob/master/ibmjava/8/jre/alpine/Dockerfile
-apk add --no-cache --virtual .build-deps curl binutils \
+echo "$(date): Musl libc uninstalled, start to install glibc." >> ${LOG_FILE}
+output=$(apk add --no-cache --virtual .build-deps curl binutils \
     && GLIBC_VER="2.30-r0" \
     && ALPINE_GLIBC_REPO="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" \
     && GCC_LIBS_URL="https://archive.archlinux.org/packages/g/gcc-libs/gcc-libs-8.2.1%2B20180831-1-x86_64.pkg.tar.xz" \
@@ -35,18 +40,18 @@ apk add --no-cache --virtual .build-deps curl binutils \
     && strip /usr/glibc-compat/lib/libgcc_s.so.* /usr/glibc-compat/lib/libstdc++.so* \
     && apk del --purge .build-deps \
     && apk add --no-cache ca-certificates openssl \
-    && rm -rf /tmp/${GLIBC_VER}.apk /tmp/gcc /tmp/gcc-libs.tar.xz /var/cache/apk/* /tmp/*.pub
+    && rm -rf /tmp/${GLIBC_VER}.apk /tmp/gcc /tmp/gcc-libs.tar.xz /var/cache/apk/* /tmp/*.pub)
+echo $output >> ${LOG_FILE}
 
 # Define const variables for IM installation
 IM_INSTALL_KIT_URL=https://public.dhe.ibm.com/ibmdl/export/pub/software/im/zips/agent.installer.linux.gtk.x86_64.zip
 IM_INSTALL_KIT=/tmp/agent.installer.linux.gtk.x86_64.zip
 IM_INSTALL_KIT_UNPACK=/tmp/im_installer
 IM_INSTALL_DIRECTORY=/tmp/IBM/InstallationManager/V1.9
-LOG_FILE=/tmp/deployment.log
 WAS_ND_VERSION_ENTITLED=ND.v90_9.0.5007
 NO_PACKAGES_FOUND="No packages were found"
 
-echo "$(date): Start to install IBM Installation Manager." > ${LOG_FILE}
+echo "$(date): Glibc installed, start to install IBM Installation Manager." >> ${LOG_FILE}
 
 # Create installation directories
 mkdir -p ${IM_INSTALL_KIT_UNPACK} && mkdir -p ${IM_INSTALL_DIRECTORY}
@@ -54,13 +59,15 @@ mkdir -p ${IM_INSTALL_KIT_UNPACK} && mkdir -p ${IM_INSTALL_DIRECTORY}
 # Install IBM Installation Manager
 wget -O ${IM_INSTALL_KIT} ${IM_INSTALL_KIT_URL} -q
 unzip -q ${IM_INSTALL_KIT} -d ${IM_INSTALL_KIT_UNPACK}
-${IM_INSTALL_KIT_UNPACK}/userinstc -log ${LOG_FILE} -acceptLicense -installationDirectory ${IM_INSTALL_DIRECTORY}
+output=$(${IM_INSTALL_KIT_UNPACK}/userinstc -log im_install_log -acceptLicense -installationDirectory ${IM_INSTALL_DIRECTORY})
+echo $output >> ${LOG_FILE}
 
 echo "$(date): IBM Installation Manager installed, start to check entitlement." >> ${LOG_FILE}
 
 # Save credentials to a secure storage file
-${IM_INSTALL_DIRECTORY}/eclipse/tools/imutilsc saveCredential -secureStorageFile storage_file \
-    -userName "$IBM_USER_ID" -userPassword "$IBM_USER_PWD" -passportAdvantage
+output=$(${IM_INSTALL_DIRECTORY}/eclipse/tools/imutilsc saveCredential -secureStorageFile storage_file \
+    -userName "$IBM_USER_ID" -userPassword "$IBM_USER_PWD" -passportAdvantage)
+echo $output >> ${LOG_FILE}
 
 # Check whether IBMid is entitled or not
 if [ $? -ne 0 ]; then
@@ -82,8 +89,14 @@ else
     fi
 fi
 
-# Remove the secure storage file
-rm -rf storage_file
+# Remove temporary files
+rm -rf storage_file && rm -rf im_install_log
 
 echo "$(date): Entitlement check completed." >> ${LOG_FILE}
+
+# Output outputs
+errInfo="Unentitled user"
+outputJson=$(jq -n -c --arg errInfo $errInfo '{test: $errInfo}')
+echo $outputJson > $AZ_SCRIPTS_OUTPUT_PATH
+
 [ $result -eq 1 ] && exit 1
