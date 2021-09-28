@@ -54,13 +54,48 @@
                 }
             },
             {
-                "name": "About",
-                "type": "Microsoft.Common.InfoBox",
-                "options": {
-                    "icon": "None",
-                    "text": "Template version ${project.version}"
-                },
-                "visible": "[bool('${template.version.visible}')]"
+                "name": "howToReportIssues",
+                "type": "Microsoft.Common.Section",
+                "label": "Report issues, get help, and share feedback",
+                "elements": [
+                    {
+                        "name": "howToReportIssueText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you encounter problems during deployment of WebSphere, please report them here.",
+                            "link": {
+                                "label": "Issue tracker",
+                                "uri": "https://aka.ms/azure-twasnd-cluster-issues?version=${project.version}"
+                            }
+                        }
+                    },
+                    {
+                        "name": "howToReportVendorIssueText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "To use your existing IBM support contract, file an issue with IBM directly.",
+                            "link": {
+                                "label": "IBM support",
+                                "uri": "https://www.ibm.com/mysupport/"
+                            }
+                        }
+                    },
+                    {
+                        "name": "survey",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "To get free help with Azure migration from the development team, fill out this survey.",
+                            "link": {
+                                "label": "Take survey",
+                                "uri": "https://aka.ms/ibm-stack-migration-survey"
+                            }
+                        }
+                    }
+                ],
+                "visible": true
             }
         ],
         "steps": [
