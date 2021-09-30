@@ -35,8 +35,29 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 1. How to publish the image in marketplace and who can do it?
    1. For `twas-nd` image: Wait until the CI/CD workflow for `twas-nd CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
    1. For `ihs` image: Wait until the CI/CD workflow for `ihs CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
-   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) > Select the Directory `IBM-Alliance-Microsoft Partner Network-Global-Tenant` > Expand `Build solutions` and choose `Publish your solution`.  Click to open the offer for `<date>-twas-cluster-base-image` base image > Click `Plan overview` > Click to open the plan > Click `Technical configuration` > Click `+ Add VM image` > Specify a new value for `Disk version` (following the convention \<product version\>.\<date\>, e.g. 9.0.20210929) and write it down > Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `twas-nd` to textbox `SAS URI` > Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` to textbox `Data disk VHD link` > Scroll to the bottom of the page > Click `Save draft` > Click `Review and publish` > Click `Publish`;
-   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) > Click to open the offer for `ihs` base image > Click `Plan overview` > Click to open the plan > Click `Technical configuration` > Click `+ Add VM image` > Specify a new value for `Disk version` and write it down > Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `ihs` to textbox `SAS URI` > Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `ihs` to textbox `Data disk VHD link` > Scroll to the bottom of the page > Click `Save draft` > Click `Review and publish` > Click `Publish`;
+   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview)
+      * Select the Directory `IBM-Alliance-Microsoft Partner Network-Global-Tenant`
+      * Expand `Build solutions` and choose `Publish your solution`.  
+      * Click to open the offer for `<date>-twas-cluster-base-image` base image
+      * Click `Plan overview` the click to open the plan 
+      * Click `Technical configuration` 
+      * Click `+ Add VM image` > Specify a new value for `Disk version`, following the convention \<product version\>.\<date\>, e.g. 9.0.20210929 and write it down 
+      * Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `twas-nd` from the github issue for the update to the textbox `SAS URI` 
+      * Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` from the github issue for the update to the textbox `Data disk VHD link`
+      * Scroll to the bottom of the page and click `Save draft`
+      * Click `Review and publish`
+      * Click `Publish`;
+   3. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview)
+      * Select the Directory `IBM-Alliance-Microsoft Partner Network-Global-Tenant`
+      * Expand `Build solutions` and choose `Publish your solution`.  
+      * Click to open the offer for `ihs base image` 
+      * Click `Plan overview` and click to open the plan
+      * Click `Technical configuration`
+      * Click `+ Add VM image` > Specify a new value for `Disk version` and write it down > Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `ihs` from the github issue for the update to the textbox `SAS URI`
+      * Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `ihs` from the github issue for the update to the textbox `Data disk VHD link`
+      * Scroll to the bottom of the page and click `Save draft`
+      * Click `Review and publish`
+      * Click `Publish`;
 
    Note: Currently Graham Charters has privilege to update the image in marketplace, contact him for more information.
 
