@@ -93,6 +93,8 @@ Note: The steps included in this section are also applied to release new feature
 
    Note: Currently Graham Charters has privilege to update the solution in marketplace, contact him for more information.
 
+1. Create a [release](https://github.com/WASdev/azure.websphere-traditional.cluster/releases) for this GA code and tag with the pom.xml version number.
+
 1. How to test the solution, what testcases to run?
    1. Wait until the soluton offer is in `Publisher signoff` (aka "preview") stage;
    1. Run test cases defined in [twas-solution-test-cases.pdf](twas-solution-test-cases.pdf). Note: use "preview link" for each test case.
