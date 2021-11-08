@@ -73,13 +73,13 @@ The IBM WebSphere product family is a suite of enterprise Java application serve
 
 ## Description (Observed max 2973 characters, not including formatting)
 
-<p>The product family powers some of the most mission critical enterprise applications across the globe and includes WebSphere (Traditional) Application Server, WebSphere Liberty and Open Liberty.</p>
+<p>The WebSphere product family powers some of the most mission critical enterprise applications across the globe and includes WebSphere (Traditional) Application Server, WebSphere Liberty and Open Liberty.</p>
 
-<p>WebSphere products are key components in enabling enterprise Java workloads on Azure. IBM and Microsoft collaborate on a set of jointly developed and supported solutions for the product family. The offers aim to cover a range of use cases from mission critical existing traditional workloads to cloud native applications. Offers include Open Liberty on Azure Red Hat OpenShift (ARO), WebSphere Liberty on ARO, WebSphere Application Server (Traditional) on Virtual Machines, Open Liberty on the Azure Kubernetes Service (AKS), and WebSphere Liberty on AKS. The offers make it as easy as possible to migrate your application to the cloud by automating most boilerplate Azure and Java resource provisioning and configuration tasks. Once initial provisioning is complete, you are completely free to customize deployments further.</p>
+<p>WebSphere products are key components in enabling enterprise Java workloads on Azure. IBM and Microsoft are collaborating on a set of jointly developed and supported solutions for the product family. The offers cover a range of use cases from mission critical existing traditional workloads to cloud-native applications. Offers include Open Liberty on Azure Red Hat OpenShift (ARO), WebSphere Liberty on ARO, Open Liberty on the Azure Kubernetes Service (AKS), WebSphere Liberty on AKS, and WebSphere Application Server (Traditional) on Virtual Machines. The offers make it as easy as possible to migrate your application to the cloud by automating most boilerplate Azure and Java resource provisioning and configuration tasks. Once initial provisioning is complete, you are completely free to customize deployments further.</p>
 
 <p>The currently available offers are linked in the learn more section at the bottom of this page.</p>
 
-<p>IBM and Microsoft also provide basic step-by-step guidance on getting started with <a href=”https://techcommunity.microsoft.com/t5/apps-on-azure/run-websphere-liberty-and-open-liberty-on-openshift/ba-p/1951071”>Liberty and ARO</a> or <a href=”https://techcommunity.microsoft.com/t5/apps-on-azure/run-websphere-liberty-and-open-liberty-on-aks/ba-p/2156486”>Liberty and AKS</a>. The guidance is suitable for customers that wish to remain as close as possible to a native OpenShift or Kubernetes manual deployment experience.</p>
+<p>IBM and Microsoft also provide basic step-by-step guidance on getting started with <a href=”https://techcommunity.microsoft.com/t5/apps-on-azure/run-websphere-liberty-and-open-liberty-on-openshift/ba-p/1951071”>Liberty and ARO</a>, <a href=”https://techcommunity.microsoft.com/t5/apps-on-azure/run-websphere-liberty-and-open-liberty-on-aks/ba-p/2156486”>Liberty and AKS</a> and <a href="https://community.ibm.com/community/user/wasdevops/blogs/ryan-storey/2021/10/12/twas-azure">WebSphere Traditional on Azure VMs</a>. The guidance is suitable for customers that wish to remain as close as possible to a native OpenShift or Kubernetes manual deployment experience, without relying on an Azure Marketplace offer.</p>
 
 <p><i>If you want to provide feedback on these offers, stay-up-date on the roadmap, or work closely on your migration scenarios with the engineering team developing these offers, just hit the CONTACT ME button</i>. Program managers, architects and engineers will reach back out to you shortly and initiate collaboration. The opportunity to collaborate on a migration scenario is completely free while the offers are under active development.</p>
 
@@ -97,11 +97,11 @@ https://www.ibm.com/privacy
 
 ## Useful Links
 
-* [IBM WebSphere Application Server (Traditional) Cluster Offer](https://portal.azure.com/#create/ibm-usa-ny-armonk-hq-6275750-ibmcloud-aiops.2021-04-08-twas-clustercluster)
-
 * [WebSphere Liberty and Open Liberty on Azure Red Hat OpenShift Offer](https://portal.azure.com/#create/ibm-usa-ny-armonk-hq-6275750-ibmcloud-aiops.20210823-liberty-aroliberty-aro)
 
 * [WebSphere Liberty and Open Liberty on Azure Kubernetes Service Offer](https://portal.azure.com/#create/ibm-usa-ny-armonk-hq-6275750-ibmcloud-aiops.20210924-liberty-aksliberty-aks)
+
+* [IBM WebSphere Application Server (Traditional) Cluster Offer](https://portal.azure.com/#create/ibm-usa-ny-armonk-hq-6275750-ibmcloud-aiops.2021-04-08-twas-clustercluster)
 
 * [IBM WebSphere Application Server](https://www.ibm.com/cloud/websphere-application-server)
 
