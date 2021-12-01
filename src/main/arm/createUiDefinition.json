@@ -109,26 +109,6 @@
                 "bladeTitle": "Cluster configuration",
                 "elements": [
                     {
-                        "name": "dynamic",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Dynamic cluster?",
-                        "defaultValue": "No",
-                        "toolTip": "Create a dynamic cluster that dynamically starts nodes when workload increases and stops nodes when workload decreases.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
                         "name": "numberOfNodes",
                         "type": "Microsoft.Common.Slider",
                         "min": 2,
@@ -415,7 +395,6 @@
             "location": "[location()]",
             "ibmUserId": "[basics('ibmUserId')]",
             "ibmUserPwd": "[basics('ibmUserPwd')]",
-            "dynamic": "[bool(steps('ClusterConfig').dynamic)]",
             "numberOfNodes": "[int(steps('ClusterConfig').numberOfNodes)]",
             "vmSize": "[steps('ClusterConfig').vmSizeSelect]",
             "dmgrVMPrefix": "[steps('ClusterConfig').dmgrVMPrefix]",
