@@ -37,6 +37,7 @@
         },
         "dynamic": {
             "type": "bool",
+            "defaultValue": false,
             "metadata": {
                 "description": "Boolean value indicating, if the cluster is a dynamic one or not."
             }
