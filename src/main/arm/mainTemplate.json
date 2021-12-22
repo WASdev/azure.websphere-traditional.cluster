@@ -668,6 +668,7 @@
             }
         },
         {
+            "condition": "[parameters('configureIHS')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
             "name": "ihsVMCreated",
