@@ -1,6 +1,9 @@
 # Related Repositories
 
-* [Base images deployed by this Azure application](https://github.com/WASdev/azure.websphere-traditional.image)
+* Base images deployed by this Azure application
+  * [twas-nd](https://github.com/WASdev/azure.websphere-traditional.image/tree/main/twas-nd)
+  * [ihs](https://github.com/WASdev/azure.websphere-traditional.image/tree/main/ihs)
+* [WebSphere traditional single server](https://github.com/WASdev/azure.websphere-traditional.singleserver)
 * [Liberty on ARO](https://github.com/WASdev/azure.liberty.aro)
 * [Liberty on AKS](https://github.com/WASdev/azure.liberty.aks)
 
