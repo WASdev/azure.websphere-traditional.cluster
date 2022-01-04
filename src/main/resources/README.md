@@ -2,7 +2,7 @@
 
 - Content that required to create an Azure applicatoin offer from [Commerical Marketplace Overview](https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/overview) -> New Offer > Azure Application
 - See [Azure applicatoin offer](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/azure-applications/cpp-azure-app-offer) for details
-- When submitting the offer, use content from [this directory](https://github.com/WASdev/azure.websphere-traditional.cluster/tree/master/src/main/resources) (To-Be-Changed), but apply the changes in this file on top
+- When submitting the offer, use content from [this directory](https://github.com/WASdev/azure.websphere-traditional.cluster/tree/main/src/main/resources) (To-Be-Changed), but apply the changes in this file on top
 
 ## New offer
 
@@ -104,7 +104,7 @@
 
 #### Store logos
 
-- [marketing-artifacts](https://github.com/WASdev/azure.websphere-traditional.cluster/tree/master/src/main/resources/marketing-artifacts)
+- [marketing-artifacts](https://github.com/WASdev/azure.websphere-traditional.cluster/tree/main/src/main/resources/marketing-artifacts)
   - Small: 48*48
   - Medium: 90*90
   - Large: 216*216
