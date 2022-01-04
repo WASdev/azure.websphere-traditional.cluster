@@ -63,7 +63,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
    Note: Currently Graham Charters has privilege to update the image in marketplace, contact him for more information.
 
 1. Do we need to update the solution every time we do the image update?
-   * Yes. That's because image versions of [`twas-nd`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/pom.xml#L51) and [`ihs`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/pom.xml#L57) are explicitely referenced in the tWAS solutoin. Make sure correct image versions are specified in the `pom.xml` of the solution code.
+   * Yes. That's because image versions of [`twas-nd`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/pom.xml#L51) and [`ihs`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/pom.xml#L57) are explicitely referenced in the tWAS solution. Make sure correct image versions are specified in the `pom.xml` of the solution code.
 
 ## Updating and publishing the solution code
 
@@ -96,7 +96,7 @@ Note: The steps included in this section are also applied to release new feature
 1. Create a [release](https://github.com/WASdev/azure.websphere-traditional.cluster/releases) for this GA code and tag with the pom.xml version number.
 
 1. How to test the solution, what testcases to run?
-   1. Wait until the soluton offer is in `Publisher signoff` (aka "preview") stage;
+   1. Wait until the solution offer is in `Publisher signoff` (aka "preview") stage;
    1. Run test cases defined in [twas-solution-test-cases.pdf](twas-solution-test-cases.pdf). Note: use "preview link" for each test case.
 
 ## What needs to be cleaned up from test env and how to clean them up?
