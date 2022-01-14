@@ -9,28 +9,28 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "This offer is Bring-Your-Own-License. To deploy this offer, you must enter your registered IBM ID and your IBM ID must have active WebSphere entitlements associated with it. If provisioning fails due to lack of entitlements, ask the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at <a href='https://ibm.biz/IBMidEntitlement' target='_blank'>IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure."
+                    "text": "This offer is Bring-Your-Own-License. To deploy this offer, you must enter your registered IBMid and your IBMid must have active WebSphere entitlements associated with it. If provisioning fails due to lack of entitlements, ask the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at <a href='https://ibm.biz/IBMidEntitlement' target='_blank'>IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure."
                 }
             },
             {
                 "name": "ibmUserId",
                 "type": "Microsoft.Common.TextBox",
-                "label": "IBM ID",
-                "toolTip": "Your IBM ID.",
+                "label": "IBMid",
+                "toolTip": "Your IBMid.",
                 "constraints": {
                     "required": true,
                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
-                    "validationMessage": "The value must be valid IBM ID."
+                    "validationMessage": "The value must be valid IBMid."
                 }
             },
             {
                 "name": "ibmUserPwd",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": {
-                    "password": "Password for IBM ID",
+                    "password": "Password for IBMid",
                     "confirmPassword": "Confirm password"
                 },
-                "toolTip": "Password for your IBM ID.",
+                "toolTip": "Password for your IBMid.",
                 "constraints": {
                     "required": true
                 }
@@ -63,7 +63,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "If you encounter problems during deployment of WebSphere, please report them here.",
+                            "text": "If you encounter problems during deployment of WebSphere, open an issue.",
                             "link": {
                                 "label": "Issue tracker",
                                 "uri": "https://aka.ms/azure-twasnd-cluster-issues?version=${project.version}"
@@ -75,7 +75,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "To use your existing IBM support contract, file an issue with IBM directly.",
+                            "text": "To use your existing IBM support contract, open an issue with IBM directly.",
                             "link": {
                                 "label": "IBM support",
                                 "uri": "https://www.ibm.com/mysupport/"
