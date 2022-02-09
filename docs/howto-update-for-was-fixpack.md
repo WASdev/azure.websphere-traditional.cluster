@@ -46,6 +46,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
       * Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` (from the earlier steps) to the textbox `Data disk VHD link`
       * Scroll to the bottom of the page and click `Save draft`
       * Click `Review and publish`
+      * In the "Notes for certification" section enter the twas-nd CICD URL
       * Click `Publish`;
    3. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview)
       * Select the Directory `IBM-Alliance-Microsoft Partner Network-Global-Tenant`
@@ -58,6 +59,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
       * Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `ihs` (from the earlier steps) to the textbox `Data disk VHD link`
       * Scroll to the bottom of the page and click `Save draft`
       * Click `Review and publish`
+      * In the "Notes for certification" section enter the ihs CICD URL
       * Click `Publish`;
 
    Note: Currently Graham Charters has privilege to update the image in marketplace, contact him for more information.
