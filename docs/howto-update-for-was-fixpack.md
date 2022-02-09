@@ -90,6 +90,7 @@ Note: **Wait for images to be published before proceeding with this step.** The 
        * Run test cases defined in [twas-solution-test-cases.pdf](twas-solution-test-cases.pdf). Note: use "preview link" for each test case.
        * Click "Go Live"
        * Wait for remaining steps to complete (may take couple of days)
+       * Make sure to delete your test deployments
        * Once the solution is in "Publish" stage, new version is publicly available
 
    Note: Currently Graham Charters has privilege to update the solution in marketplace, contact him for more information.
