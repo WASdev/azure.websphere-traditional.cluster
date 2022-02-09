@@ -74,6 +74,7 @@ Note: The steps included in this section are also applied to release new feature
 1. How to update the version of the solution?
    * Increase the [version number](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/pom.xml#L23) which is specified in the `pom.xml`
    * Also update the `twasnd.image.version` and `ihs.image.version` (obtained from publish step)
+   * Get the PR merged
 
 1. How to run CI/CD?
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.cluster/actions) > Click `Package ARM` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
