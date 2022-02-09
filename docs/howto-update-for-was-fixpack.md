@@ -35,32 +35,22 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 1. How to publish the image in marketplace and who can do it?
    1. For `twas-nd` image: Wait until the CI/CD workflow for `twas-nd CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
    1. For `ihs` image: Wait until the CI/CD workflow for `ihs CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
-   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview)
+   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview): Repeat these steps for ND and IHS images.
       * Select the Directory `IBM-Alliance-Microsoft Partner Network-Global-Tenant`
       * Expand `Build solutions` and choose `Publish your solution`.  
-      * Click to open the offer for `<date>-twas-cluster-base-image` base image
+      * Click to open the offer for `<date>-twas-cluster-base-image` ND base image (`<date>-ihs base image` for IHS image)
       * Click `Plan overview` the click to open the plan 
       * Click `Technical configuration` 
       * Click `+ Add VM image` > Specify a new value for `Disk version`, following the convention \<major version\>.YYYYMMDD, e.g. 9.0.20210929 and write it down (We deliberately do not specify the minor verson because the pipeline gets the latest at the time it is run). 
-      * Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `twas-nd` (from the earlier steps) to the textbox `SAS URI` 
-      * Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` (from the earlier steps) to the textbox `Data disk VHD link`
+      * Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `twas-nd` or `ihs` (from the earlier steps) to the textbox `SAS URI` 
+      * Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` or `ihs` (from the earlier steps) to the textbox `Data disk VHD link`
       * Scroll to the bottom of the page and click `Save draft`
       * Click `Review and publish`
-      * In the "Notes for certification" section enter the twas-nd CICD URL
+      * In the "Notes for certification" section enter the twas-nd or ihs CICD URL
       * Click `Publish`;
-   3. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview)
-      * Select the Directory `IBM-Alliance-Microsoft Partner Network-Global-Tenant`
-      * Expand `Build solutions` and choose `Publish your solution`.  
-      * Click to open the offer for `ihs base image` 
-      * Click `Plan overview` and click to open the plan
-      * Click `Technical configuration`
-      * Click `+ Add VM image` > Specify a new value for `Disk version`, following the convention \<major version\>.YYYYMMDD, e.g. 9.0.20210929 and write it down (We deliberately do not specify the minor verson because the pipeline gets the latest at the time it is run). 
-      * Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `ihs` (from the earlier steps) to the textbox `SAS URI`
-      * Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `ihs` (from the earlier steps) to the textbox `Data disk VHD link`
-      * Scroll to the bottom of the page and click `Save draft`
-      * Click `Review and publish`
-      * In the "Notes for certification" section enter the ihs CICD URL
-      * Click `Publish`;
+      * Wait for few hours to a day, keep refreshing the page until "Go Live" button appears
+      * Click on "Go Live" and wait again (for few hours) for the image to be published. See [screenshots](https://github.com/WASdev/azure.websphere-traditional.cluster/issues/138#issuecomment-1034053293)
+      * Now proceed to [Updating and publishing the solution code](#updating-and-publishing-the-solution-code) steps
 
    Note: Currently Graham Charters has privilege to update the image in marketplace, contact him for more information.
 
@@ -69,7 +59,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 
 ## Updating and publishing the solution code
 
-Note: Wait for images to go live before proceeding with this step. The steps included in this section are also applied to release new features / bug fixes which have no changes to the images.
+Note: **Wait for images to be published before proceeding with this step.** The steps included in this section are also applied to release new features / bug fixes which have no changes to the images.
 
 1. How to update the version of the solution?
    * Increase the [version number](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/pom.xml#L23) which is specified in the `pom.xml`
@@ -79,7 +69,7 @@ Note: Wait for images to go live before proceeding with this step. The steps inc
 1. How to run CI/CD?
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.cluster/actions) > Click `Package ARM` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
 
-1. How to publish the solution in marketplace and who can do it? (Note: Make sure the images are live before puublishing the solution)
+1. How to publish the solution in marketplace and who can do it? (**Note: Make sure the images are published before publishing the solution**)
    1. Wait until the CI/CD workflow for `Package ARM` successfully completes 
        * Click to open details of the workflow run > Scroll to the bottom of the page
        * Click `azure.websphere-traditional.cluster-<version>-arm-assembly` to download the zip file `azure.websphere-traditional.cluster-<version>-arm-assembly.zip`;
@@ -94,14 +84,18 @@ Note: Wait for images to go live before proceeding with this step. The steps inc
        * Click `Review and publish`
        * In the "Notes for certification" section enter the `Package ARM` URL
        * Click `Publish`
+       * Wait until solution offer is in `Publisher signoff` (aka "preview") stage and "Go Live" button appears(it could take few hours)
+       * Before clicking "Go Live" use the preview link to test the solution
+       * <img width="1115" alt="image" src="https://user-images.githubusercontent.com/24283162/153244611-d3623867-61b2-4997-a265-ce0491e1ae8d.png">
+       * Run test cases defined in [twas-solution-test-cases.pdf](twas-solution-test-cases.pdf). Note: use "preview link" for each test case.
+       * Click "Go Live"
+       * Wait for remaining steps to complete (may take couple of days)
+       * Once the solution is in "Publish" stage, new version is publicly available
 
    Note: Currently Graham Charters has privilege to update the solution in marketplace, contact him for more information.
 
 1. Create a [release](https://github.com/WASdev/azure.websphere-traditional.cluster/releases) for this GA code and tag with the pom.xml version number.
 
-1. How to test the solution, what testcases to run?
-   1. Wait until the solution offer is in `Publisher signoff` (aka "preview") stage;
-   1. Run test cases defined in [twas-solution-test-cases.pdf](twas-solution-test-cases.pdf). Note: use "preview link" for each test case.
 
 ## What needs to be cleaned up from test env and how to clean them up?
 
