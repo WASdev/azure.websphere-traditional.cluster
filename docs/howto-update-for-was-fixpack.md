@@ -69,7 +69,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 
 ## Updating and publishing the solution code
 
-Note: The steps included in this section are also applied to release new features / bug fixes which have no changes to the images.
+Note: Wait for images to go live before proceeding with this step. The steps included in this section are also applied to release new features / bug fixes which have no changes to the images.
 
 1. How to update the version of the solution?
    * Increase the [version number](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/pom.xml#L23) which is specified in the `pom.xml`
@@ -79,7 +79,7 @@ Note: The steps included in this section are also applied to release new feature
 1. How to run CI/CD?
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.cluster/actions) > Click `Package ARM` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
 
-1. How to publish the solution in marketplace and who can do it?
+1. How to publish the solution in marketplace and who can do it? (Note: Make sure the images are live before puublishing the solution)
    1. Wait until the CI/CD workflow for `Package ARM` successfully completes 
        * Click to open details of the workflow run > Scroll to the bottom of the page
        * Click `azure.websphere-traditional.cluster-<version>-arm-assembly` to download the zip file `azure.websphere-traditional.cluster-<version>-arm-assembly.zip`;
