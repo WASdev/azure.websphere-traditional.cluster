@@ -92,6 +92,7 @@ Note: The steps included in this section are also applied to release new feature
        * Scroll to the bottom of the page
        * Click `Save draft`
        * Click `Review and publish`
+       * In the "Notes for certification" section enter the `Package ARM` URL
        * Click `Publish`
 
    Note: Currently Graham Charters has privilege to update the solution in marketplace, contact him for more information.
