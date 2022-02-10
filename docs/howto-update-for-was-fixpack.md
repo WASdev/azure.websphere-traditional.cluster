@@ -92,6 +92,7 @@ Note: **Wait for images to be published before proceeding with this step.** The 
        * Wait for remaining steps to complete (may take couple of days)
        * Make sure to delete your test deployments
        * Once the solution is in "Publish" stage, new version is publicly available
+       * To verify the version number, launch the solution in Azure portal and hover over "Issue tracker" and it should display the version number. For example, https://aka.ms/azure-twasnd-cluster-issues?version=**1.3.29**
 
    Note: Currently Graham Charters has privilege to update the solution in marketplace, contact him for more information.
 
