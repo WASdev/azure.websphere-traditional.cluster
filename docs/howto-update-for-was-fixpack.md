@@ -87,7 +87,7 @@ Note: **Wait for images to be published before proceeding with this step.** The 
        * Wait until solution offer is in `Publisher signoff` (aka "preview") stage and "Go Live" button appears(it could take few hours)
        * Before clicking "Go Live" use the preview link to test the solution
        * <img width="1115" alt="image" src="https://user-images.githubusercontent.com/24283162/153244611-d3623867-61b2-4997-a265-ce0491e1ae8d.png">
-       * Run test cases defined in [twas-solution-test-cases.pdf](twas-solution-test-cases.pdf). Note: use "preview link" for each test case.
+       * Run test cases defined in [twas-solution-test-cases.md](twas-solution-test-cases.md). Note: use "preview link" for each test case.
        * Click "Go Live"
        * Wait for remaining steps to complete (may take couple of days)
        * Make sure to delete your test deployments
