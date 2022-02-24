@@ -25,12 +25,14 @@
         },
         "ibmUserId": {
             "type": "string",
+            "defaultValue": "",
             "metadata": {
                 "description": "Username of your IBMid account."
             }
         },
         "ibmUserPwd": {
             "type": "securestring",
+            "defaultValue": "",
             "metadata": {
                 "description": "Password of your IBMid account."
             }

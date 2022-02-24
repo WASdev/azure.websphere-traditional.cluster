@@ -53,7 +53,7 @@ isDone=false
 while [ $isDone = false ]
 do
     result=`(tail -n1) <$WAS_LOG_PATH`
-    if [[ $result = $ENTITLED ]] || [[ $result = $UNENTITLED ]] || [[ $result = $UNDEFINED ]]; then
+    if [[ $result = $ENTITLED ]] || [[ $result = $UNENTITLED ]] || [[ $result = $UNDEFINED ]] || [[ $result = $EVALUATION ]]; then
         isDone=true
     else
         sleep 5
@@ -64,7 +64,7 @@ done
 cloud-init clean --logs
 
 # Terminate the process for the un-entitled or undefined user
-if [ ${result} != $ENTITLED ]; then
+if [ ${result} != $ENTITLED ] && [ ${result} != $EVALUATION ]; then
     if [ ${result} = $UNENTITLED ]; then
         echo "The provided IBMid does not have entitlement to install WebSphere Application Server. Please contact the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at IBM eCustomer Care (https://ibm.biz/IBMidEntitlement) for further assistance."
     else
