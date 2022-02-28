@@ -5,11 +5,31 @@
     "parameters": {
         "basics": [
             {
-                "name": "ibmIdInfo",
+                "name": "useTrial",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Deploy with existing WebSphere entitlement or with evaluation license?",
+                "toolTip": "Select to deploy with existing WebSphere entitlement or with evaluation license.",
+                "defaultValue": "Entitled",
+                "constraints": {
+                    "allowedValues": [
+                        {
+                            "label": "Entitled",
+                            "value": "false"
+                        },
+                        {
+                            "label": "Evaluation",
+                            "value": "true"
+                        }
+                    ],
+                    "required": true
+                }
+            },
+            {
+                "name": "entitlementInfo",
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "This offer is Bring-Your-Own-License. To deploy this offer, you must enter your registered IBMid and your IBMid must have active WebSphere entitlements associated with it. If provisioning fails due to lack of entitlements, ask the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at <a href='https://ibm.biz/IBMidEntitlement' target='_blank'>IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure."
+                    "text": "[if(bool(basics('useTrial')), 'TBD text will contain points such as: 1) BIG BOLD NO iFixes warning. 2) The trial is 60 days in duration.', 'This offer is Bring-Your-Own-License. To deploy this offer, you must enter your registered IBMid and your IBMid must have active WebSphere entitlements associated with it. If provisioning fails due to lack of entitlements, ask the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at <a href=\"https://ibm.biz/IBMidEntitlement\" target=\"_blank\">IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure.')]"
                 }
             },
             {
@@ -21,7 +41,8 @@
                     "required": true,
                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
                     "validationMessage": "The value must be valid IBMid."
-                }
+                },
+                "visible": "[not(bool(basics('useTrial')))]"
             },
             {
                 "name": "ibmUserPwd",
@@ -33,7 +54,8 @@
                 "toolTip": "Password for your IBMid.",
                 "constraints": {
                     "required": true
-                }
+                },
+                "visible": "[not(bool(basics('useTrial')))]"
             },
             {
                 "name": "licenseInfo",
@@ -393,6 +415,7 @@
         ],
         "outputs": {
             "location": "[location()]",
+            "useTrial": "[bool(basics('useTrial'))]",
             "ibmUserId": "[basics('ibmUserId')]",
             "ibmUserPwd": "[basics('ibmUserPwd')]",
             "numberOfNodes": "[int(steps('ClusterConfig').numberOfNodes)]",

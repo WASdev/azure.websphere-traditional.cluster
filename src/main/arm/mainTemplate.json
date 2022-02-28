@@ -23,6 +23,12 @@
                 "description": "Location for all resources."
             }
         },
+        "useTrial": {
+            "type": "bool",
+            "metadata": {
+                "description": "Boolean value indicating, if use wants to deploy a tWAS cluster for evaluation only."
+            }
+        },
         "ibmUserId": {
             "type": "string",
             "defaultValue": "",
@@ -249,7 +255,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.start}",
+            "name": "[if(parameters('useTrial'), '${cluster.trial.start}', '${cluster.start}')]",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -467,7 +473,7 @@
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPasswordOrKey')]",
                     "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]",
-                    "customData": "[base64(concat(parameters('ibmUserId'), ' ', parameters('ibmUserPwd')))]"
+                    "customData": "[base64(if(parameters('useTrial'), ' ', concat(parameters('ibmUserId'), ' ', parameters('ibmUserPwd'))))]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -542,7 +548,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.end}",
+            "name": "[if(parameters('useTrial'), '${cluster.trial.end}', '${cluster.end}')]",
             "dependsOn": [
                 "virtualMachineExtensionLoop"
             ],
@@ -560,7 +566,7 @@
             "condition": "[parameters('configureIHS')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${ihs.start}",
+            "name": "[if(parameters('useTrial'), '${ihs.trial.start}', '${ihs.start}')]",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -647,7 +653,7 @@
                     "adminUsername": "[parameters('ihsUnixUsername')]",
                     "adminPassword": "[parameters('ihsUnixPasswordOrKey')]",
                     "linuxConfiguration": "[if(equals(parameters('ihsAuthenticationType'), 'password'), json('null'), variables('const_ihsLinuxConfiguration'))]",
-                    "customData": "[base64(concat(parameters('ibmUserId'), ' ', parameters('ibmUserPwd')))]"
+                    "customData": "[base64(if(parameters('useTrial'), ' ', concat(parameters('ibmUserId'), ' ', parameters('ibmUserPwd'))))]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -716,7 +722,7 @@
             "condition": "[parameters('configureIHS')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${ihs.end}",
+            "name": "[if(parameters('useTrial'), '${ihs.trial.end}', '${ihs.end}')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('name_ihsVM'), 'install')]"
             ],
