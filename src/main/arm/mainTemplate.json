@@ -26,7 +26,7 @@
         "useTrial": {
             "type": "bool",
             "metadata": {
-                "description": "Boolean value indicating, if use wants to deploy a tWAS cluster for evaluation only."
+                "description": "Boolean value indicating, if user wants to deploy a tWAS cluster for evaluation only."
             }
         },
         "ibmUserId": {
