@@ -5,6 +5,9 @@
         "_artifactsLocation": {
             "value": "${artifactsLocationBase}/${project.artifactId}/${git.tag}/src/main/"
         },
+        "useTrial": {
+            "value": "${useTrial}"
+        },
         "ibmUserId": {
             "value": "${ibmUserId}"
         },
