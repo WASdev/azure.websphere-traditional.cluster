@@ -29,9 +29,8 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "This offer is Bring-Your-Own-License. To deploy this offer, you must enter your registered IBMid and your IBMid must have active WebSphere entitlements associated with it. If provisioning fails due to lack of entitlements, ask the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at <a href='https://ibm.biz/IBMidEntitlement' target='_blank'>IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure."
-                },
-                "visible": "[not(bool(basics('useTrial')))]"
+                    "text": "[if(bool(basics('useTrial')), 'By accepting the IBM License Agreement you are accepting the Evaluation terms of the license. An evaluation deployment does not include WebSphere interim fixes (iFixes). The evaluation period runs for 60 days after which you must purchase entitlement to continue to use WebSphere.', 'This offer is Bring-Your-Own-License. To deploy this offer, you must enter your registered IBMid and your IBMid must have active WebSphere entitlements associated with it. If provisioning fails due to lack of entitlements, ask the primary or secondary contacts for your IBM Passport Advantage site to grant you access or follow steps at <a href=\"https://ibm.biz/IBMidEntitlement\" target=\"_blank\">IBM eCustomer Care</a> for further assistance. This offer also assumes you are properly licensed to run offers in Microsoft Azure.')]"
+                }
             },
             {
                 "name": "ibmUserId",
@@ -63,7 +62,7 @@
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
                     "icon": "Info",
-                    "text": "[concat(if(bool(basics('useTrial')), 'By accepting the IBM License Agreement you are accepting the Evaluation terms of the license. An evaluation deployment does not include WebSphere interim fixes (iFixes). The evaluation period runs for 60 days after which you must purchase entitlement to continue to use WebSphere.', 'Accept the IBM License Agreement to proceed with the deployment.'), ' <a href=\"https://ibm.biz/tWASBaseLicenseAzureVMs\" target=\"_blank\">IBM WebSphere Application Server</a>.')]"
+                    "text": "Accept the <a href='https://ibm.biz/tWASBaseLicenseAzureVMs' target='_blank'>IBM WebSphere Application Server License Agreement</a> to proceed with the deployment."
                 }
             },
             {
