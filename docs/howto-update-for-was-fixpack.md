@@ -24,8 +24,11 @@ Please follow sections below in order to update the solution for next tWAS fixpa
      ```
 
      Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minor version.
+1. When to update the images?
+- For new tWAS fixpack, try to update the image soon after the fixpack GA but no longer than one week after the GA.
+- Images may also need to updated to fix a critical WebSphere or OS fixes.
 
-1. How to run CI/CD?
+3. How to run CI/CD?
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `twas-nd CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `ihs CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
 
