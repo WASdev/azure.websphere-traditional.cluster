@@ -50,7 +50,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
       * Click to open the offer for `<date>-twas-cluster-base-image` ND base image (`<date>-ihs base image` for IHS image)
       * Click `Plan overview` the click to open the plan 
       * Click `Technical configuration` 
-      * Click `+ Add VM image` > Specify a new value for `Disk version`, following the convention \<major version\>.YYYYMMDD, e.g. 9.0.20210929 and write it down (We deliberately do not specify the minor verson because the pipeline gets the latest at the time it is run). 
+      * Scroll down and click `+ Add VM image` > Specify a new value for `Disk version`, following the convention \<major version\>.YYYYMMDD, e.g. 9.0.20210929 and write it down (We deliberately do not specify the minor verson because the pipeline gets the latest at the time it is run). 
       * Select `SAS URI` > Copy and paste value of `osDiskSasUrl` for `twas-nd` or `ihs` (from the earlier steps) to the textbox `SAS URI` 
       * Click `+ Add data disk (max 16)` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` or `ihs` (from the earlier steps) to the textbox `Data disk VHD link`
       * Scroll to the bottom of the page and click `Save draft`
