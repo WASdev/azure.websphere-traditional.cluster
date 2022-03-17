@@ -31,6 +31,12 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 3. How to run CI/CD?
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `twas-nd CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `ihs CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
+   * If Workflow does not kick off from the UI, try the command line:
+   ```
+   PERSONAL_ACCESS_TOKEN=<access-token>
+   REPO_NAME=WASdev/azure.websphere-traditional.image
+   curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test-all"}
+   ```
 
 1. How to test the image, what testcases to run?
    * The CI/CD has already contains tests to verify the entitlement check and tWAS installation, so basically it's good to go without manual tests.
