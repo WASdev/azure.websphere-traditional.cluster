@@ -119,3 +119,6 @@ Previous versions of the solution are archived. You can find/download them from 
 ## Create a release and a branch with the GA code (for image and cluster repo)
 
 Probably creating a release/tag for each GA code is good enough.
+
+## Troubleshooting
+1. `AADSTS7000215: Invalid client secret provided`: See https://github.com/WASdev/azure.websphere-traditional.cluster/issues/153
