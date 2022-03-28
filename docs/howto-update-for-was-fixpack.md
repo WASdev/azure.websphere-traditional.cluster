@@ -40,6 +40,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 
 1. How to test the image, what testcases to run?
    * The CI/CD has already contains tests to verify the entitlement check and tWAS installation, so basically it's good to go without manual tests.
+   * However, if CI/CD failed, please look at error messages from the CI/CD logs, and [access the source VM](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/docs/howto-access-source-vm.md) for troubleshooting if necessary.
 
 1. How to publish the image in marketplace and who can do it?
    1. For `twas-nd` image: Wait until the CI/CD workflow for `twas-nd CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
