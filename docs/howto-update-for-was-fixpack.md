@@ -60,6 +60,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
       * Click `Publish`;
       * Wait for few hours to a day, keep refreshing the page until "Go Live" button appears
       * Click on "Go Live" and wait again (for few hours) for the image to be published. See [screenshots](https://github.com/WASdev/azure.websphere-traditional.cluster/issues/138#issuecomment-1034053293)
+      * **Note:** After the image is successfully published and available, please [clean up the storage account with VHD files](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/docs/howto-cleanup-after-image-published.md) for reducing Azure cost.
       * Now proceed to [Updating and publishing the solution code](#updating-and-publishing-the-solution-code) steps
 
    Note: Currently Graham Charters has privilege to update the image in marketplace, contact him for more information.
