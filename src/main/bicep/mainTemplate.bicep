@@ -187,7 +187,7 @@ resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices
   }
 }
 
-resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-01-01' = {
+resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: name_networkSecurityGroup
   location: location
   properties: {
@@ -215,7 +215,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-01-0
   }
 }
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = {
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-08-01' = {
   name: name_virtualNetwork
   location: location
   properties: {
@@ -232,7 +232,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = {
   ]
 }
 
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' = {
+resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' = {
   parent: virtualNetwork
   name: const_subnetName
   properties: {
@@ -243,7 +243,7 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' = {
   }
 }
 
-resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
+resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
   name: name_publicIPAddress
   location: location
   properties: {
@@ -254,7 +254,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
   }
 }
 
-resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2022-01-01' = {
+resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = {
   name: '${name_dmgrVM}-if'
   location: location
   properties: {
@@ -278,7 +278,7 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2022-01-01'
   }
 }
 
-resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2022-01-01' = [for i in range(0, (numberOfNodes - 1)): {
+resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08-01' = [for i in range(0, (numberOfNodes - 1)): {
   name: '${const_managedVMPrefix}${(i + 1)}-if'
   location: location
   properties: {
@@ -405,7 +405,7 @@ module ihsStartPid './modules/_pids/_empty.bicep' = if (configureIHS) {
   }
 }
 
-resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2022-01-01' = if (configureIHS) {
+resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (configureIHS) {
   name: name_ihsPublicIPAddress
   location: location
   properties: {
@@ -416,7 +416,7 @@ resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2022-01-01' = i
   }
 }
 
-resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2022-01-01' = if (configureIHS) {
+resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = if (configureIHS) {
   name: '${name_ihsVM}-if'
   location: location
   properties: {
