@@ -299,7 +299,7 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2022-01
   }
 }]
 
-resource cluserVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in range(0, numberOfNodes): {
+resource clusterVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in range(0, numberOfNodes): {
   name: i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}'
   location: location
   properties: {
@@ -358,11 +358,11 @@ module clusterVMsCreated './modules/_pids/_empty.bicep' = {
   params: {
   }
   dependsOn: [
-    cluserVMs
+    clusterVMs
   ]
 }
 
-resource cluserVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = [for i in range(0, numberOfNodes): {
+resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = [for i in range(0, numberOfNodes): {
   name: format('{0}/install', i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}')
   location: location
   properties: {
@@ -386,7 +386,7 @@ resource cluserVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-0
   }
   dependsOn: [
     storageAccountFileShare
-    cluserVMs
+    clusterVMs
   ]
 }]
 
@@ -395,7 +395,7 @@ module clusterEndPid './modules/_pids/_empty.bicep' = {
   params: {
   }
   dependsOn: [
-    cluserVMsExtension
+    clusterVMsExtension
   ]
 }
 
