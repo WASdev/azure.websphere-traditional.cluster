@@ -20,12 +20,13 @@
 
     <groupId>com.ibm.websphere.azure</groupId>
     <artifactId>azure.websphere-traditional.cluster</artifactId>
-    <version>1.3.34</version>
-    
+    <version>1.4.0</version>
+
+    <!-- mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests -->
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.11</version>
+        <version>1.0.16</version>
         <relativePath></relativePath>
     </parent>
     
@@ -34,30 +35,7 @@
 
     <properties>
         <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
-        <azure.apiVersion>2020-06-01</azure.apiVersion>
-        <azure.apiVersion2>2019-06-01</azure.apiVersion2>
-        <customer.usage.attribution.id>pid-fb16aee1-039d-45dc-a476-806224793a6c-partnercenter</customer.usage.attribution.id>
-        <cluster.start>c2efe274-0dc2-50f3-b51f-338a3fe01afb</cluster.start>
-        <cluster.end>9c5dbfce-a6b9-5659-96bc-ca0cf429122a</cluster.end>
-        <ihs.start>5526bacf-3c35-57b7-8b22-337d78b4f478</ihs.start>
-        <ihs.end>3720d7ef-c2dc-5ad4-83bc-96e54bd2bd13</ihs.end>
-        <cluster.trial.start>e71b564d-20cf-5fc6-a5f5-dc4857c8311b</cluster.trial.start>
-        <cluster.trial.end>97aa2bca-c9ae-523f-a577-210a0a32c88a</cluster.trial.end>
-        <ihs.trial.start>2a3847d2-c1fa-583e-bb90-c483d43ad131</ihs.trial.start>
-        <ihs.trial.end>a9365407-7f6b-5b78-9b51-2d76e9888a21</ihs.trial.end>
-        <!-- This is the "Partner ID" in Partner Center" -->
-        <image.publisher>ibm-usa-ny-armonk-hq-6275750-ibmcloud-aiops</image.publisher>
-        <!-- This is the twas-nd "Offer ID" of the "Azure Virtual Machine" offer type -->
-        <twasnd.image.offer>2021-04-27-twas-cluster-base-image</twasnd.image.offer>
-        <!-- This is the twas-nd "Plan ID" of the plan within the "Azure Virtual Machine" offer -->
-        <twasnd.image.sku>2021-04-27-twas-cluster-base-image</twasnd.image.sku>
-        <!-- This is the twas-nd "Disk version" of the VM image of the plan within the "Azure Virtual Machine" offer -->
-        <twasnd.image.version>9.0.20220621</twasnd.image.version>
-        <!-- This is the ihs "Offer ID" of the "Azure Virtual Machine" offer type -->
-        <ihs.image.offer>2021-06-03-ihs-base-image</ihs.image.offer>
-        <!-- This is the ihs "Plan ID" of the plan within the "Azure Virtual Machine" offer -->
-        <ihs.image.sku>2021-06-03-ihs-base-image</ihs.image.sku>
-        <!-- This is the ihs "Disk version" of the VM image of the plan within the "Azure Virtual Machine" offer -->
-        <ihs.image.version>9.0.20220621</ihs.image.version>
+        <git.repo>WASdev</git.repo>
+        <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo}/${project.artifactId}/${git.tag}</artifactsLocationBase>
     </properties>
 </project>
