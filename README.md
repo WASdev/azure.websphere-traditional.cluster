@@ -23,11 +23,12 @@
 1. Checkout [azure-javaee-iaas](https://github.com/Azure/azure-javaee-iaas)
    1. Change to directory hosting the repo project & run `mvn clean install`
 1. Checkout [arm-ttk](https://github.com/Azure/arm-ttk) under the specified parent directory
+   1. Run `git checkout cf5c927eaf1f5652556e86a6b67816fc910d1b74` to checkout the verified version of `arm-ttk`
 1. Checkout this repo under the same parent directory and change to directory hosting the repo project
 1. Build the project by replacing all placeholder `${<place_holder>}` with valid values
 
    ```bash
-   mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -DnumberOfNodes=<numberOfNodes> -DvmSize=<vmSize> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DadminUsername=<adminUsername> -DadminPasswordOrKey=<adminPassword|adminSSHPublicKey> -DauthenticationType=<password|sshPublicKey> -DwasUsername=<wasUsername> -DwasPassword=<wasPassword> -DconfigureIHS=<true|false> -DihsVmSize=<ihsVmSize> -DihsVMPrefix=<ihsVMPrefix> -DihsDnsLabelPrefix=<ihsDnsLabelPrefix> -DihsUnixUsername=<ihsUnixUsername> -DihsUnixPasswordOrKey=<ihsUnixPassword|ihsUnixSSHPublicKey> -DihsAuthenticationType=<password|sshPublicKey> -DihsAdminUsername=<ihsAdminUsername> -DihsAdminPassword=<ihsAdminPassword> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
+   mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -DuseTrial=true -DnumberOfNodes=<numberOfNodes> -DvmSize=<vmSize> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DadminUsername=<adminUsername> -DadminPasswordOrKey=<adminPassword|adminSSHPublicKey> -DauthenticationType=<password|sshPublicKey> -DwasUsername=<wasUsername> -DwasPassword=<wasPassword> -DconfigureIHS=<true|false> -DihsVmSize=<ihsVmSize> -DihsVMPrefix=<ihsVMPrefix> -DihsDnsLabelPrefix=<ihsDnsLabelPrefix> -DihsUnixUsername=<ihsUnixUsername> -DihsUnixPasswordOrKey=<ihsUnixPassword|ihsUnixSSHPublicKey> -DihsAuthenticationType=<password|sshPublicKey> -DihsAdminUsername=<ihsAdminUsername> -DihsAdminPassword=<ihsAdminPassword> -Dtest.args="-Test All" -Pbicep -Passembly -Ptemplate-validation-tests clean install
    ```
 
 1. Change to `./target/cli` directory
