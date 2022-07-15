@@ -66,7 +66,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
    Note: Currently Graham Charters has privilege to update the image in marketplace, contact him for more information.
 
 1. Do we need to update the solution every time we do the image update?
-   * Yes. That's because image versions of [`twas-nd`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/src/main/bicep/config.json#L18) and [`ihs`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/src/main/bicep/config.json#L24) are explicitely referenced in the tWAS solution. Make sure correct image versions are specified in the `config.json` of the solution code.
+   * Yes. That's because image versions of [`twas-nd`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/src/main/bicep/config.json#L17) and [`ihs`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/src/main/bicep/config.json#L23) are explicitely referenced in the tWAS solution. Make sure correct image versions are specified in the `config.json` of the solution code.
 
 ## Updating and publishing the solution code
 
@@ -74,7 +74,7 @@ Note: **Wait for images to be published before proceeding with this step.** The 
 
 1. How to update the version of the solution?
    * Increase the [version number](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/pom.xml#L23) which is specified in the `pom.xml`
-   * Also update the [`twasNdImageVersion`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/src/main/bicep/config.json#L18) and [`ihsImageVersion`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/src/main/bicep/config.json#L24) in the `config.json` (obtained from publish step)
+   * Also update the [`twasNdImageVersion`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/src/main/bicep/config.json#L17) and [`ihsImageVersion`](https://github.com/WASdev/azure.websphere-traditional.cluster/blob/main/src/main/bicep/config.json#L23) in the `config.json` (obtained from publish step)
    * Get the PR merged
 
 1. How to run CI/CD?
