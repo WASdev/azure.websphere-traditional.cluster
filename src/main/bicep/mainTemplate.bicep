@@ -169,6 +169,7 @@ var name_publicIPAddress = '${name_dmgrVM}-ip'
 var name_share = 'wasshare'
 var name_storageAccount = 'storage${guidValue}'
 var name_storageAccountPrivateEndpoint = 'storagepe${guidValue}'
+var ref_storageAccountPrivateEndpoint = configureIHS ? reference(name_storageAccountPrivateEndpoint, '2021-05-01').customDnsConfigs[0].ipAddresses[0] : ''
 
 // Work around arm-ttk test "Variables Must Be Referenced"
 var configBase64 = loadFileAsBase64('config.json')
@@ -457,7 +458,7 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, reference(name_storageAccountPrivateEndpoint, '2021-05-01').customDnsConfigs[0].ipAddresses[0]) : '')
+      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
     }
   }
   dependsOn: [
@@ -611,7 +612,7 @@ resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, reference(name_storageAccountPrivateEndpoint, '2021-05-01').customDnsConfigs[0].ipAddresses[0])
+      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint)
     }
   }
   dependsOn: [
