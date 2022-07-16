@@ -15,9 +15,9 @@
 #  limitations under the License.
 
 # Check required parameters
-if [ "$7" == "" ]; then 
+if [ "$8" == "" ]; then 
   echo "Usage:"
-  echo "  ./configure-ihs-on-dmgr.sh [profile] [wasUser] [wasPassword] [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath]"
+  echo "  ./configure-ihs-on-dmgr.sh [profile] [wasUser] [wasPassword] [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
   exit 1
 fi
 profile=$1
@@ -27,6 +27,7 @@ storageAccountName=$4
 storageAccountKey=$5
 fileShareName=$6
 mountpointPath=$7
+storageAccountPrivateIp=$8
 
 echo "$(date): Start to configure IHS on dmgr."
 
@@ -38,11 +39,11 @@ mkdir /etc/smbcredentials
 echo "username=$storageAccountName" > /etc/smbcredentials/${storageAccountName}.cred
 echo "password=$storageAccountKey" >> /etc/smbcredentials/${storageAccountName}.cred
 chmod 600 /etc/smbcredentials/${storageAccountName}.cred
-echo "//${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath cifs nofail,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino" >> /etc/fstab
+echo "//${storageAccountPrivateIp}/${fileShareName} $mountpointPath cifs nofail,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino" >> /etc/fstab
 
-mount -t cifs //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath -o credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
+mount -t cifs //${storageAccountPrivateIp}/${fileShareName} $mountpointPath -o credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
 if [[ $? != 0 ]]; then
-  echo "$(date): Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath."
+  echo "$(date): Failed to mount //${storageAccountPrivateIp}/${fileShareName} $mountpointPath."
   exit 1
 fi
 

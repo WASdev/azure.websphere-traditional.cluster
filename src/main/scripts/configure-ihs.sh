@@ -74,9 +74,9 @@ if [ ${result} != $ENTITLED ] && [ ${result} != $EVALUATION ]; then
 fi
 
 # Check required parameters
-if [ "$8" == "" ]; then 
+if [ "$9" == "" ]; then 
   echo "Usage:"
-  echo "  ./configure-ihs.sh [dmgrHostname] [ihsUnixUsername] [ihsAdminUsername] [ihsAdminPassword] [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath]"
+  echo "  ./configure-ihs.sh [dmgrHostname] [ihsUnixUsername] [ihsAdminUsername] [ihsAdminPassword] [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
   exit 1
 fi
 dmgrHostname=$1
@@ -87,6 +87,7 @@ storageAccountName=$5
 storageAccountKey=$6
 fileShareName=$7
 mountpointPath=$8
+storageAccountPrivateIp=$9
 
 echo "$(date): Start to configure IHS."
 
@@ -136,11 +137,11 @@ mkdir /etc/smbcredentials
 echo "username=$storageAccountName" > /etc/smbcredentials/${storageAccountName}.cred
 echo "password=$storageAccountKey" >> /etc/smbcredentials/${storageAccountName}.cred
 chmod 600 /etc/smbcredentials/${storageAccountName}.cred
-echo "//${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath cifs nofail,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino" >> /etc/fstab
+echo "//${storageAccountPrivateIp}/${fileShareName} $mountpointPath cifs nofail,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino" >> /etc/fstab
 
-mount -t cifs //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath -o credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
+mount -t cifs //${storageAccountPrivateIp}/${fileShareName} $mountpointPath -o credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
 if [[ $? != 0 ]]; then
-  echo "$(date): Failed to mount //${storageAccountName}.file.core.windows.net/${fileShareName} $mountpointPath."
+  echo "$(date): Failed to mount //${storageAccountPrivateIp}/${fileShareName} $mountpointPath."
   exit 1
 fi
 
