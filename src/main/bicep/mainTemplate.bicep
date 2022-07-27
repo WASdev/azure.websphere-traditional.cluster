@@ -105,9 +105,31 @@ param ihsAdminUsername string = 'ihsadmin'
 @description('Password for IBM HTTP Server admin.')
 @secure()
 param ihsAdminPassword string = ''
+
+@description('VNET for cluster.')
+param vnetForCluster object = {
+  name: 'twascluster-vnet'
+  resourceGroup: resourceGroup().name
+  addressPrefixes: [
+    '10.0.0.32/27'
+  ]
+  addressPrefix: '10.0.0.32/27'
+  newOrExisting: 'new'
+  subnets: {
+    subnet1: {
+      name: 'twascluster-subnet'
+      addressPrefix: '10.0.0.32/27'
+      startAddress: '10.0.0.36'
+    }
+  }
+}
+@description('To mitigate ARM-TTK error: Control Named vnetForCluster must output the newOrExisting property when hideExisting is false')
+param newOrExistingVnetForCluster string = 'new'
+@description('To mitigate ARM-TTK error: Control Named vnetForCluster must output the resourceGroup property when hideExisting is false')
+param vnetRGNameForCluster string = resourceGroup().name
+
 param guidValue string = take(replace(newGuid(), '-', ''), 6)
 
-var const_addressPrefix = '10.0.0.0/16'
 var const_arguments = format(' {0} {1} {2} {3} {4} {5}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, configureIHS)
 var const_dnsLabelPrefix = format('{0}{1}', dnsLabelPrefix, guidValue)
 var const_ihsArguments1 = format(' {0} {1} {2} {3} {4}', name_dmgrVM, ihsUnixUsername, ihsAdminUsername, ihsAdminPassword, name_storageAccount)
@@ -137,9 +159,8 @@ var const_linuxConfiguration = {
 }
 var const_managedVMPrefix = format('{0}{1}VM', managedVMPrefix, guidValue)
 var const_mountPointPath = '/mnt/${name_share}'
+var const_newVNet = (newOrExistingVnetForCluster == 'new') ? true : false
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
-var const_subnetAddressPrefix = '10.0.1.0/24'
-var const_subnetName = 'subnet01'
 var name_dmgrVM = format('{0}{1}VM', dmgrVMPrefix, guidValue)
 var name_ihsPublicIPAddress = '${name_ihsVM}-ip'
 var name_ihsVM = format('{0}{1}VM', ihsVMPrefix, guidValue)
@@ -147,14 +168,15 @@ var name_networkSecurityGroup = '${const_dnsLabelPrefix}-nsg'
 var name_publicIPAddress = '${name_dmgrVM}-ip'
 var name_share = 'wasshare'
 var name_storageAccount = 'storage${guidValue}'
-var name_virtualNetwork = '${const_dnsLabelPrefix}-vnet'
+var name_storageAccountPrivateEndpoint = 'storagepe${guidValue}'
+var ref_storageAccountPrivateEndpoint = configureIHS ? reference(name_storageAccountPrivateEndpoint, '2021-05-01').customDnsConfigs[0].ipAddresses[0] : ''
 
 // Work around arm-ttk test "Variables Must Be Referenced"
 var configBase64 = loadFileAsBase64('config.json')
 var config = base64ToJson(configBase64)
 
 module partnerCenterPid './modules/_pids/_empty.bicep' = {
-  name: config.customerUsageAttributionId
+  name: 'pid-fb16aee1-039d-45dc-a476-806224793a6c-partnercenter'
   params: {
   }
 }
@@ -171,7 +193,33 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   sku: {
     name: 'Standard_LRS'
   }
-  kind: 'Storage'
+  kind: 'StorageV2'
+}
+
+resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = if (configureIHS) {
+  name: name_storageAccountPrivateEndpoint
+  location: location
+  properties: {
+    privateLinkServiceConnections: [
+      {
+        name: name_storageAccountPrivateEndpoint
+        properties: {
+          privateLinkServiceId: resourceId('Microsoft.Storage/storageAccounts/', name_storageAccount)
+          groupIds: [
+            'file'
+          ]
+        }
+      }
+    ]
+    subnet: {
+      id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.subnet1.name) : existingSubnet.id
+    }
+  }
+  dependsOn: [
+    storageAccount
+    virtualNetwork
+    existingSubnet
+  ]
 }
 
 resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@2021-09-01' = if (configureIHS) {
@@ -187,7 +235,7 @@ resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices
   }
 }
 
-resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
+resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2021-08-01' = if (const_newVNet) {
   name: name_networkSecurityGroup
   location: location
   properties: {
@@ -215,35 +263,38 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2021-08-0
   }
 }
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-08-01' = {
-  name: name_virtualNetwork
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-08-01' = if (const_newVNet) {
+  name: vnetForCluster.name
   location: location
   properties: {
     addressSpace: {
-      addressPrefixes: [
-        const_addressPrefix
-      ]
+      addressPrefixes: vnetForCluster.addressPrefixes
     }
-    enableDdosProtection: false
-    enableVmProtection: false
-  }
-  dependsOn: [
-    networkSecurityGroup
-  ]
-}
-
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' = {
-  parent: virtualNetwork
-  name: const_subnetName
-  properties: {
-    addressPrefix: const_subnetAddressPrefix
-    networkSecurityGroup: {
-      id: networkSecurityGroup.id
-    }
+    subnets: [
+      {
+        name: vnetForCluster.subnets.subnet1.name
+        properties: {
+          addressPrefix: vnetForCluster.subnets.subnet1.addressPrefix
+          networkSecurityGroup: {
+            id: networkSecurityGroup.id
+          }
+        }
+      }
+    ]
   }
 }
 
-resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
+resource existingVNet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = if (!const_newVNet) {
+  name: vnetForCluster.name
+  scope: resourceGroup(vnetRGNameForCluster)
+}
+
+resource existingSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (!const_newVNet) {
+  parent: existingVNet
+  name: vnetForCluster.subnets.subnet1.name
+}
+
+resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (const_newVNet) {
   name: name_publicIPAddress
   location: location
   properties: {
@@ -254,7 +305,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
   }
 }
 
-resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = {
+resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = if (const_newVNet) {
   name: '${name_dmgrVM}-if'
   location: location
   properties: {
@@ -267,7 +318,7 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01'
             id: publicIPAddress.id
           }
           subnet: {
-            id: subnet.id
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.subnet1.name)
           }
         }
       }
@@ -275,6 +326,27 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01'
     dnsSettings: {
       internalDnsNameLabel: name_dmgrVM
     }
+  }
+  dependsOn: [
+    virtualNetwork
+  ]
+}
+
+resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-08-01' = if (!const_newVNet) {
+  name: '${name_dmgrVM}-no-pub-ip-if'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: existingSubnet.id
+          }
+        }
+      }
+    ]
   }
 }
 
@@ -288,7 +360,7 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: subnet.id
+            id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.subnet1.name) : existingSubnet.id
           }
         }
       }
@@ -297,6 +369,10 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08
       internalDnsNameLabel: '${const_managedVMPrefix}${(i + 1)}'
     }
   }
+  dependsOn: [
+    virtualNetwork
+    existingSubnet
+  ]
 }]
 
 resource clusterVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in range(0, numberOfNodes): {
@@ -331,7 +407,7 @@ resource clusterVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in r
     networkProfile: {
       networkInterfaces: [
         {
-          id: resourceId('Microsoft.Network/networkInterfaces', format('{0}-if', i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}'))
+          id: resourceId('Microsoft.Network/networkInterfaces', format('{0}-if', i == 0 ? (const_newVNet ? name_dmgrVM : '${name_dmgrVM}-no-pub-ip') : '${const_managedVMPrefix}${i}'))
         }
       ]
     }
@@ -349,6 +425,7 @@ resource clusterVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in r
   }
   dependsOn: [
     dmgrVMNetworkInterface
+    dmgrVMNetworkInterfaceNoPubIp
     managedVMNetworkInterfaces
   ]
 }]
@@ -381,7 +458,7 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, configureIHS ? format(' {0} {1}{2}', name_storageAccount, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2) : '')
+      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
     }
   }
   dependsOn: [
@@ -405,7 +482,7 @@ module ihsStartPid './modules/_pids/_empty.bicep' = if (configureIHS) {
   }
 }
 
-resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (configureIHS) {
+resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (configureIHS && const_newVNet) {
   name: name_ihsPublicIPAddress
   location: location
   properties: {
@@ -416,7 +493,7 @@ resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = i
   }
 }
 
-resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = if (configureIHS) {
+resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = if (configureIHS && const_newVNet) {
   name: '${name_ihsVM}-if'
   location: location
   properties: {
@@ -429,7 +506,7 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' 
             id: ihsPublicIPAddress.id
           }
           subnet: {
-            id: subnet.id
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.subnet1.name)
           }
         }
       }
@@ -437,6 +514,27 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' 
     dnsSettings: {
       internalDnsNameLabel: name_ihsVM
     }
+  }
+  dependsOn: [
+    virtualNetwork
+  ]
+}
+
+resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-08-01' = if (configureIHS && !const_newVNet) {
+  name: '${name_ihsVM}-no-pub-ip-if'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: existingSubnet.id
+          }
+        }
+      }
+    ]
   }
 }
 
@@ -472,7 +570,7 @@ resource ihsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = if (configureIHS
     networkProfile: {
       networkInterfaces: [
         {
-          id: ihsVMNetworkInterface.id
+          id: const_newVNet ? ihsVMNetworkInterface.id : ihsVMNetworkInterfaceNoPubIp.id
         }
       ]
     }
@@ -514,7 +612,7 @@ resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh configure-ihs.sh{0} {1}{2}', const_ihsArguments1, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2)
+      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint)
     }
   }
   dependsOn: [
@@ -538,7 +636,7 @@ output nodeGroupName string = 'DefaultNodeGroup'
 output coreGroupName string = 'DefaultCoreGroup'
 output dmgrHostName string = name_dmgrVM
 output dmgrPort string = '8879'
-output virtualNetworkName string = name_virtualNetwork
-output subnetName string = const_subnetName
-output adminSecuredConsole string = uri(format('https://{0}:9043/', publicIPAddress.properties.dnsSettings.fqdn), 'ibm/console')
-output ihsConsole string = configureIHS ? uri(format('http://{0}', ihsPublicIPAddress.properties.dnsSettings.fqdn), '') : 'N/A'
+output virtualNetworkName string = vnetForCluster.name
+output subnetName string = vnetForCluster.subnets.subnet1.name
+output adminSecuredConsole string = uri(format('https://{0}:9043/', const_newVNet ? publicIPAddress.properties.dnsSettings.fqdn : reference('${name_dmgrVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), 'ibm/console')
+output ihsConsole string = configureIHS ? uri(format('http://{0}', const_newVNet ? ihsPublicIPAddress.properties.dnsSettings.fqdn : reference('${name_ihsVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), '') : 'N/A'

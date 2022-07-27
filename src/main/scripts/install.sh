@@ -249,9 +249,9 @@ if [ ${result} != $ENTITLED ] && [ ${result} != $EVALUATION ]; then
 fi
 
 # Check required parameters
-if [ "$7" = True ] && [ "${11}" == "" ]; then 
+if [ "$7" = True ] && [ "${12}" == "" ]; then 
   echo "Usage:"
-  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath]"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
   exit 1
 elif [ "$7" == "" ]; then 
   echo "Usage:"
@@ -269,6 +269,7 @@ storageAccountName=$8
 storageAccountKey=$9
 fileShareName=${10}
 mountpointPath=${11}
+storageAccountPrivateIp=${12}
 
 # Create cluster by creating deployment manager, node agent & add nodes to be managed
 if [ "$dmgr" = True ]; then
@@ -280,7 +281,7 @@ if [ "$dmgr" = True ]; then
 
     # Configure IHS if required
     if [ "$configureIHS" = True ]; then
-        ./configure-ihs-on-dmgr.sh Dmgr001 "$adminUserName" "$adminPassword" "$storageAccountName" "$storageAccountKey" "$fileShareName" "$mountpointPath"
+        ./configure-ihs-on-dmgr.sh Dmgr001 "$adminUserName" "$adminPassword" "$storageAccountName" "$storageAccountKey" "$fileShareName" "$mountpointPath" "$storageAccountPrivateIp"
     fi
 else
     create_custom_profile Custom $(hostname) $(hostname)Node01 $dmgrHostName 8879 "$adminUserName" "$adminPassword"

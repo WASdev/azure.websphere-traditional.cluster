@@ -411,6 +411,61 @@
                         "visible": "[bool(steps('IHSConfig').configIHS)]"
                     }
                 ]
+            },
+            {
+                "name": "NetworkingConfig",
+                "label": "Networking",
+                "subLabel": {
+                    "preValidation": "Provide required information for networking",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Networking",
+                "elements": [
+                    {
+                        "name": "vnetInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "options": {
+                            "icon": "Info",
+                            "text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual network's address prefix. When using an existing virtual network, a minimum virtual network size of /28 and a minimum subnet size of /29 are required. Additionally, the subnet must have adequate available addresses for the cluster setup."
+                        }
+                    },
+                    {
+                        "name": "vnetForCluster",
+                        "type": "Microsoft.Network.VirtualNetworkCombo",
+                        "label": {
+                            "virtualNetwork": "Virtual network",
+                            "subnets": "Subnets"
+                        },
+                        "toolTip": {
+                            "virtualNetwork": "Name of the virtual network",
+                            "subnets": "Subnets for the virtual network"
+                        },
+                        "defaultValue": {
+                            "name": "[concat('twascluster-vnet',take(guid(), 8))]",
+                            "addressPrefixSize": "/27"
+                        },
+                        "constraints": {
+                            "minAddressPrefixSize": "/28"
+                        },
+                        "options": {
+                            "hideExisting": false
+                        },
+                        "subnets": {
+                            "subnet1": {
+                                "label": "Subnet",
+                                "defaultValue": {
+                                    "name": "twas-cluster-subnet",
+                                    "addressPrefixSize": "/27"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/29",
+                                    "minAddressCount": "[add(int(steps('ClusterConfig').numberOfNodes), if(bool(steps('IHSConfig').configIHS), 2, 0))]",
+                                    "requireContiguousAddresses": false
+                                }
+                            }
+                        }
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -436,7 +491,10 @@
             "ihsUnixPasswordOrKey": "[if(equals(steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType, 'password'), steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.password, steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.sshPublicKey)]",
             "ihsAuthenticationType": "[steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType]",
             "ihsAdminUsername": "[steps('IHSConfig').ihsInfo.ihsAdminUsername]",
-            "ihsAdminPassword": "[steps('IHSConfig').ihsInfo.ihsAdminPassword]"
+            "ihsAdminPassword": "[steps('IHSConfig').ihsInfo.ihsAdminPassword]",
+            "vnetForCluster": "[steps('NetworkingConfig').vnetForCluster]",
+            "newOrExistingVnetForCluster": "[steps('NetworkingConfig').vnetForCluster.newOrExisting]",
+            "vnetRGNameForCluster": "[steps('NetworkingConfig').vnetForCluster.resourceGroup]"
         }
     }
 }
