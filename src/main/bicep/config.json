@@ -20,5 +20,6 @@
     "ihsImageSkuDescription": "This is the ihs 'Plan ID' of the plan within the 'Azure Virtual Machine' offer",
     "ihsImageSku": "2021-06-03-ihs-base-image",
     "ihsImageVersionDescription": "This is the ihs 'Disk version' of the VM image of the plan within the 'Azure Virtual Machine' offer",
-    "ihsImageVersion": "9.0.20220621"
+    "ihsImageVersion": "9.0.20220621",
+    "shareCompanyNamePid": "f246c770-92c5-5a97-b5d6-83feac7623d3"
 }

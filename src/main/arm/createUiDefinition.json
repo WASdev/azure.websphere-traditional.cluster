@@ -76,6 +76,25 @@
                 }
             },
             {
+                "name": "shareCompanyNameInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "options": {
+                    "icon": "Info",
+                    "text": "Check the following box if you agree to share your company's or organization's contact information with IBM for the purpose of discussing IBM offerings."
+                },
+                "visible": "[bool(basics('useTrial'))]"
+            },
+            {
+                "name": "shareCompanyNameCheck",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "I agree to IBM contacting my company or organization.",
+                "toolTip": "Select to agree to IBM contacting my company or organization.",
+                "constraints": {
+                    "required": false
+                },
+                "visible": "[bool(basics('useTrial'))]"
+            },
+            {
                 "name": "howToReportIssues",
                 "type": "Microsoft.Common.Section",
                 "label": "Report issues, get help, and share feedback",
@@ -473,6 +492,7 @@
             "useTrial": "[bool(basics('useTrial'))]",
             "ibmUserId": "[basics('ibmUserId')]",
             "ibmUserPwd": "[basics('ibmUserPwd')]",
+            "shareCompanyName": "[bool(basics('shareCompanyNameCheck'))]",
             "numberOfNodes": "[int(steps('ClusterConfig').numberOfNodes)]",
             "vmSize": "[steps('ClusterConfig').vmSizeSelect]",
             "dmgrVMPrefix": "[steps('ClusterConfig').dmgrVMPrefix]",
