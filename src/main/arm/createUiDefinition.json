@@ -88,7 +88,7 @@
                 "name": "shareCompanyNameCheck",
                 "type": "Microsoft.Common.CheckBox",
                 "label": "I agree to IBM contacting my company or organization.",
-                "toolTip": "Select to agree to IBM contacting my company or organization.",
+                "toolTip": "Select to agree to IBM contacting your company or organization.",
                 "constraints": {
                     "required": false
                 },
