@@ -34,6 +34,9 @@ param ibmUserId string = ''
 @secure()
 param ibmUserPwd string = ''
 
+@description('Boolean value indicating, if user agrees to IBM contacting my company or organization.')
+param shareCompanyName bool = false
+
 @description('Boolean value indicating, if the cluster is a dynamic one or not.')
 param dynamic bool = false
 
@@ -179,6 +182,11 @@ module partnerCenterPid './modules/_pids/_empty.bicep' = {
   name: 'pid-fb16aee1-039d-45dc-a476-806224793a6c-partnercenter'
   params: {
   }
+}
+
+module shareCompanyNamePid './modules/_pids/_empty.bicep' = if (useTrial && shareCompanyName) {
+  name: config.shareCompanyNamePid
+  params: {}
 }
 
 module clusterStartPid './modules/_pids/_empty.bicep' = {
