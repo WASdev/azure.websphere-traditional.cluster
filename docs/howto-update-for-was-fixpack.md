@@ -78,10 +78,10 @@ Note: **Wait for images to be published before proceeding with this step.** The 
    * Get the PR merged
 
 1. How to run CI/CD?
-   * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.cluster/actions) > Click `Package ARM` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
+   * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.cluster/actions) > Click `integration-test` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
 
 1. How to publish the solution in marketplace and who can do it? (**Note: Make sure the images are published before publishing the solution**)
-   1. Wait until the CI/CD workflow for `Package ARM` successfully completes 
+   1. Wait until the CI/CD workflow for `integration-test` successfully completes 
        * Click to open details of the workflow run > Scroll to the bottom of the page
        * Click `azure.websphere-traditional.cluster-<version>-arm-assembly` to download the zip file `azure.websphere-traditional.cluster-<version>-arm-assembly.zip`;
    3. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview)
@@ -93,7 +93,7 @@ Note: **Wait for images to be published before proceeding with this step.** The 
        * Scroll to the bottom of the page
        * Click `Save draft`
        * Click `Review and publish`
-       * In the "Notes for certification" section enter the `Package ARM` URL
+       * In the "Notes for certification" section enter the `integration-test` URL
        * Click `Publish`
        * Wait until solution offer is in `Publisher signoff` (aka "preview") stage and "Go Live" button appears(it could take few hours)
        * Before clicking "Go Live" use the preview link to test the solution

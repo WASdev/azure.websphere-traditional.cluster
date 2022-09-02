@@ -646,5 +646,5 @@ output dmgrHostName string = name_dmgrVM
 output dmgrPort string = '8879'
 output virtualNetworkName string = vnetForCluster.name
 output subnetName string = vnetForCluster.subnets.subnet1.name
-output adminSecuredConsole string = uri(format('https://{0}:9043/', const_newVNet ? publicIPAddress.properties.dnsSettings.fqdn : reference('${name_dmgrVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), 'ibm/console')
+output adminSecuredConsole string = uri(format('https://{0}:9043/', const_newVNet ? publicIPAddress.properties.dnsSettings.fqdn : reference('${name_dmgrVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), 'ibm/console/logon.jsp')
 output ihsConsole string = configureIHS ? uri(format('http://{0}', const_newVNet ? ihsPublicIPAddress.properties.dnsSettings.fqdn : reference('${name_ihsVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), '') : 'N/A'
