@@ -190,11 +190,13 @@ create_custom_profile() {
     
     echo "$(date): Check if dmgr is ready."
     curl $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
-    while [ $? -ne 56 ]
+    rtnCode=$?
+    while [ $rtnCode -ne 0 ] && [ $rtnCode -ne 56 ]
     do
         sleep 5
         echo "dmgr is not ready"
         curl $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
+        rtnCode=$?
     done
     sleep 60
     echo "$(date): Dmgr is ready, start to create custom profile."
