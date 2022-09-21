@@ -311,14 +311,15 @@ if [ "$dmgr" = True ]; then
     # Configure JDBC provider and data source
     if [ "$enableDB" == "True" ]; then
         copy_jdbc_drivers $jdbcDriverPath $databaseType
-        
+
         jdbcDataSourceName=dataSource-$databaseType
         ./create-ds.sh ${WAS_ND_INSTALL_DIRECTORY} Dmgr001 MyCluster "$databaseType" "$jdbcDataSourceName" "$jdbcDataSourceJNDIName" "$dsConnectionURL" "$dbUser" "$dbPassword" "$jdbcDriverPath"
 
         # Test connection for the created data source
         ${WAS_ND_INSTALL_DIRECTORY}/profiles/Dmgr001/bin/wsadmin.sh -lang jython -c "AdminControl.testConnection(AdminConfig.getid('/DataSource:${jdbcDataSourceName}/'))"
-        if [[ $? != 0 ]]; then
-            echo "$(date): Test data source connection failed."
+        rtnCode=$?
+        if [[ $rtnCode != 0 ]]; then
+            echo "$(date): Test data source connection failed with return code ${rtnCode}."
             exit 1
         fi
     fi

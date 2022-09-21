@@ -62,6 +62,7 @@ sleep 60
 
 # Restart active nodes which will restart all servers running on the nodes
 "$wasRootPath"/profiles/${wasProfileName}/bin/wsadmin.sh -lang jython -c "AdminNodeManagement.restartActiveNodes()"
+sleep 120
 
 # Remove datasource creation script file
 rm -rf $createDsScript
