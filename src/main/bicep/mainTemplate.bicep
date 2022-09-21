@@ -150,7 +150,7 @@ param dbPassword string = newGuid()
 
 param guidValue string = take(replace(newGuid(), '-', ''), 6)
 
-var const_arguments = format(' {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, configureIHS, enableDB, databaseType, base64(jdbcDataSourceJNDIName), base64(dsConnectionURL), base64(dbUser), base64(dbPassword))
+var const_arguments = format(' {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, enableDB, databaseType, base64(jdbcDataSourceJNDIName), base64(dsConnectionURL), base64(dbUser), base64(dbPassword), configureIHS)
 var const_dnsLabelPrefix = format('{0}{1}', dnsLabelPrefix, guidValue)
 var const_ihsArguments1 = format(' {0} {1} {2} {3} {4}', name_dmgrVM, ihsUnixUsername, ihsAdminUsername, ihsAdminPassword, name_storageAccount)
 var const_ihsArguments2 = format(' {0} {1}', name_share, const_mountPointPath)
@@ -488,6 +488,8 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-
         uri(const_scriptLocation, 'configure-ihs-on-dmgr.sh${_artifactsLocationSasToken}')
         uri(const_scriptLocation, 'configure-im.py${_artifactsLocationSasToken}')
         uri(const_scriptLocation, 'pluginutil.sh${_artifactsLocationSasToken}')
+        uri(const_scriptLocation, 'create-ds.sh${_artifactsLocationSasToken}')
+        uri(const_scriptLocation, 'create-ds-db2.py.template${_artifactsLocationSasToken}')
       ]
     }
     protectedSettings: {

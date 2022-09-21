@@ -217,6 +217,17 @@ create_custom_profile() {
     echo "$(date): Custom profile created."
 }
 
+copy_jdbc_drivers() {
+    jdbcDriverPath=$1
+    databaseType=$2
+
+    mkdir -p "$jdbcDriverPath"
+
+    if [ $databaseType == "db2" ]; then
+        find ${WAS_ND_INSTALL_DIRECTORY} -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
+    fi
+}
+
 # Get tWAS installation properties
 source /datadrive/virtualimage.properties
 
@@ -251,13 +262,13 @@ if [ ${result} != $ENTITLED ] && [ ${result} != $EVALUATION ]; then
 fi
 
 # Check required parameters
-if [ "$7" = True ] && [ "${12}" == "" ]; then 
+if [ "$7" = True ] && [ "${13}" = True ] && [ "${18}" == "" ]; then 
   echo "Usage:"
-  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [databaseType] [jdbcDataSourceJNDIName] [dsConnectionURL] [dbUser] [dbPassword] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
   exit 1
-elif [ "$7" == "" ]; then 
+elif [ "${13}" == "" ]; then 
   echo "Usage:"
-  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] False"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] <True|False> [databaseType] [jdbcDataSourceJNDIName] [dsConnectionURL] [dbUser] [dbPassword] False"
   exit 1
 fi
 dmgr=$1
@@ -266,12 +277,23 @@ adminPassword=$3
 dmgrHostName=$4
 members=$5
 dynamic=$6
-configureIHS=$7
-storageAccountName=$8
-storageAccountKey=$9
-fileShareName=${10}
-mountpointPath=${11}
-storageAccountPrivateIp=${12}
+
+enableDB=$7
+databaseType=$8
+jdbcDataSourceJNDIName=$9
+dsConnectionURL=${10}
+dbUser=${11}
+dbPassword=${12}
+
+configureIHS=${13}
+storageAccountName=${14}
+storageAccountKey=${15}
+fileShareName=${16}
+mountpointPath=${17}
+storageAccountPrivateIp=${18}
+
+# Jdbc driver path
+jdbcDriverPath=${WAS_ND_INSTALL_DIRECTORY}/${databaseType}/java
 
 # Create cluster by creating deployment manager, node agent & add nodes to be managed
 if [ "$dmgr" = True ]; then
@@ -285,8 +307,28 @@ if [ "$dmgr" = True ]; then
     if [ "$configureIHS" = True ]; then
         ./configure-ihs-on-dmgr.sh Dmgr001 "$adminUserName" "$adminPassword" "$storageAccountName" "$storageAccountKey" "$fileShareName" "$mountpointPath" "$storageAccountPrivateIp"
     fi
+
+    # Configure JDBC provider and data source
+    if [ "$enableDB" == "True" ]; then
+        copy_jdbc_drivers $jdbcDriverPath $databaseType
+        
+        jdbcDataSourceName=dataSource-$databaseType
+        ./create-ds.sh ${WAS_ND_INSTALL_DIRECTORY} Dmgr001 MyCluster "$databaseType" "$jdbcDataSourceName" "$jdbcDataSourceJNDIName" "$dsConnectionURL" "$dbUser" "$dbPassword" "$jdbcDriverPath"
+
+        # Test connection for the created data source
+        ${WAS_ND_INSTALL_DIRECTORY}/profiles/Dmgr001/bin/wsadmin.sh -lang jython -c "AdminControl.testConnection(AdminConfig.getid('/DataSource:${jdbcDataSourceName}/'))"
+        if [[ $? != 0 ]]; then
+            echo "$(date): Test data source connection failed."
+            exit 1
+        fi
+    fi
 else
     create_custom_profile Custom $(hostname) $(hostname)Node01 $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
     create_was_service nodeagent Custom
+
+    # Copy JDBC drivers
+    if [ "$enableDB" == "True" ]; then
+        copy_jdbc_drivers $jdbcDriverPath $databaseType
+    fi
 fi
