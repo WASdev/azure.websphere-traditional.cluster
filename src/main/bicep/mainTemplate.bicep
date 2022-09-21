@@ -131,9 +131,26 @@ param newOrExistingVnetForCluster string = 'new'
 @description('To mitigate ARM-TTK error: Control Named vnetForCluster must output the resourceGroup property when hideExisting is false')
 param vnetRGNameForCluster string = resourceGroup().name
 
+@description('Boolean value indicating, if user wants to enable database connection.')
+param enableDB bool = false
+@allowed([
+  'db2'
+])
+@description('One of the supported database types')
+param databaseType string = 'db2'
+@description('JNDI Name for JDBC Datasource')
+param jdbcDataSourceJNDIName string = 'jdbc/contoso'
+@description('JDBC Connection String')
+param dsConnectionURL string = 'jdbc:db2://contoso.db2.database:50000/sample'
+@description('User id of Database')
+param dbUser string = 'contosoDbUser'
+@secure()
+@description('Password for Database')
+param dbPassword string = newGuid()
+
 param guidValue string = take(replace(newGuid(), '-', ''), 6)
 
-var const_arguments = format(' {0} {1} {2} {3} {4} {5}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, configureIHS)
+var const_arguments = format(' {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, configureIHS, enableDB, databaseType, base64(jdbcDataSourceJNDIName), base64(dsConnectionURL), base64(dbUser), base64(dbPassword))
 var const_dnsLabelPrefix = format('{0}{1}', dnsLabelPrefix, guidValue)
 var const_ihsArguments1 = format(' {0} {1} {2} {3} {4}', name_dmgrVM, ihsUnixUsername, ihsAdminUsername, ihsAdminPassword, name_storageAccount)
 var const_ihsArguments2 = format(' {0} {1}', name_share, const_mountPointPath)
@@ -447,6 +464,14 @@ module clusterVMsCreated './modules/_pids/_empty.bicep' = {
   ]
 }
 
+module dbConnectionStartPid './modules/_pids/_empty.bicep' = if (enableDB) {
+  name: config.dbConnectionStart
+  params: {}
+  dependsOn: [
+    clusterVMs
+  ]
+}
+
 resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = [for i in range(0, numberOfNodes): {
   name: format('{0}/install', i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}')
   location: location
@@ -474,6 +499,14 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-
     clusterVMs
   ]
 }]
+
+module dbConnectionEndPid './modules/_pids/_empty.bicep' = if (enableDB) {
+  name: config.dbConnectionEnd
+  params: {}
+  dependsOn: [
+    clusterVMsExtension
+  ]
+}
 
 module clusterEndPid './modules/_pids/_empty.bicep' = {
   name: (useTrial ? config.clusterTrialEnd : config.clusterEnd)

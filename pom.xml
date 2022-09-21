@@ -20,7 +20,7 @@
 
     <groupId>com.ibm.websphere.azure</groupId>
     <artifactId>azure.websphere-traditional.cluster</artifactId>
-    <version>1.3.37</version>
+    <version>1.3.38</version>
 
     <!-- mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests -->
     <parent>
