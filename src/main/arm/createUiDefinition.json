@@ -637,7 +637,6 @@
             "vnetForCluster": "[steps('NetworkingConfig').vnetForCluster]",
             "newOrExistingVnetForCluster": "[steps('NetworkingConfig').vnetForCluster.newOrExisting]",
             "vnetRGNameForCluster": "[steps('NetworkingConfig').vnetForCluster.resourceGroup]",
-            "vnetRGNameForSingleServer": "[steps('NetworkingConfig').vnetForSingleServer.resourceGroup]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
             "jdbcDataSourceJNDIName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceJNDIName]",
