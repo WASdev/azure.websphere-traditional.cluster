@@ -1,16 +1,40 @@
 name: integration-test
 on:
   workflow_dispatch:
+    inputs:
+      databaseType:
+        description: 'Database connection'
+        required: true
+        default: 'db2'
+        type: choice
+        options:
+        - db2
+        - none
+      deleteAzureResources:
+        description: 'Delete Azure resources at the end'
+        required: true
+        type: boolean
+        default: true
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
+  # Enable IBM DB2 database connection and delete Azure resources at the end
   # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main"}'
+  # Enable IBM DB2 database connection and keep Azure resources at the end
+  # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"deleteAzureResources": "false"}}'
+  # Disable IBM DB2 database connection and delete Azure resources at the end
+  # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"databaseType": "none"}}'
+  # Disable IBM DB2 database connection and keep Azure resources at the end
+  # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"databaseType": "none", "deleteAzureResources": "false"}}'
   repository_dispatch:
     types: [integration-test]
   # sample request
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
-  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test"}'
+  # Delete Azure resources at the end
+  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"deleteAzureResources": true}}'
+  # Keep Azure resources at the end
+  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"deleteAzureResources": false}}'
 env:
   # Latest version is at https://github.com/Azure/azure-cli/releases
   azCliVersion: 2.31.0
@@ -25,9 +49,12 @@ env:
   msTeamsWebhook: ${{ secrets.MSTEAMS_WEBHOOK }}
   vmAdminId: ${{ secrets.VM_ADMIN_ID }}
   vmAdminPassword: ${{ secrets.VM_ADMIN_PASSWORD }}
+  db2VmName: db2${{ github.run_id }}${{ github.run_number }}
+  db2inst1Password: ${{ secrets.DB2INST1_PASSWORD }}
   testResourceGroup: twasClusterTestRG${{ github.run_id }}${{ github.run_number }}
   testDeploymentName: twasClusterTestDeployment${{ github.run_id }}${{ github.run_number }}
   location: eastus
+  scriptLocation: https://raw.githubusercontent.com/${{ secrets.USER_NAME }}/azure.websphere-traditional.cluster/$GITHUB_REF_NAME/test/
 jobs:
   integration-test:
     runs-on: ubuntu-latest
@@ -61,21 +88,55 @@ jobs:
           ref: ${{ github.event.inputs.ref }}
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
-      - name: Build ${{ env.repoName }}
-        run: |
-          cd ${{ env.repoName }}
-          mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME -DuseTrial=true \
-            -DnumberOfNodes=2 -DvmSize=Standard_D2_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
-            -DadminUsername=${{ env.vmAdminId }} -DadminPasswordOrKey=${{ env.vmAdminPassword }} \
-            -DauthenticationType=password -DwasUsername=${{ env.vmAdminId }} -DwasPassword=${{ env.vmAdminPassword }} \
-            -DconfigureIHS=true -DihsVmSize=Standard_D2_v3 -DihsVMPrefix=ihs -DihsDnsLabelPrefix=ihs \
-            -DihsUnixUsername=${{ env.vmAdminId }} -DihsUnixPasswordOrKey=${{ env.vmAdminPassword }} \
-            -DihsAuthenticationType=password -DihsAdminUsername=${{ env.vmAdminId }} -DihsAdminPassword=${{ env.vmAdminPassword }} \
-            -Dtest.args="-Test All" -Pbicep -Passembly -Ptemplate-validation-tests clean install
       - uses: azure/login@v1
         id: azure-login
         with:
           creds: ${{ env.azureCredentials }}
+      - name: Deploy an IBM DB2 server on Azure VM
+        if: ${{ inputs.databaseType == 'db2' }}
+        run: |
+          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          az vm create \
+            --resource-group ${{ env.testResourceGroup }} --name ${{ env.db2VmName }} \
+            --image "Canonical:UbuntuServer:18.04-LTS:latest" \
+            --admin-username azureuser --generate-ssh-keys \
+            --nsg-rule NONE --enable-agent true \
+            --vnet-name ${{ env.db2VmName }}VNET --enable-auto-update false \
+            --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true
+          az vm open-port -g ${{ env.testResourceGroup }} -n ${{ env.db2VmName }} --port 50000 --priority 100
+          az vm extension set --name CustomScript \
+            --extension-instance-name install-db2-in-docker \
+            --resource-group ${{ env.testResourceGroup }} --vm-name ${{ env.db2VmName }} \
+            --publisher Microsoft.Azure.Extensions --version 2.0 \
+            --settings "{\"fileUris\": [\"${{ env.scriptLocation }}install-db2.sh\"]}" \
+            --protected-settings "{\"commandToExecute\":\"bash install-db2.sh ${{ env.db2inst1Password }}\"}"
+      - name: Build ${{ env.repoName }}
+        run: |
+          cd ${{ env.repoName }}
+          if ${{ inputs.databaseType != 'none' }}; then
+            db2VmPublicIP=$(az vm show \
+              --resource-group ${{ env.testResourceGroup }} --name ${{ env.db2VmName }} \
+              --show-details --query publicIps -o tsv)
+            mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME -DuseTrial=true \
+              -DnumberOfNodes=2 -DvmSize=Standard_D2_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
+              -DadminUsername=${{ env.vmAdminId }} -DadminPasswordOrKey=${{ env.vmAdminPassword }} \
+              -DauthenticationType=password -DwasUsername=${{ env.vmAdminId }} -DwasPassword=${{ env.vmAdminPassword }} \
+              -DconfigureIHS=true -DihsVmSize=Standard_D2_v3 -DihsVMPrefix=ihs -DihsDnsLabelPrefix=ihs \
+              -DihsUnixUsername=${{ env.vmAdminId }} -DihsUnixPasswordOrKey=${{ env.vmAdminPassword }} \
+              -DihsAuthenticationType=password -DihsAdminUsername=${{ env.vmAdminId }} -DihsAdminPassword=${{ env.vmAdminPassword }} \
+              -DenableDB=true -DdatabaseType=db2 -DjdbcDataSourceJNDIName=jdbc/Sample -DdsConnectionURL=jdbc:db2://${db2VmPublicIP}:50000/sample -DdbUser=db2inst1 -DdbPassword=${{ env.db2inst1Password }} \
+              -Dtest.args="-Test All" -Pbicep -Passembly -Ptemplate-validation-tests clean install
+          else
+            mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME -DuseTrial=true \
+              -DnumberOfNodes=2 -DvmSize=Standard_D2_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
+              -DadminUsername=${{ env.vmAdminId }} -DadminPasswordOrKey=${{ env.vmAdminPassword }} \
+              -DauthenticationType=password -DwasUsername=${{ env.vmAdminId }} -DwasPassword=${{ env.vmAdminPassword }} \
+              -DconfigureIHS=true -DihsVmSize=Standard_D2_v3 -DihsVMPrefix=ihs -DihsDnsLabelPrefix=ihs \
+              -DihsUnixUsername=${{ env.vmAdminId }} -DihsUnixPasswordOrKey=${{ env.vmAdminPassword }} \
+              -DihsAuthenticationType=password -DihsAdminUsername=${{ env.vmAdminId }} -DihsAdminPassword=${{ env.vmAdminPassword }} \
+              -DenableDB=false -DdatabaseType=db2 \
+              -Dtest.args="-Test All" -Pbicep -Passembly -Ptemplate-validation-tests clean install
+          fi
       - name: Deploy a twas-cluster on Azure VMs
         run: |
           cd ${{ env.repoName }}/target/cli
@@ -98,7 +159,7 @@ jobs:
           fi
       - name: Delete all Azure resources
         id: delete-resources-in-group
-        if: always()
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.deleteAzureResources) || (github.event_name == 'repository_dispatch' && github.event.client_payload.deleteAzureResources) }}
         uses: azure/CLI@v1
         with:
           azcliversion: ${{ env.azCliVersion }}
@@ -123,6 +184,8 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Output inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"
       - name: Send notification
         if: always()
         run: |
