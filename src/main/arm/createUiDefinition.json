@@ -501,7 +501,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the offer to configure WebSphere to connect to the desired pre-existing database. The database must be network accessible to the VNET and subnets configured in Networking."
+                            "text": "Select 'Yes' and specify connection settings to configure WebSphere to connect to a pre-existing database. The database must be network accessible to the VNET and subnets that are configured in Networking."
                         }
                     },
                     {
@@ -509,7 +509,7 @@
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Connect to database?",
                         "defaultValue": "No",
-                        "toolTip": "Select 'Yes' and provide required info to configure the connection to a database.",
+                        "toolTip": "Select 'Yes' to configure the connection to a database. The default is 'No'.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -549,7 +549,7 @@
                             {
                                 "name": "jdbcDataSourceJNDIName",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "JNDI Name",
+                                "label": "JNDI name",
                                 "toolTip": "The JNDI name for the database JDBC connection",
                                 "defaultValue": "",
                                 "constraints": {
@@ -562,7 +562,7 @@
                             {
                                 "name": "db2DsConnectionURL",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "DataSource Connection String (jdbc:db2://&lt;host&gt;:&lt;port&gt;/&lt;database&gt;)",
+                                "label": "Data source connection string (jdbc:db2://&lt;host&gt;:&lt;port&gt;/&lt;database&gt;)",
                                 "toolTip": "The JDBC connection string for the database",
                                 "defaultValue": "",
                                 "constraints": {
@@ -581,7 +581,7 @@
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(?=.{1,128}$)[a-zA-Z](?!.*--)(?!.*@@)(?!.*-@)(?!.*@-)[a-zA-Z0-9-@]*[a-zA-Z0-9]$",
-                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen (-) and the at sign, no hyphen allowed at the beginning and the end of the database username."
                                 },
                                 "visible": true
                             },
@@ -589,10 +589,10 @@
                                 "name": "dbPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
-                                    "password": "Database Password",
+                                    "password": "Database password",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "Database Password",
+                                "toolTip": "Database password",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{6,128}$",
