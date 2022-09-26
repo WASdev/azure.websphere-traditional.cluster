@@ -219,11 +219,11 @@ create_custom_profile() {
 
 copy_jdbc_drivers() {
     jdbcDriverPath=$1
-    databaseType=$2
+    dbType=$2
 
     mkdir -p "$jdbcDriverPath"
 
-    if [ $databaseType == "db2" ]; then
+    if [ $dbType == "db2" ]; then
         find ${WAS_ND_INSTALL_DIRECTORY} -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
     fi
 }
@@ -264,11 +264,11 @@ fi
 # Check required parameters
 if [ "$7" = True ] && [ "${13}" = True ] && [ "${18}" == "" ]; then 
   echo "Usage:"
-  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [databaseType] [jdbcDataSourceJNDIName] [dsConnectionURL] [dbUser] [dbPassword] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [dbType] [jdbcDSJNDIName] [dsConnectionURL] [databaseUser] [databasePassword] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
   exit 1
 elif [ "${13}" == "" ]; then 
   echo "Usage:"
-  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] <True|False> [databaseType] [jdbcDataSourceJNDIName] [dsConnectionURL] [dbUser] [dbPassword] False"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] <True|False> [dbType] [jdbcDSJNDIName] [dsConnectionURL] [databaseUser] [databasePassword] False"
   exit 1
 fi
 dmgr=$1
@@ -279,11 +279,11 @@ members=$5
 dynamic=$6
 
 enableDB=$7
-databaseType=$8
-jdbcDataSourceJNDIName=$9
+dbType=$8
+jdbcDSJNDIName=$9
 dsConnectionURL=${10}
-dbUser=${11}
-dbPassword=${12}
+databaseUser=${11}
+databasePassword=${12}
 
 configureIHS=${13}
 storageAccountName=${14}
@@ -293,7 +293,7 @@ mountpointPath=${17}
 storageAccountPrivateIp=${18}
 
 # Jdbc driver path
-jdbcDriverPath=${WAS_ND_INSTALL_DIRECTORY}/${databaseType}/java
+jdbcDriverPath=${WAS_ND_INSTALL_DIRECTORY}/${dbType}/java
 
 # Create cluster by creating deployment manager, node agent & add nodes to be managed
 if [ "$dmgr" = True ]; then
@@ -310,10 +310,10 @@ if [ "$dmgr" = True ]; then
 
     # Configure JDBC provider and data source
     if [ "$enableDB" == "True" ]; then
-        copy_jdbc_drivers $jdbcDriverPath $databaseType
+        copy_jdbc_drivers $jdbcDriverPath $dbType
 
-        jdbcDataSourceName=dataSource-$databaseType
-        ./create-ds.sh ${WAS_ND_INSTALL_DIRECTORY} Dmgr001 MyCluster "$databaseType" "$jdbcDataSourceName" "$jdbcDataSourceJNDIName" "$dsConnectionURL" "$dbUser" "$dbPassword" "$jdbcDriverPath"
+        jdbcDataSourceName=dataSource-$dbType
+        ./create-ds.sh ${WAS_ND_INSTALL_DIRECTORY} Dmgr001 MyCluster "$dbType" "$jdbcDataSourceName" "$jdbcDSJNDIName" "$dsConnectionURL" "$databaseUser" "$databasePassword" "$jdbcDriverPath"
 
         # Test connection for the created data source
         ${WAS_ND_INSTALL_DIRECTORY}/profiles/Dmgr001/bin/wsadmin.sh -lang jython -c "AdminControl.testConnection(AdminConfig.getid('/DataSource:${jdbcDataSourceName}/'))"
@@ -330,6 +330,6 @@ else
 
     # Copy JDBC drivers
     if [ "$enableDB" == "True" ]; then
-        copy_jdbc_drivers $jdbcDriverPath $databaseType
+        copy_jdbc_drivers $jdbcDriverPath $dbType
     fi
 fi
