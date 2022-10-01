@@ -31,10 +31,14 @@ on:
   # sample request
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
-  # Delete Azure resources at the end
-  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"deleteAzureResources": true}}'
-  # Keep Azure resources at the end
-  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"deleteAzureResources": false}}'
+  # Enable IBM DB2 database connection and delete Azure resources at the end
+  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"databaseType": "db2", "deleteAzureResources": true}}'
+  # Enable IBM DB2 database connection and keep Azure resources at the end
+  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"databaseType": "db2", "deleteAzureResources": false}}'
+  # Disable IBM DB2 database connection and delete Azure resources at the end
+  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"databaseType": "none", "deleteAzureResources": true}}'
+  # Disable IBM DB2 database connection and keep Azure resources at the end
+  # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"databaseType": "none", "deleteAzureResources": false}}'
 env:
   # Latest version is at https://github.com/Azure/azure-cli/releases
   azCliVersion: 2.31.0
@@ -93,7 +97,7 @@ jobs:
         with:
           creds: ${{ env.azureCredentials }}
       - name: Deploy an IBM DB2 server on Azure VM
-        if: ${{ inputs.databaseType == 'db2' }}
+        if: ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}
         run: |
           az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
           az vm create \
@@ -113,7 +117,7 @@ jobs:
       - name: Build ${{ env.repoName }}
         run: |
           cd ${{ env.repoName }}
-          if ${{ inputs.databaseType != 'none' }}; then
+          if ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}; then
             db2VmPublicIP=$(az vm show \
               --resource-group ${{ env.testResourceGroup }} --name ${{ env.db2VmName }} \
               --show-details --query publicIps -o tsv)
@@ -184,10 +188,12 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Output inputs
+      - name: Output inputs from workflow_dispatch
         run: echo "${{ toJSON(github.event.inputs) }}"
+      - name: Output client_payload from repository_dispatch
+        run: echo "${{ toJSON(github.event.client_payload) }}"
       - name: Send notification
-        if: always()
+        if: ${{ env.msTeamsWebhook != 'NA' }}
         run: |
             workflowJobs=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ env.userName }}/${{ env.repoName }}/actions/runs/${{ github.run_id }}/jobs)
             successIntegrationTestJob=$(echo $workflowJobs | jq '.jobs | map(select(.name=="integration-test" and .conclusion=="success")) | length')
