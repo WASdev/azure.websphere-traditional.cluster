@@ -1,0 +1,61 @@
+#      Copyright (c) Microsoft Corporation.
+# 
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+# 
+#           http://www.apache.org/licenses/LICENSE-2.0
+# 
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+# Get WAS cluster id as the parent ID for creating JDBC provider
+cluster = AdminConfig.getid('/ServerCluster:${CLUSTER_NAME}/')
+
+# JDBC Provider
+n1 = ['name', 'OracleJDBCProvider']
+implCN = ['implementationClassName', 'oracle.jdbc.xa.client.OracleXADataSource']
+cls = ['classpath', '${ORACLE_JDBC_DRIVER_CLASS_PATH}']
+provider = ['providerType', 'Oracle JDBC Driver (XA)']
+xa = ['xa', 'true']
+jdbcAttrs = [n1,  implCN, cls, provider, xa]
+jdbCProvider = AdminConfig.create('JDBCProvider', cluster, jdbcAttrs)
+
+# JASS Auth entry
+userAlias = 'wasnd-cluster/oracle'
+alias = ['alias', userAlias]
+userid = ['userId', '${ORACLE_DATABASE_USER_NAME}']
+password = ['password', '${ORACLE_DATABASE_USER_PASSWORD}']
+jaasAttrs = [alias, userid, password]
+security = AdminConfig.getid('/Security:/')
+j2cUser = AdminConfig.create('JAASAuthData', security, jaasAttrs)
+
+# Data Source
+newjdbc = AdminConfig.getid('/JDBCProvider:OracleJDBCProvider/')
+name = ['name', '${ORACLE_DATASOURCE_NAME}']
+jndi = ['jndiName', '${ORACLE_DATASOURCE_JNDI_NAME}']
+auth = ['authDataAlias', userAlias]
+authMechanism = ['authMechanismPreference', 'BASIC_PASSWORD']
+helper = ['datasourceHelperClassname', 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper']
+dsAttrs = [name, jndi, auth, authMechanism, helper]
+newds = AdminConfig.create('DataSource', newjdbc, dsAttrs)
+
+# Data Source properties
+propSet = AdminConfig.create('J2EEResourcePropertySet', newds, [])
+AdminConfig.create('J2EEResourceProperty', propSet, [["name", "URL"], ["value", "${ORACLE_DATABASE_URL}"]])
+
+# Create CMP Connection factory
+rra = AdminConfig.getid("/ServerCluster:${CLUSTER_NAME}/J2CResourceAdapter:WebSphere Relational Resource Adapter/")
+cmpAttrs = []
+cmpAttrs.append(["name", "OracleDataSource_CF"])
+cmpAttrs.append(["authMechanismPreference", "BASIC_PASSWORD"])
+cmpAttrs.append(["authDataAlias", userAlias])
+cmpAttrs.append(["cmpDatasource", newds])
+cf = AdminConfig.create("CMPConnectorFactory", rra, cmpAttrs)
+
+# Save configuratoin changes and sync to active nodes
+AdminConfig.save()
+AdminNodeManagement.syncActiveNodes()
