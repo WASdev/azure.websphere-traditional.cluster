@@ -153,6 +153,8 @@ USE_GITHUB_CLI=false
 msg "${GREEN}(3/4) Create service principal ${SERVICE_PRINCIPAL_NAME}"
 SUBSCRIPTION_ID=$(az account show --query id --output tsv --only-show-errors)
 SERVICE_PRINCIPAL=$(az ad sp create-for-rbac --name ${SERVICE_PRINCIPAL_NAME} --role="Contributor" --scopes="/subscriptions/${SUBSCRIPTION_ID}" --sdk-auth --only-show-errors | base64 -w0)
+msg "${YELLOW}\"DISAMBIG_PREFIX\""
+msg "${GREEN}${DISAMBIG_PREFIX}"
 
 # Create GitHub action secrets
 AZURE_CREDENTIALS=$(echo $SERVICE_PRINCIPAL | base64 -d)
@@ -170,8 +172,6 @@ if $USE_GITHUB_CLI; then
     gh ${GH_FLAGS} secret set DB2INST1_PASSWORD -b"${DB2INST1_PASSWORD}"
     gh ${GH_FLAGS} secret set ORACLE_DB_PASSWORD -b"${ORACLE_DB_PASSWORD}"
     gh ${GH_FLAGS} secret set MSTEAMS_WEBHOOK -b"${MSTEAMS_WEBHOOK}"
-    msg "${YELLOW}\"DISAMBIG_PREFIX\""
-    msg "${GREEN}${DISAMBIG_PREFIX}"
     msg "${GREEN}Secrets configured"
   } || {
     USE_GITHUB_CLI=false
