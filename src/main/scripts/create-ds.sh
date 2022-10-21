@@ -21,7 +21,7 @@ wasClusterName=$3                                   # WAS cluster name
 dbType=$4                                           # Supported database types: [db2, oracle]
 jdbcDataSourceName=$5                               # JDBC Datasource name
 jdbcDSJNDIName=$(echo "${6}" | base64 -d)           # JDBC Datasource JNDI name
-dsConnectionURL=$(echo "${7}" | base64 -d)          # JDBC Datasource connection String
+dsConnectionString=$(echo "${7}" | base64 -d)       # JDBC Datasource connection String
 databaseUser=$(echo "${8}" | base64 -d)             # Database username
 databasePassword=$(echo "${9}" | base64 -d)         # Database user password
 jdbcDriverPath=${10}                                # JDBC driver path
@@ -36,12 +36,12 @@ cp $createDsTemplate $createDsScript
 
 if [ $dbType == "db2" ]; then
     regex="^jdbc:db2://([^/]+):([0-9]+)/([[:alnum:]_-]+)"
-    if [[ $dsConnectionURL =~ $regex ]]; then 
+    if [[ $dsConnectionString =~ $regex ]]; then 
         db2ServerName="${BASH_REMATCH[1]}"
         db2ServerPortNumber="${BASH_REMATCH[2]}"
         db2DBName="${BASH_REMATCH[3]}"
     else
-        echo "$dsConnectionURL doesn't match the required format of DB2 data source connection string."
+        echo "$dsConnectionString doesn't match the required format of DB2 data source connection string."
         exit 1
     fi
 
@@ -63,7 +63,7 @@ elif [ $dbType == "oracle" ]; then
     sed -i "s/\${ORACLE_DATABASE_USER_PASSWORD}/${databasePassword}/g" $createDsScript
     sed -i "s/\${ORACLE_DATASOURCE_NAME}/${jdbcDataSourceName}/g" $createDsScript
     sed -i "s#\${ORACLE_DATASOURCE_JNDI_NAME}#${jdbcDSJNDIName}#g" $createDsScript
-    sed -i "s#\${ORACLE_DATABASE_URL}#${dsConnectionURL}#g" $createDsScript
+    sed -i "s#\${ORACLE_DATABASE_URL}#${dsConnectionString}#g" $createDsScript
 fi
 
 # Create JDBC provider and data source using jython file
