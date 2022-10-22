@@ -12,50 +12,46 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# Reference: https://raw.githubusercontent.com/keensoft/was-db2-docker/master/was/assets/create-datasource.jython
-
 # Get WAS cluster id as the parent ID for creating JDBC provider
 cluster = AdminConfig.getid('/ServerCluster:${CLUSTER_NAME}/')
 
 # JDBC Provider
-n1 = ['name', 'DB2JDBCProvider']
-implCN = ['implementationClassName', 'com.ibm.db2.jcc.DB2XADataSource']
-cls = ['classpath', '${DB2UNIVERSAL_JDBC_DRIVER_PATH}/db2jcc.jar;${DB2UNIVERSAL_JDBC_DRIVER_PATH}/db2jcc_license_cu.jar;${DB2UNIVERSAL_JDBC_DRIVER_PATH}/db2jcc_license_cisuz.jar']
-provider = ['providerType', 'DB2 Universal JDBC Driver Provider (XA)']
-xa = ['xa', 'true']
-jdbcAttrs = [n1,  implCN, cls, provider, xa]
+n1 = ['name', 'SQLServerJDBCProvider']
+implCN = ['implementationClassName', 'com.microsoft.sqlserver.jdbc.SQLServerConnectionPoolDataSource']
+cls = ['classpath', '${SQLSERVER_JDBC_DRIVER_CLASS_PATH}']
+provider = ['providerType', 'Microsoft SQL Server JDBC Driver']
+jdbcAttrs = [n1,  implCN, cls, provider]
 jdbCProvider = AdminConfig.create('JDBCProvider', cluster, jdbcAttrs)
 
 # JASS Auth entry
-userAlias = 'wasnd-cluster/db2'
+userAlias = 'wasnd-cluster/sqlserver'
 alias = ['alias', userAlias]
-userid = ['userId', '${DB2_DATABASE_USER_NAME}']
-password = ['password', '${DB2_DATABASE_USER_PASSWORD}']
+userid = ['userId', '${SQLSERVER_DATABASE_USER_NAME}']
+password = ['password', '${SQLSERVER_DATABASE_USER_PASSWORD}']
 jaasAttrs = [alias, userid, password]
 security = AdminConfig.getid('/Security:/')
 j2cUser = AdminConfig.create('JAASAuthData', security, jaasAttrs)
 
 # Data Source
-newjdbc = AdminConfig.getid('/JDBCProvider:DB2JDBCProvider/')
-name = ['name', '${DB2_DATASOURCE_NAME}']
-jndi = ['jndiName', '${DB2_DATASOURCE_JNDI_NAME}']
+newjdbc = AdminConfig.getid('/JDBCProvider:SQLServerJDBCProvider/')
+name = ['name', '${SQLSERVER_DATASOURCE_NAME}']
+jndi = ['jndiName', '${SQLSERVER_DATASOURCE_JNDI_NAME}']
 auth = ['authDataAlias', userAlias]
 authMechanism = ['authMechanismPreference', 'BASIC_PASSWORD']
-helper = ['datasourceHelperClassname', 'com.ibm.websphere.rsadapter.DB2UniversalDataStoreHelper']
+helper = ['datasourceHelperClassname', 'com.ibm.websphere.rsadapter.MicrosoftSQLServerDataStoreHelper']
 dsAttrs = [name, jndi, auth, authMechanism, helper]
 newds = AdminConfig.create('DataSource', newjdbc, dsAttrs)
 
 # Data Source properties
 propSet = AdminConfig.create('J2EEResourcePropertySet', newds, [])
-AdminConfig.create('J2EEResourceProperty', propSet, [["name", "driverType"], ["value", "4"]])
-AdminConfig.create('J2EEResourceProperty', propSet, [["name", "databaseName"], ["value", "${DB2_DATABASE_NAME}"]])
-AdminConfig.create('J2EEResourceProperty', propSet, [["name", "serverName"], ["value", "${DB2_SERVER_NAME}"]])
-AdminConfig.create('J2EEResourceProperty', propSet, [["name", "portNumber"], ["value", "${DB2_PORT_NUMBER}"]])
+AdminConfig.create('J2EEResourceProperty', propSet, [["name", "databaseName"], ["value", "${SQLSERVER_DATABASE_NAME}"]])
+AdminConfig.create('J2EEResourceProperty', propSet, [["name", "serverName"], ["value", "${SQLSERVER_SERVER_NAME}"]])
+AdminConfig.create('J2EEResourceProperty', propSet, [["name", "portNumber"], ["value", "${SQLSERVER_PORT_NUMBER}"]])
 
 # Create CMP Connection factory
 rra = AdminConfig.getid("/ServerCluster:${CLUSTER_NAME}/J2CResourceAdapter:WebSphere Relational Resource Adapter/")
 cmpAttrs = []
-cmpAttrs.append(["name", "DB2DataSource_CF"])
+cmpAttrs.append(["name", "SQLServerDataSource_CF"])
 cmpAttrs.append(["authMechanismPreference", "BASIC_PASSWORD"])
 cmpAttrs.append(["authDataAlias", userAlias])
 cmpAttrs.append(["cmpDatasource", newds])

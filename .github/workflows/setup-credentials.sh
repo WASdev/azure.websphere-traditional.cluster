@@ -35,6 +35,10 @@ VM_ADMIN_PASSWORD=
 DB2INST1_PASSWORD=
 # Password for Oracle database user testuser
 ORACLE_DB_PASSWORD=
+# Password for Microsoft SQL Server database user testuser
+SQLSERVER_DB_PASSWORD=
+# Password for PostgreSQL database user testuser
+POSTGRESQL_DB_PASSWORD=
 # Optional: Web hook for Microsoft Teams channel
 MSTEAMS_WEBHOOK=
 
@@ -109,6 +113,16 @@ if [ "$ORACLE_DB_PASSWORD" == '' ] ; then
     read -r -p "Enter password for Oracle database user testuser: " ORACLE_DB_PASSWORD
 fi
 
+# get SQLSERVER_DB_PASSWORD if not set at the beginning of this file
+if [ "$SQLSERVER_DB_PASSWORD" == '' ] ; then
+    read -r -p "Enter password for Microsoft SQL Server database user testuser: " SQLSERVER_DB_PASSWORD
+fi
+
+# get POSTGRESQL_DB_PASSWORD if not set at the beginning of this file
+if [ "$POSTGRESQL_DB_PASSWORD" == '' ] ; then
+    read -r -p "Enter password for PostgreSQL database user testuser: " POSTGRESQL_DB_PASSWORD
+fi
+
 # Optional: get MSTEAMS_WEBHOOK if not set at the beginning of this file
 if [ "$MSTEAMS_WEBHOOK" == '' ] ; then
     read -r -p "[Optional] Enter Web hook for Microsoft Teams channel, or press 'Enter' to ignore: " MSTEAMS_WEBHOOK
@@ -171,6 +185,8 @@ if $USE_GITHUB_CLI; then
     gh ${GH_FLAGS} secret set VM_ADMIN_PASSWORD -b"${VM_ADMIN_PASSWORD}"
     gh ${GH_FLAGS} secret set DB2INST1_PASSWORD -b"${DB2INST1_PASSWORD}"
     gh ${GH_FLAGS} secret set ORACLE_DB_PASSWORD -b"${ORACLE_DB_PASSWORD}"
+    gh ${GH_FLAGS} secret set SQLSERVER_DB_PASSWORD -b"${SQLSERVER_DB_PASSWORD}"
+    gh ${GH_FLAGS} secret set POSTGRESQL_DB_PASSWORD -b"${POSTGRESQL_DB_PASSWORD}"
     gh ${GH_FLAGS} secret set MSTEAMS_WEBHOOK -b"${MSTEAMS_WEBHOOK}"
     msg "${GREEN}Secrets configured"
   } || {
@@ -195,6 +211,10 @@ if [ $USE_GITHUB_CLI == false ]; then
   msg "${GREEN}${DB2INST1_PASSWORD}"
   msg "${YELLOW}\"ORACLE_DB_PASSWORD\""
   msg "${GREEN}${ORACLE_DB_PASSWORD}"
+  msg "${YELLOW}\"SQLSERVER_DB_PASSWORD\""
+  msg "${GREEN}${SQLSERVER_DB_PASSWORD}"
+  msg "${YELLOW}\"POSTGRESQL_DB_PASSWORD\""
+  msg "${GREEN}${POSTGRESQL_DB_PASSWORD}"
   msg "${YELLOW}\"MSTEAMS_WEBHOOK\""
   msg "${GREEN}${MSTEAMS_WEBHOOK}"
   msg "${NOFORMAT}========================================================================"

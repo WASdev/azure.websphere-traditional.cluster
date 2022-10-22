@@ -544,6 +544,14 @@
                                         {
                                             "label": "Oracle database",
                                             "value": "oracle"
+                                        },
+                                        {
+                                            "label": "Microsoft SQL Server",
+                                            "value": "sqlserver"
+                                        },
+                                        {
+                                            "label": "PostgreSQL",
+                                            "value": "postgres"
                                         }
                                     ],
                                     "required": true
@@ -588,6 +596,32 @@
                                     "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
                                 },
                                 "visible": "[equals(steps('section_database').databaseConnectionInfo.databaseType, 'oracle')]"
+                            },
+                            {
+                                "name": "sqlserverDsConnectionURL",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Data source connection string (jdbc:sqlserver://&lt;host&gt;:&lt;port&gt;;database=&lt;database&gt;)",
+                                "toolTip": "The JDBC connection string for the database",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^jdbc:sqlserver:\/\/([^\/]+):([0-9]+);database=([\\w-]+)",
+                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                },
+                                "visible": "[equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver')]"
+                            },
+                            {
+                                "name": "postgresDsConnectionURL",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Data source connection string (jdbc:postgresql://&lt;host&gt;:&lt;port&gt;/&lt;database&gt;)",
+                                "toolTip": "The JDBC connection string for the database",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^jdbc:postgresql:\/\/([^\/]+):([0-9]+)\/([\\w-]+)",
+                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                },
+                                "visible": "[equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgres')]"
                             },
                             {
                                 "name": "dbUser",
@@ -657,7 +691,7 @@
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
             "jdbcDataSourceJNDIName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceJNDIName]",
-            "dsConnectionURL": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'oracle'), steps('section_database').databaseConnectionInfo.oracleDsConnectionURL, steps('section_database').databaseConnectionInfo.db2DsConnectionURL)]",
+            "dsConnectionURL": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'oracle'), steps('section_database').databaseConnectionInfo.oracleDsConnectionURL, if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'), steps('section_database').databaseConnectionInfo.sqlserverDsConnectionURL, if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgres'), steps('section_database').databaseConnectionInfo.postgresDsConnectionURL, steps('section_database').databaseConnectionInfo.db2DsConnectionURL)))]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]"  
         }
