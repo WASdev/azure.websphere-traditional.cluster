@@ -17,11 +17,10 @@ cluster = AdminConfig.getid('/ServerCluster:${CLUSTER_NAME}/')
 
 # JDBC Provider
 n1 = ['name', 'OracleJDBCProvider']
-implCN = ['implementationClassName', 'oracle.jdbc.xa.client.OracleXADataSource']
+implCN = ['implementationClassName', 'oracle.jdbc.pool.OracleConnectionPoolDataSource']
 cls = ['classpath', '${ORACLE_JDBC_DRIVER_CLASS_PATH}']
-provider = ['providerType', 'Oracle JDBC Driver (XA)']
-xa = ['xa', 'true']
-jdbcAttrs = [n1,  implCN, cls, provider, xa]
+provider = ['providerType', 'Oracle JDBC Driver']
+jdbcAttrs = [n1,  implCN, cls, provider]
 jdbCProvider = AdminConfig.create('JDBCProvider', cluster, jdbcAttrs)
 
 # JASS Auth entry
