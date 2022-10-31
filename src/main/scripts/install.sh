@@ -217,6 +217,9 @@ create_custom_profile() {
     echo "$(date): Custom profile created."
 }
 
+# retry attempt for curl command
+retryMaxAttempt=5
+
 copy_jdbc_drivers() {
     jdbcDriverPath=$1
     dbType=$2
@@ -227,7 +230,7 @@ copy_jdbc_drivers() {
         find ${WAS_ND_INSTALL_DIRECTORY} -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
     elif [ $dbType == "oracle" ]; then
         # Download jdbc drivers
-        curl -Lo ${jdbcDriverPath}/ojdbc8.jar https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc8.jar
+        curl --retry ${retryMaxAttempt} -Lo ${jdbcDriverPath}/ojdbc8.jar https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc8.jar
         JDBC_DRIVER_CLASS_PATH=$(realpath "$jdbcDriverPath"/ojdbc8.jar)
     fi
 }
