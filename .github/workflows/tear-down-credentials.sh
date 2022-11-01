@@ -77,6 +77,7 @@ if $USE_GITHUB_CLI; then
     gh ${GH_FLAGS} secret remove VM_ADMIN_ID
     gh ${GH_FLAGS} secret remove VM_ADMIN_PASSWORD
     gh ${GH_FLAGS} secret remove DB2INST1_PASSWORD
+    gh ${GH_FLAGS} secret remove ORACLE_DB_PASSWORD
     gh ${GH_FLAGS} secret remove MSTEAMS_WEBHOOK
     msg "${GREEN}Secrets removed"
   } || {
@@ -94,6 +95,7 @@ if [ $USE_GITHUB_CLI == false ]; then
   msg "${YELLOW}\"VM_ADMIN_ID\""
   msg "${YELLOW}\"VM_ADMIN_PASSWORD\""
   msg "${YELLOW}\"DB2INST1_PASSWORD\""
+  msg "${YELLOW}\"ORACLE_DB_PASSWORD\""
   msg "${YELLOW}\"MSTEAMS_WEBHOOK\""
   msg "${NOFORMAT}========================================================================"
 fi

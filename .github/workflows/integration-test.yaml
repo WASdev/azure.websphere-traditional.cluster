@@ -9,6 +9,7 @@ on:
         type: choice
         options:
         - db2
+        - oracle
         - none
       deleteAzureResources:
         description: 'Delete Azure resources at the end'
@@ -18,26 +19,26 @@ on:
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
-  # Enable IBM DB2 database connection and delete Azure resources at the end
-  # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main"}'
-  # Enable IBM DB2 database connection and keep Azure resources at the end
-  # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"deleteAzureResources": "false"}}'
-  # Disable IBM DB2 database connection and delete Azure resources at the end
+  # Enable database connection and delete Azure resources at the end. Specify the desired database type (db2, oracle) for parameter "databaseType".
+  # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"databaseType": "db2"}}'
+  # Enable database connection and keep Azure resources at the end. Specify the desired database type (db2, oracle) for parameter "databaseType".
+  # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"databaseType": "db2", "deleteAzureResources": "false"}}'
+  # Disable database connection and delete Azure resources at the end
   # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"databaseType": "none"}}'
-  # Disable IBM DB2 database connection and keep Azure resources at the end
+  # Disable database connection and keep Azure resources at the end
   # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"databaseType": "none", "deleteAzureResources": "false"}}'
   repository_dispatch:
     types: [integration-test]
   # sample request
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
-  # Enable IBM DB2 database connection and delete Azure resources at the end
+  # Enable database connection and delete Azure resources at the end. Specify the desired database type (db2, oracle) for parameter "databaseType".
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"databaseType": "db2", "deleteAzureResources": true}}'
-  # Enable IBM DB2 database connection and keep Azure resources at the end
+  # Enable database connection and keep Azure resources at the end. Specify the desired database type (db2, oracle) for parameter "databaseType".
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"databaseType": "db2", "deleteAzureResources": false}}'
-  # Disable IBM DB2 database connection and delete Azure resources at the end
+  # Disable database connection and delete Azure resources at the end
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"databaseType": "none", "deleteAzureResources": true}}'
-  # Disable IBM DB2 database connection and keep Azure resources at the end
+  # Disable database connection and keep Azure resources at the end
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"databaseType": "none", "deleteAzureResources": false}}'
 env:
   repoName: "azure.websphere-traditional.cluster"
@@ -46,8 +47,9 @@ env:
   msTeamsWebhook: ${{ secrets.MSTEAMS_WEBHOOK }}
   vmAdminId: ${{ secrets.VM_ADMIN_ID }}
   vmAdminPassword: ${{ secrets.VM_ADMIN_PASSWORD }}
-  db2VmName: db2${{ github.run_id }}${{ github.run_number }}
+  dbVmName: db${{ github.run_id }}${{ github.run_number }}
   db2inst1Password: ${{ secrets.DB2INST1_PASSWORD }}
+  oracleDBPassword: ${{ secrets.ORACLE_DB_PASSWORD }}
   testResourceGroup: twasClusterTestRG${{ github.run_id }}${{ github.run_number }}
   testDeploymentName: twasClusterTestDeployment${{ github.run_id }}${{ github.run_number }}
   location: eastus
@@ -102,26 +104,55 @@ jobs:
         run: |
           az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
           az vm create \
-            --resource-group ${{ env.testResourceGroup }} --name ${{ env.db2VmName }} \
+            --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbVmName }} \
             --image "Canonical:UbuntuServer:18.04-LTS:latest" \
             --admin-username azureuser --generate-ssh-keys \
             --nsg-rule NONE --enable-agent true \
-            --vnet-name ${{ env.db2VmName }}VNET --enable-auto-update false \
+            --vnet-name ${{ env.dbVmName }}VNET --enable-auto-update false \
             --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true
-          az vm open-port -g ${{ env.testResourceGroup }} -n ${{ env.db2VmName }} --port 50000 --priority 100
+          az vm open-port -g ${{ env.testResourceGroup }} -n ${{ env.dbVmName }} --port 50000 --priority 100
           az vm extension set --name CustomScript \
             --extension-instance-name install-db2-in-docker \
-            --resource-group ${{ env.testResourceGroup }} --vm-name ${{ env.db2VmName }} \
+            --resource-group ${{ env.testResourceGroup }} --vm-name ${{ env.dbVmName }} \
             --publisher Microsoft.Azure.Extensions --version 2.0 \
             --settings "{\"fileUris\": [\"${{ env.scriptLocation }}install-db2.sh\"]}" \
             --protected-settings "{\"commandToExecute\":\"bash install-db2.sh ${{ env.db2inst1Password }}\"}"
+      - name: Deploy an Oracle database server on Azure VM
+        if: ${{ inputs.databaseType == 'oracle' || github.event.client_payload.databaseType == 'oracle' }}
+        run: |
+          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          az vm create \
+            --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbVmName }} \
+            --image Oracle:oracle-database-19-3:oracle-database-19-0904:latest --size Standard_DS2_v2 \
+            --admin-username azureuser --generate-ssh-keys \
+            --nsg-rule NONE --enable-agent true \
+            --vnet-name ${{ env.dbVmName }}VNET --enable-auto-update false \
+            --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true
+          az vm disk attach --name oradata01 --new --resource-group ${{ env.testResourceGroup }} --vm-name ${{ env.dbVmName }} --size-gb 64 --sku StandardSSD_LRS
+          az vm open-port -g ${{ env.testResourceGroup }} -n ${{ env.dbVmName }} --port 1521,5502 --priority 100
+          az vm extension set --name CustomScript \
+            --extension-instance-name install-oracle \
+            --resource-group ${{ env.testResourceGroup }} --vm-name ${{ env.dbVmName }} \
+            --publisher Microsoft.Azure.Extensions --version 2.0 \
+            --settings "{\"fileUris\": [\"${{ env.scriptLocation }}install-oracle-main.sh\", \"${{ env.scriptLocation }}install-oracle.sh\"]}" \
+            --protected-settings "{\"commandToExecute\":\"bash install-oracle-main.sh ${{ env.oracleDBPassword }}\"}"           
       - name: Build ${{ env.repoName }}
         run: |
           cd ${{ env.repoName }}
-          if ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}; then
-            db2VmPublicIP=$(az vm show \
-              --resource-group ${{ env.testResourceGroup }} --name ${{ env.db2VmName }} \
+          if ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' || inputs.databaseType == 'oracle' || github.event.client_payload.databaseType == 'oracle' }}; then
+            dbVmPublicIP=$(az vm show \
+              --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbVmName }} \
               --show-details --query publicIps -o tsv)
+            databaseType=db2
+            dsConnectionURL=jdbc:db2://${dbVmPublicIP}:50000/sample
+            dbUser=db2inst1
+            dbPassword=${{ env.db2inst1Password }}
+            if ${{ inputs.databaseType == 'oracle' || github.event.client_payload.databaseType == 'oracle' }}; then
+              databaseType=oracle
+              dsConnectionURL=jdbc:oracle:thin:@${dbVmPublicIP}:1521/oratest1
+              dbUser=testuser
+              dbPassword=${{ env.oracleDBPassword }}
+            fi
             mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME -DuseTrial=true \
               -DnumberOfNodes=2 -DvmSize=Standard_D2_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
               -DadminUsername=${{ env.vmAdminId }} -DadminPasswordOrKey=${{ env.vmAdminPassword }} \
@@ -129,7 +160,7 @@ jobs:
               -DconfigureIHS=true -DihsVmSize=Standard_D2_v3 -DihsVMPrefix=ihs -DihsDnsLabelPrefix=ihs \
               -DihsUnixUsername=${{ env.vmAdminId }} -DihsUnixPasswordOrKey=${{ env.vmAdminPassword }} \
               -DihsAuthenticationType=password -DihsAdminUsername=${{ env.vmAdminId }} -DihsAdminPassword=${{ env.vmAdminPassword }} \
-              -DenableDB=true -DdatabaseType=db2 -DjdbcDataSourceJNDIName=jdbc/Sample -DdsConnectionURL=jdbc:db2://${db2VmPublicIP}:50000/sample -DdbUser=db2inst1 -DdbPassword=${{ env.db2inst1Password }} \
+              -DenableDB=true -DdatabaseType=${databaseType} -DjdbcDataSourceJNDIName=jdbc/WebSphereCafeDB -DdsConnectionURL=${dsConnectionURL} -DdbUser=${dbUser} -DdbPassword=${dbPassword} \
               -Dtest.args="-Test All" -Pbicep -Passembly -Ptemplate-validation-tests clean install
           else
             mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME -DuseTrial=true \

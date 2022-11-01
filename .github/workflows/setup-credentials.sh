@@ -33,6 +33,8 @@ VM_ADMIN_ID=
 VM_ADMIN_PASSWORD=
 # Password for IBM DB2 database user db2inst1
 DB2INST1_PASSWORD=
+# Password for Oracle database user testuser
+ORACLE_DB_PASSWORD=
 # Optional: Web hook for Microsoft Teams channel
 MSTEAMS_WEBHOOK=
 
@@ -102,6 +104,11 @@ if [ "$DB2INST1_PASSWORD" == '' ] ; then
     read -r -p "Enter password for IBM DB2 database user db2inst1: " DB2INST1_PASSWORD
 fi
 
+# get ORACLE_DB_PASSWORD if not set at the beginning of this file
+if [ "$ORACLE_DB_PASSWORD" == '' ] ; then
+    read -r -p "Enter password for Oracle database user testuser: " ORACLE_DB_PASSWORD
+fi
+
 # Optional: get MSTEAMS_WEBHOOK if not set at the beginning of this file
 if [ "$MSTEAMS_WEBHOOK" == '' ] ; then
     read -r -p "[Optional] Enter Web hook for Microsoft Teams channel, or press 'Enter' to ignore: " MSTEAMS_WEBHOOK
@@ -146,6 +153,8 @@ USE_GITHUB_CLI=false
 msg "${GREEN}(3/4) Create service principal ${SERVICE_PRINCIPAL_NAME}"
 SUBSCRIPTION_ID=$(az account show --query id --output tsv --only-show-errors)
 SERVICE_PRINCIPAL=$(az ad sp create-for-rbac --name ${SERVICE_PRINCIPAL_NAME} --role="Contributor" --scopes="/subscriptions/${SUBSCRIPTION_ID}" --sdk-auth --only-show-errors | base64 -w0)
+msg "${YELLOW}\"DISAMBIG_PREFIX\""
+msg "${GREEN}${DISAMBIG_PREFIX}"
 
 # Create GitHub action secrets
 AZURE_CREDENTIALS=$(echo $SERVICE_PRINCIPAL | base64 -d)
@@ -161,9 +170,8 @@ if $USE_GITHUB_CLI; then
     gh ${GH_FLAGS} secret set VM_ADMIN_ID -b"${VM_ADMIN_ID}"
     gh ${GH_FLAGS} secret set VM_ADMIN_PASSWORD -b"${VM_ADMIN_PASSWORD}"
     gh ${GH_FLAGS} secret set DB2INST1_PASSWORD -b"${DB2INST1_PASSWORD}"
+    gh ${GH_FLAGS} secret set ORACLE_DB_PASSWORD -b"${ORACLE_DB_PASSWORD}"
     gh ${GH_FLAGS} secret set MSTEAMS_WEBHOOK -b"${MSTEAMS_WEBHOOK}"
-    msg "${YELLOW}\"DISAMBIG_PREFIX\""
-    msg "${GREEN}${DISAMBIG_PREFIX}"
     msg "${GREEN}Secrets configured"
   } || {
     USE_GITHUB_CLI=false
@@ -185,6 +193,8 @@ if [ $USE_GITHUB_CLI == false ]; then
   msg "${GREEN}${VM_ADMIN_PASSWORD}"
   msg "${YELLOW}\"DB2INST1_PASSWORD\""
   msg "${GREEN}${DB2INST1_PASSWORD}"
+  msg "${YELLOW}\"ORACLE_DB_PASSWORD\""
+  msg "${GREEN}${ORACLE_DB_PASSWORD}"
   msg "${YELLOW}\"MSTEAMS_WEBHOOK\""
   msg "${GREEN}${MSTEAMS_WEBHOOK}"
   msg "${NOFORMAT}========================================================================"
