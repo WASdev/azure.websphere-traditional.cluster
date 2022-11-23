@@ -50,10 +50,7 @@ env:
   vmAdminId: ${{ secrets.VM_ADMIN_ID }}
   vmAdminPassword: ${{ secrets.VM_ADMIN_PASSWORD }}
   dbInstanceName: db${{ github.run_id }}${{ github.run_number }}
-  db2inst1Password: ${{ secrets.DB2INST1_PASSWORD }}
-  oracleDBPassword: ${{ secrets.ORACLE_DB_PASSWORD }}
-  sqlserverDBPassword: ${{ secrets.SQLSERVER_DB_PASSWORD }}
-  postgresqlDBPassword: ${{ secrets.POSTGRESQL_DB_PASSWORD }}
+  dbPassword: ${{ secrets.DATABASE_PASSWORD }}
   testResourceGroup: twasClusterTestRG${{ github.run_id }}${{ github.run_number }}
   testDeploymentName: twasClusterTestDeployment${{ github.run_id }}${{ github.run_number }}
   location: eastus
@@ -120,7 +117,7 @@ jobs:
             --resource-group ${{ env.testResourceGroup }} --vm-name ${{ env.dbInstanceName }} \
             --publisher Microsoft.Azure.Extensions --version 2.0 \
             --settings "{\"fileUris\": [\"${{ env.scriptLocation }}install-db2.sh\"]}" \
-            --protected-settings "{\"commandToExecute\":\"bash install-db2.sh ${{ env.db2inst1Password }}\"}"
+            --protected-settings "{\"commandToExecute\":\"bash install-db2.sh ${{ env.dbPassword }}\"}"
       - name: Deploy an Oracle database server on Azure VM
         if: ${{ inputs.databaseType == 'oracle' || github.event.client_payload.databaseType == 'oracle' }}
         run: |
@@ -139,14 +136,14 @@ jobs:
             --resource-group ${{ env.testResourceGroup }} --vm-name ${{ env.dbInstanceName }} \
             --publisher Microsoft.Azure.Extensions --version 2.0 \
             --settings "{\"fileUris\": [\"${{ env.scriptLocation }}install-oracle-main.sh\", \"${{ env.scriptLocation }}install-oracle.sh\"]}" \
-            --protected-settings "{\"commandToExecute\":\"bash install-oracle-main.sh ${{ env.oracleDBPassword }}\"}"
+            --protected-settings "{\"commandToExecute\":\"bash install-oracle-main.sh ${{ env.dbPassword }}\"}"
       - name: Deploy an instance of Azure SQL Database
         if: ${{ inputs.databaseType == 'sqlserver' || github.event.client_payload.databaseType == 'sqlserver' }}
         run: |
           az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
           az sql server create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
-            --admin-user testuser --admin-password ${{ env.sqlserverDBPassword }} \
+            --admin-user testuser --admin-password ${{ env.dbPassword }} \
             --location ${{ env.location }}
           host=$(az sql server show \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
@@ -163,7 +160,7 @@ jobs:
           az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
           az postgres server create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
-            --admin-user testuser --admin-password ${{ env.postgresqlDBPassword }} \
+            --admin-user testuser --admin-password ${{ env.dbPassword }} \
             --location ${{ env.location }}
           host=$(az postgres server show \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
@@ -180,33 +177,28 @@ jobs:
           databaseType=db2
           dsConnectionURL=jdbc:db2://contoso.db2.database:50000/sample
           dbUser=contosoDbUser
-          dbPassword=contosoDbPwd
           if ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}; then
             enableDB=true
             databaseType=db2
             publicIp=$(az vm show -g ${{ env.testResourceGroup }} -n ${{ env.dbInstanceName }} -d --query publicIps -o tsv)
             dsConnectionURL=jdbc:db2://${publicIp}:50000/sample
             dbUser=db2inst1
-            dbPassword=${{ env.db2inst1Password }}
           elif ${{ inputs.databaseType == 'oracle' || github.event.client_payload.databaseType == 'oracle' }}; then
             enableDB=true
             databaseType=oracle
             publicIp=$(az vm show -g ${{ env.testResourceGroup }} -n ${{ env.dbInstanceName }} -d --query publicIps -o tsv)
             dsConnectionURL=jdbc:oracle:thin:@${publicIp}:1521/oratest1
             dbUser=testuser
-            dbPassword=${{ env.oracleDBPassword }}
           elif ${{ inputs.databaseType == 'sqlserver' || github.event.client_payload.databaseType == 'sqlserver' }}; then
             enableDB=true
             databaseType=sqlserver
             dsConnectionURL="jdbc:sqlserver://${{ env.sqlserverHost }}:1433;database=testdb"
             dbUser=testuser@${{ env.dbInstanceName }}
-            dbPassword=${{ env.sqlserverDBPassword }}
           elif ${{ inputs.databaseType == 'postgres' || github.event.client_payload.databaseType == 'postgres' }}; then
             enableDB=true
             databaseType=postgres
             dsConnectionURL="jdbc:postgresql://${{ env.postgresqlHost }}:5432/testdb"
             dbUser=testuser@${{ env.dbInstanceName }}
-            dbPassword=${{ env.postgresqlDBPassword }}
           fi
           cd ${{ env.repoName }}
           mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME -DuseTrial=true \
@@ -216,7 +208,7 @@ jobs:
             -DconfigureIHS=true -DihsVmSize=Standard_D2_v3 -DihsVMPrefix=ihs -DihsDnsLabelPrefix=ihs \
             -DihsUnixUsername=${{ env.vmAdminId }} -DihsUnixPasswordOrKey=${{ env.vmAdminPassword }} \
             -DihsAuthenticationType=password -DihsAdminUsername=${{ env.vmAdminId }} -DihsAdminPassword=${{ env.vmAdminPassword }} \
-            -DenableDB=${enableDB} -DdatabaseType=${databaseType} -DjdbcDataSourceJNDIName=jdbc/WebSphereCafeDB -DdsConnectionURL=${dsConnectionURL} -DdbUser=${dbUser} -DdbPassword=${dbPassword} \
+            -DenableDB=${enableDB} -DdatabaseType=${databaseType} -DjdbcDataSourceJNDIName=jdbc/WebSphereCafeDB -DdsConnectionURL=${dsConnectionURL} -DdbUser=${dbUser} -DdbPassword=${{ env.dbPassword }} \
             -Dtest.args="-Test All" -Pbicep -Passembly -Ptemplate-validation-tests clean install
       - name: Deploy a twas-cluster on Azure VMs
         run: |
