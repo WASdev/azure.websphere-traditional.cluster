@@ -31,10 +31,8 @@ OWNER_REPONAME=
 VM_ADMIN_ID=
 # Password for VM/Admin account
 VM_ADMIN_PASSWORD=
-# Password for IBM DB2 database user db2inst1
-DB2INST1_PASSWORD=
-# Password for Oracle database user testuser
-ORACLE_DB_PASSWORD=
+# Password for database user db2inst1 (IBM DB2) and testuser (other database types)
+DATABASE_PASSWORD=
 # Optional: Web hook for Microsoft Teams channel
 MSTEAMS_WEBHOOK=
 
@@ -99,14 +97,9 @@ if [ "$VM_ADMIN_PASSWORD" == '' ] ; then
     read -r -p "Enter password for VM/Admin account: " VM_ADMIN_PASSWORD
 fi
 
-# get DB2INST1_PASSWORD if not set at the beginning of this file
-if [ "$DB2INST1_PASSWORD" == '' ] ; then
-    read -r -p "Enter password for IBM DB2 database user db2inst1: " DB2INST1_PASSWORD
-fi
-
-# get ORACLE_DB_PASSWORD if not set at the beginning of this file
-if [ "$ORACLE_DB_PASSWORD" == '' ] ; then
-    read -r -p "Enter password for Oracle database user testuser: " ORACLE_DB_PASSWORD
+# get DATABASE_PASSWORD if not set at the beginning of this file
+if [ "$DATABASE_PASSWORD" == '' ] ; then
+    read -r -p "Enter password for database user db2inst1 (IBM DB2) and testuser (other database types): " DATABASE_PASSWORD
 fi
 
 # Optional: get MSTEAMS_WEBHOOK if not set at the beginning of this file
@@ -169,8 +162,7 @@ if $USE_GITHUB_CLI; then
     gh ${GH_FLAGS} secret set USER_NAME -b"${USER_NAME}"
     gh ${GH_FLAGS} secret set VM_ADMIN_ID -b"${VM_ADMIN_ID}"
     gh ${GH_FLAGS} secret set VM_ADMIN_PASSWORD -b"${VM_ADMIN_PASSWORD}"
-    gh ${GH_FLAGS} secret set DB2INST1_PASSWORD -b"${DB2INST1_PASSWORD}"
-    gh ${GH_FLAGS} secret set ORACLE_DB_PASSWORD -b"${ORACLE_DB_PASSWORD}"
+    gh ${GH_FLAGS} secret set DATABASE_PASSWORD -b"${DATABASE_PASSWORD}"
     gh ${GH_FLAGS} secret set MSTEAMS_WEBHOOK -b"${MSTEAMS_WEBHOOK}"
     msg "${GREEN}Secrets configured"
   } || {
@@ -191,10 +183,8 @@ if [ $USE_GITHUB_CLI == false ]; then
   msg "${GREEN}${VM_ADMIN_ID}"
   msg "${YELLOW}\"VM_ADMIN_PASSWORD\""
   msg "${GREEN}${VM_ADMIN_PASSWORD}"
-  msg "${YELLOW}\"DB2INST1_PASSWORD\""
-  msg "${GREEN}${DB2INST1_PASSWORD}"
-  msg "${YELLOW}\"ORACLE_DB_PASSWORD\""
-  msg "${GREEN}${ORACLE_DB_PASSWORD}"
+  msg "${YELLOW}\"DATABASE_PASSWORD\""
+  msg "${GREEN}${DATABASE_PASSWORD}"
   msg "${YELLOW}\"MSTEAMS_WEBHOOK\""
   msg "${GREEN}${MSTEAMS_WEBHOOK}"
   msg "${NOFORMAT}========================================================================"

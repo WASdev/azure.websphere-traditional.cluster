@@ -232,6 +232,14 @@ copy_jdbc_drivers() {
         # Download jdbc drivers
         curl --retry ${retryMaxAttempt} -Lo ${jdbcDriverPath}/ojdbc8.jar https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc8.jar
         JDBC_DRIVER_CLASS_PATH=$(realpath "$jdbcDriverPath"/ojdbc8.jar)
+    elif [ $dbType == "sqlserver" ]; then
+        # Download jdbc drivers
+        curl --retry ${retryMaxAttempt} -Lo ${jdbcDriverPath}/mssql-jdbc-11.2.1.jre8.jar https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/11.2.1.jre8/mssql-jdbc-11.2.1.jre8.jar
+        JDBC_DRIVER_CLASS_PATH=$(realpath "$jdbcDriverPath"/mssql-jdbc-11.2.1.jre8.jar)
+    elif [ $dbType == "postgres" ]; then
+        # Download jdbc drivers
+        curl --retry ${retryMaxAttempt} -Lo ${jdbcDriverPath}/postgresql-42.5.0.jar https://jdbc.postgresql.org/download/postgresql-42.5.0.jar
+        JDBC_DRIVER_CLASS_PATH=$(realpath "$jdbcDriverPath"/postgresql-42.5.0.jar)
     fi
 }
 
