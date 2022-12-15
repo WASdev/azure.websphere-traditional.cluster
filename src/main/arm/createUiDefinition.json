@@ -297,17 +297,17 @@
                         "name": "selectLoadBalancer",
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Select a load balancer",
-                        "defaultValue": "Azure Application Gateway",
-                        "toolTip": "Select 'Azure Application Gateway' or 'IBM HTTP Server' and provide the required information to configure a load balancer. If you select 'No', you will not be able to use this offer to add a load balancer later to an existing cluster. You either must set up a new cluster or add a load balancer manually.",
+                        "defaultValue": "IBM HTTP Server",
+                        "toolTip": "Select 'IBM HTTP Server' or 'Azure Application Gateway' and provide the required information to configure a load balancer. If you select 'No', you will not be able to use this offer to add a load balancer later to an existing cluster. You either must set up a new cluster or add a load balancer manually.",
                         "constraints": {
                             "allowedValues": [
                                 {
-                                    "label": "Azure Application Gateway",
-                                    "value": "appgw"
-                                },
-                                {
                                     "label": "IBM HTTP Server",
                                     "value": "ihs"
+                                },
+                                {
+                                    "label": "Azure Application Gateway",
+                                    "value": "appgw"
                                 },
                                 {
                                     "label": "No",
