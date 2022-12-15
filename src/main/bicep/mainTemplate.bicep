@@ -267,7 +267,7 @@ module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureA
 module appgwSecretDeployment 'modules/_azure-resources/_keyvaultForGateway.bicep' = if (const_configureAppGw) {
   name: 'appgateway-certificates-secrets-deployment'
   params: {
-    identity: obj_uamiForDeploymentScript
+    identity: const_configureAppGw ? obj_uamiForDeploymentScript : {}
     location: location
     sku: 'Standard'
     subjectName: format('CN={0}', const_azureSubjectName)
