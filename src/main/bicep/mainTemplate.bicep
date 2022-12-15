@@ -843,6 +843,6 @@ output dmgrPort string = '8879'
 output virtualNetworkName string = vnetForCluster.name
 output subnetName string = vnetForCluster.subnets.clusterSubnet.name
 output adminSecuredConsole string = uri(format('https://{0}:9043/', const_newVNet ? publicIPAddress.properties.dnsSettings.fqdn : reference('${name_dmgrVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), 'ibm/console/logon.jsp')
+output ihsConsole string = const_configureIHS ? uri(format('http://{0}', const_newVNet ? ihsPublicIPAddress.properties.dnsSettings.fqdn : reference('${name_ihsVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), '') : 'N/A'
 output appGatewayHttpURL string = const_configureAppGw ? uri(format('http://{0}/', appgwDeployment.outputs.appGatewayURL), '/') : 'N/A'
 output appGatewayHttpsURL string = const_configureAppGw ? uri(format('https://{0}/', appgwDeployment.outputs.appGatewaySecuredURL), '/') : 'N/A'
-output ihsConsole string = const_configureIHS ? uri(format('http://{0}', const_newVNet ? ihsPublicIPAddress.properties.dnsSettings.fqdn : reference('${name_ihsVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), '') : 'N/A'
