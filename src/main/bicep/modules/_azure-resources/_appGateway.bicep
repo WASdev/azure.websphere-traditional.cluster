@@ -26,6 +26,8 @@ param sslCertData string = newGuid()
 param utcValue string = utcNow()
 param appGatewayName string = 'twasclusterappgw'
 param enableCookieBasedAffinity bool = true
+param numberOfWorkerNodes int
+param workerNodePrefix string
 
 var name_appGateway = appGatewayName
 var const_appGatewayFrontEndHTTPPort = 80
@@ -38,6 +40,10 @@ var name_httpPort = 'managedHttpPort'
 var name_httpSetting = 'managedHttpSetting'
 var name_httpsListener = 'managedHttpsListener'
 var name_httpsPort = 'managedHttpsPort'
+var name_httpRoutingRule = 'managedNodeHttpRoutingRule'
+var name_httpsRoutingRule = 'managedNodeHttpsRoutingRule'
+var name_httpRewriteRuleSet = 'rewriteLocationHeaderHttp'
+var name_httpsRewriteRuleSet = 'rewriteLocationHeaderHttps'
 var name_probe = 'HTTPHealthProbe'
 var ref_backendAddressPool = resourceId('Microsoft.Network/applicationGateways/backendAddressPools', name_appGateway, name_managedBackendAddressPool)
 var ref_backendHttpSettings = resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', name_appGateway, name_httpSetting)
@@ -46,6 +52,8 @@ var ref_frontendHTTPPort = resourceId('Microsoft.Network/applicationGateways/fro
 var ref_frontendHTTPSPort = resourceId('Microsoft.Network/applicationGateways/frontendPorts', name_appGateway, name_httpsPort)
 var ref_frontendIPConfiguration = resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', name_appGateway, name_frontEndIPConfig)
 var ref_httpListener = resourceId('Microsoft.Network/applicationGateways/httpListeners', name_appGateway, name_httpListener)
+var ref_httpRewriteRuleSet = resourceId('Microsoft.Network/applicationGateways/rewriteRuleSets', name_appGateway, name_httpRewriteRuleSet)
+var ref_httpsRewriteRuleSet = resourceId('Microsoft.Network/applicationGateways/rewriteRuleSets', name_appGateway, name_httpsRewriteRuleSet)
 var ref_httpsListener = resourceId('Microsoft.Network/applicationGateways/httpListeners', name_appGateway, name_httpsListener)
 var ref_publicIPAddress = resourceId('Microsoft.Network/publicIPAddresses', gatewayPublicIPAddressName)
 var ref_sslCertificate = resourceId('Microsoft.Network/applicationGateways/sslCertificates', name_appGateway, gatewaySslCertName)
@@ -118,7 +126,11 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2022-05-01' = {
     backendAddressPools: [
       {
         name: name_managedBackendAddressPool
-        properties: {}
+        properties: {
+          backendAddresses: [for i in range(1, numberOfWorkerNodes): {
+            ipAddress: reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '2021-08-01').ipConfigurations[0].properties.privateIPAddress
+          }]
+        }
       }
     ]
     httpListeners: [
@@ -156,7 +168,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2022-05-01' = {
         properties: {
           port: const_backendPort
           protocol: 'Http'
-          cookieBasedAffinity: enableCookieBasedAffinity ? 'Enabled' :'Disabled'
+          cookieBasedAffinity: enableCookieBasedAffinity ? 'Enabled' : 'Disabled'
           pickHostNameFromBackendAddress: true
           probe: {
             id: ref_backendProbe
@@ -166,7 +178,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2022-05-01' = {
     ]
     requestRoutingRules: [
       {
-        name: 'managedNodeHttpRoutingRule'
+        name: name_httpRoutingRule
         properties: {
           priority: 3
           httpListener: {
@@ -178,10 +190,13 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2022-05-01' = {
           backendHttpSettings: {
             id: ref_backendHttpSettings
           }
+          rewriteRuleSet: {
+            id: ref_httpRewriteRuleSet
+          }
         }
       }
       {
-        name: 'managedNodeHttpsRoutingRule'
+        name: name_httpsRoutingRule
         properties: {
           priority: 4
           httpListener: {
@@ -193,6 +208,61 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2022-05-01' = {
           backendHttpSettings: {
             id: ref_backendHttpSettings
           }
+          rewriteRuleSet: {
+            id: ref_httpsRewriteRuleSet
+          }
+        }
+      }
+    ]
+    rewriteRuleSets: [
+      {
+        name: name_httpRewriteRuleSet
+        properties: {
+          rewriteRules: [for i in range(1, numberOfWorkerNodes): {
+            name: 'LocationHeader${i}'
+            ruleSequence: 50
+            conditions: [
+              {
+                variable: 'http_resp_Location'
+                pattern: format('(https?):\\/\\/{0}:{1}(.*)$', reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '2021-08-01').ipConfigurations[0].properties.privateIPAddress, const_backendPort)
+                ignoreCase: true
+                negate: false
+              }
+            ]
+            actionSet: {
+              responseHeaderConfigurations: [
+                {
+                  headerName: 'Location'
+                  headerValue: 'http://${reference(gatewayPublicIP.id).dnsSettings.fqdn}{http_resp_Location_2}'
+                }
+              ]
+            }
+          }]
+        }
+      }
+      {
+        name: name_httpsRewriteRuleSet
+        properties: {
+          rewriteRules: [for i in range(1, numberOfWorkerNodes): {
+            name: 'LocationHeader${i}'
+            ruleSequence: 50
+            conditions: [
+              {
+                variable: 'http_resp_Location'
+                pattern: format('(https?):\\/\\/{0}:{1}(.*)$', reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '2021-08-01').ipConfigurations[0].properties.privateIPAddress, const_backendPort)
+                ignoreCase: true
+                negate: false
+              }
+            ]
+            actionSet: {
+              responseHeaderConfigurations: [
+                {
+                  headerName: 'Location'
+                  headerValue: 'https://${reference(gatewayPublicIP.id).dnsSettings.fqdn}{http_resp_Location_2}'
+                }
+              ]
+            }
+          }]
         }
       }
     ]

@@ -443,34 +443,6 @@ resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-0
   name: vnetForCluster.subnets.clusterSubnet.name
 }
 
-module appgwDeployment 'modules/_appgateway.bicep' = if (const_configureAppGw) {
-  name: 'app-gateway-deployment'
-  params: {
-    appGatewayName: name_appGateway
-    dnsNameforApplicationGateway: name_dnsNameforApplicationGateway
-    gatewayPublicIPAddressName: name_appGatewayPublicIPAddress
-    gatewaySubnetId: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.gatewaySubnet.name) : existingAppGwSubnet.id
-    gatewaySslCertName: name_appgwFrontendSSLCertName
-    location: location
-    sslCertDataSecretName: const_configureAppGw ? appgwSecretDeployment.outputs.sslCertDataSecretName : 'kv-ssl-data'
-    keyVaultName: name_keyVaultName
-    enableCookieBasedAffinity: enableCookieBasedAffinity
-  }
-  dependsOn: [
-    appgwSecretDeployment
-    virtualNetwork
-    existingAppGwSubnet
-  ]
-}
-
-module appGatewayEndPid './modules/_pids/_empty.bicep' = if (const_configureAppGw) {
-  name: config.appGatewayEnd
-  params: {}
-  dependsOn: [
-    appgwDeployment
-  ]
-}
-
 resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (const_newVNet) {
   name: name_publicIPAddress
   location: location
@@ -539,11 +511,6 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08
           subnet: {
             id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name) : existingClusterSubnet.id
           }
-          applicationGatewayBackendAddressPools: const_configureAppGw ? [
-            {
-              id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', name_appGateway, 'managedNodeBackendPool')
-            }
-          ] : null
         }
       }
     ]
@@ -554,9 +521,38 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08
   dependsOn: [
     virtualNetwork
     existingClusterSubnet
-    appgwDeployment
   ]
 }]
+
+module appgwDeployment 'modules/_appgateway.bicep' = if (const_configureAppGw) {
+  name: 'app-gateway-deployment'
+  params: {
+    appGatewayName: name_appGateway
+    dnsNameforApplicationGateway: name_dnsNameforApplicationGateway
+    gatewayPublicIPAddressName: name_appGatewayPublicIPAddress
+    gatewaySubnetId: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.gatewaySubnet.name) : existingAppGwSubnet.id
+    gatewaySslCertName: name_appgwFrontendSSLCertName
+    location: location
+    sslCertDataSecretName: const_configureAppGw ? appgwSecretDeployment.outputs.sslCertDataSecretName : 'kv-ssl-data'
+    keyVaultName: name_keyVaultName
+    enableCookieBasedAffinity: enableCookieBasedAffinity
+    numberOfWorkerNodes: numberOfNodes - 1
+    workerNodePrefix: const_managedVMPrefix
+  }
+  dependsOn: [
+    appgwSecretDeployment
+    existingAppGwSubnet
+    managedVMNetworkInterfaces
+  ]
+}
+
+module appGatewayEndPid './modules/_pids/_empty.bicep' = if (const_configureAppGw) {
+  name: config.appGatewayEnd
+  params: {}
+  dependsOn: [
+    appgwDeployment
+  ]
+}
 
 resource clusterVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in range(0, numberOfNodes): {
   name: i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}'

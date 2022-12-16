@@ -26,6 +26,8 @@ param appGatewayName string = 'twasclusterappgw'
 param keyVaultName string = 'keyVaultName'
 param sslCertDataSecretName string = 'sslCertDataSecretName'
 param enableCookieBasedAffinity bool = true
+param numberOfWorkerNodes int
+param workerNodePrefix string
 
 var name_appGateway = appGatewayName
 
@@ -46,6 +48,8 @@ module appgwDeployment1 './_azure-resources/_appGateway.bicep' = {
     location: location
     sslCertData: existingKeyvault.getSecret(sslCertDataSecretName)
     enableCookieBasedAffinity: enableCookieBasedAffinity
+    numberOfWorkerNodes: numberOfWorkerNodes
+    workerNodePrefix: workerNodePrefix
   }
   dependsOn: [
     existingKeyvault
