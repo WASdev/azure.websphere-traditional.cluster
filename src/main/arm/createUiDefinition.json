@@ -342,6 +342,7 @@
                                 "name": "enableCookieBasedAffinity",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Enable cookie based affinity",
+                                "defaultValue": true,
                                 "toolTip": "If checked, enable cookie based affinity"
                             }
                         ],

@@ -85,7 +85,7 @@ param wasPassword string
 param selectLoadBalancer string
 
 @description('true to enable cookie based affinity.')
-param enableCookieBasedAffinity bool = false
+param enableCookieBasedAffinity bool = true
 
 @description('The size of virtual machine to provision for each node of the cluster.')
 param ihsVmSize string = 'Standard_D2_v3'

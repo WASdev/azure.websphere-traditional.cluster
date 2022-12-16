@@ -25,7 +25,7 @@ param utcValue string = utcNow()
 param appGatewayName string = 'twasclusterappgw'
 param keyVaultName string = 'keyVaultName'
 param sslCertDataSecretName string = 'sslCertDataSecretName'
-param enableCookieBasedAffinity bool = false
+param enableCookieBasedAffinity bool = true
 
 var name_appGateway = appGatewayName
 

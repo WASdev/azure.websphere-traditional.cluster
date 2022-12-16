@@ -25,7 +25,7 @@ param location string
 param sslCertData string = newGuid()
 param utcValue string = utcNow()
 param appGatewayName string = 'twasclusterappgw'
-param enableCookieBasedAffinity bool = false
+param enableCookieBasedAffinity bool = true
 
 var name_appGateway = appGatewayName
 var const_appGatewayFrontEndHTTPPort = 80
