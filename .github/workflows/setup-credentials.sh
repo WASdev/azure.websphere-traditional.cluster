@@ -149,6 +149,10 @@ SERVICE_PRINCIPAL=$(az ad sp create-for-rbac --name ${SERVICE_PRINCIPAL_NAME} --
 msg "${YELLOW}\"DISAMBIG_PREFIX\""
 msg "${GREEN}${DISAMBIG_PREFIX}"
 
+# Assign User Access Administrator role in the subscription
+SP_ID=$(az ad sp list --display-name $SERVICE_PRINCIPAL_NAME --query [0].id -o tsv)
+az role assignment create --assignee ${SP_ID} --role "User Access Administrator"
+
 # Create GitHub action secrets
 AZURE_CREDENTIALS=$(echo $SERVICE_PRINCIPAL | base64 -d)
 
