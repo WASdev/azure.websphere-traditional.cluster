@@ -80,7 +80,7 @@ param wasPassword string
 @allowed([
   'appgw'
   'ihs'
-  'no'
+  'none'
 ])
 param selectLoadBalancer string
 

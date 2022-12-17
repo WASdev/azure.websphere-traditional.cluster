@@ -10,7 +10,7 @@ on:
         options:
         - 'ihs'
         - 'appgw'
-        - 'no'
+        - 'none'
       databaseType:
         description: 'Database connection'
         required: true
@@ -30,26 +30,26 @@ on:
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
-  # Select a load balancer, enable database connection and delete Azure resources at the end. Specify the desired load balancer type (ihs, appgw, no) for parameter "selectLoadBalancer". Specify the desired database type (db2, oracle, sqlserver, postgres) for parameter "databaseType".
+  # Select a load balancer, enable database connection and delete Azure resources at the end. Specify the desired load balancer type (ihs, appgw, none) for parameter "selectLoadBalancer". Specify the desired database type (db2, oracle, sqlserver, postgres) for parameter "databaseType".
   # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"selectLoadBalancer": "ihs", "databaseType": "db2"}}'
-  # Select a load balancer, enable database connection and keep Azure resources at the end. Specify the desired load balancer type (ihs, appgw, no) for parameter "selectLoadBalancer". Specify the desired database type (db2, oracle, sqlserver, postgres) for parameter "databaseType".
+  # Select a load balancer, enable database connection and keep Azure resources at the end. Specify the desired load balancer type (ihs, appgw, none) for parameter "selectLoadBalancer". Specify the desired database type (db2, oracle, sqlserver, postgres) for parameter "databaseType".
   # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"selectLoadBalancer": "ihs", "databaseType": "db2", "deleteAzureResources": "false"}}'
-  # Select a load balancer, disable database connection and delete Azure resources at the end. Specify the desired load balancer type (ihs, appgw, no) for parameter "selectLoadBalancer".
+  # Select a load balancer, disable database connection and delete Azure resources at the end. Specify the desired load balancer type (ihs, appgw, none) for parameter "selectLoadBalancer".
   # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"selectLoadBalancer": "ihs", "databaseType": "none"}}'
-  # Select a load balancer, disable database connection and keep Azure resources at the end. Specify the desired load balancer type (ihs, appgw, no) for parameter "selectLoadBalancer".
+  # Select a load balancer, disable database connection and keep Azure resources at the end. Specify the desired load balancer type (ihs, appgw, none) for parameter "selectLoadBalancer".
   # curl --verbose -XPOST -u "WASdev:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/actions/workflows/integration-test.yaml/dispatches --data '{"ref": "main", "inputs":{"selectLoadBalancer": "ihs", "databaseType": "none", "deleteAzureResources": "false"}}'
   repository_dispatch:
     types: [integration-test]
   # sample request
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
-  # Select a load balancer, enable database connection and delete Azure resources at the end. Specify the desired load balancer type (ihs, appgw, no) for parameter "selectLoadBalancer". Specify the desired database type (db2, oracle, sqlserver, postgres) for parameter "databaseType".
+  # Select a load balancer, enable database connection and delete Azure resources at the end. Specify the desired load balancer type (ihs, appgw, none) for parameter "selectLoadBalancer". Specify the desired database type (db2, oracle, sqlserver, postgres) for parameter "databaseType".
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"selectLoadBalancer": "ihs", "databaseType": "db2", "deleteAzureResources": true}}'
-  # Select a load balancer, enable database connection and keep Azure resources at the end. Specify the desired load balancer type (ihs, appgw, no) for parameter "selectLoadBalancer". Specify the desired database type (db2, oracle, sqlserver, postgres) for parameter "databaseType".
+  # Select a load balancer, enable database connection and keep Azure resources at the end. Specify the desired load balancer type (ihs, appgw, none) for parameter "selectLoadBalancer". Specify the desired database type (db2, oracle, sqlserver, postgres) for parameter "databaseType".
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"selectLoadBalancer": "ihs", "databaseType": "db2", "deleteAzureResources": false}}'
-  # Select a load balancer, disable database connection and delete Azure resources at the end. Specify the desired load balancer type (ihs, appgw, no) for parameter "selectLoadBalancer".
+  # Select a load balancer, disable database connection and delete Azure resources at the end. Specify the desired load balancer type (ihs, appgw, none) for parameter "selectLoadBalancer".
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"selectLoadBalancer": "ihs", "databaseType": "none", "deleteAzureResources": true}}'
-  # Select a load balancer, disable database connection and keep Azure resources at the end. Specify the desired load balancer type (ihs, appgw, no) for parameter "selectLoadBalancer".
+  # Select a load balancer, disable database connection and keep Azure resources at the end. Specify the desired load balancer type (ihs, appgw, none) for parameter "selectLoadBalancer".
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "integration-test", "client_payload": {"selectLoadBalancer": "ihs", "databaseType": "none", "deleteAzureResources": false}}'
 env:
   repoName: "azure.websphere-traditional.cluster"
@@ -209,7 +209,7 @@ jobs:
             dsConnectionURL="jdbc:postgresql://${{ env.postgresqlHost }}:5432/testdb"
             dbUser=testuser@${{ env.dbInstanceName }}
           fi
-          selectLoadBalancer=no
+          selectLoadBalancer=none
           if ${{ inputs.selectLoadBalancer == 'ihs' || github.event.client_payload.selectLoadBalancer == 'ihs' }}; then
             selectLoadBalancer=ihs
           elif ${{ inputs.selectLoadBalancer == 'appgw' || github.event.client_payload.selectLoadBalancer == 'appgw' }}; then
