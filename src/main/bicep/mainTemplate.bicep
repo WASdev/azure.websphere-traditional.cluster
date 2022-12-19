@@ -227,6 +227,7 @@ var name_domainLabelforApplicationGateway = take('${name_dnsNameforApplicationGa
 var name_appgwFrontendSSLCertName = 'appGatewaySslCert'
 var name_appGateway = format('appgw{0}', guidValue)
 var name_appGatewayPublicIPAddress = '${name_appGateway}-ip'
+var name_postDeploymentDsName = format('postdeploymentds{0}', guidValue)
 
 // Work around arm-ttk test "Variables Must Be Referenced"
 var configBase64 = loadFileAsBase64('config.json')
@@ -245,16 +246,7 @@ module shareCompanyNamePid './modules/_pids/_empty.bicep' = if (useTrial && shar
 
 module clusterStartPid './modules/_pids/_empty.bicep' = {
   name: (useTrial ? config.clusterTrialStart : config.clusterStart)
-  params: {
-  }
-}
-
-module appGatewayStartPid './modules/_pids/_empty.bicep' = if (const_configureAppGw) {
-  name: config.appGatewayStart
   params: {}
-  dependsOn: [
-    clusterVMs
-  ]
 }
 
 module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureAppGw) {
@@ -262,20 +254,6 @@ module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureA
   params: {
     location: location
   }
-}
-
-module appgwSecretDeployment 'modules/_azure-resources/_keyvaultForGateway.bicep' = if (const_configureAppGw) {
-  name: 'appgateway-certificates-secrets-deployment'
-  params: {
-    identity: const_configureAppGw ? obj_uamiForDeploymentScript : {}
-    location: location
-    sku: 'Standard'
-    subjectName: format('CN={0}', const_azureSubjectName)
-    keyVaultName: name_keyVaultName
-  }
-  dependsOn: [
-    uamiDeployment
-  ]
 }
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
@@ -524,6 +502,28 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08
   ]
 }]
 
+module appGatewayStartPid './modules/_pids/_empty.bicep' = if (const_configureAppGw) {
+  name: config.appGatewayStart
+  params: {}
+  dependsOn: [
+    uamiDeployment
+  ]
+}
+
+module appgwSecretDeployment 'modules/_azure-resources/_keyvaultForGateway.bicep' = if (const_configureAppGw) {
+  name: 'appgateway-certificates-secrets-deployment'
+  params: {
+    identity: const_configureAppGw ? obj_uamiForDeploymentScript : {}
+    location: location
+    sku: 'Standard'
+    subjectName: format('CN={0}', const_azureSubjectName)
+    keyVaultName: name_keyVaultName
+  }
+  dependsOn: [
+    uamiDeployment
+  ]
+}
+
 module appgwDeployment 'modules/_appgateway.bicep' = if (const_configureAppGw) {
   name: 'app-gateway-deployment'
   params: {
@@ -546,11 +546,29 @@ module appgwDeployment 'modules/_appgateway.bicep' = if (const_configureAppGw) {
   ]
 }
 
+module appgwPostDeployment 'modules/_deployment-scripts/_dsPostDeployment.bicep' = if (const_configureAppGw) {
+  name: name_postDeploymentDsName
+  params: {
+    name: name_postDeploymentDsName
+    location: location
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    identity: const_configureAppGw ? obj_uamiForDeploymentScript : {}
+    configureAppGw: const_configureAppGw
+    resourceGroupName: resourceGroup().name
+    numberOfWorkerNodes: numberOfNodes - 1
+    workerNodePrefix: const_managedVMPrefix
+  }
+  dependsOn: [
+    appgwDeployment
+  ]
+}
+
 module appGatewayEndPid './modules/_pids/_empty.bicep' = if (const_configureAppGw) {
   name: config.appGatewayEnd
   params: {}
   dependsOn: [
-    appgwDeployment
+    appgwPostDeployment
   ]
 }
 
