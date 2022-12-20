@@ -416,7 +416,7 @@ resource existingAppGwSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-
   name: vnetForCluster.subnets.gatewaySubnet.name
 }
 
-resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (!const_newVNet && !const_configureAppGw) {
+resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (!const_newVNet) {
   parent: existingVNet
   name: vnetForCluster.subnets.clusterSubnet.name
 }
