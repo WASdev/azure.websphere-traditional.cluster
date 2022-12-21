@@ -44,8 +44,11 @@
         "wasPassword": {
             "value": "${wasPassword}"
         },
-        "configureIHS": {
-            "value": "${configureIHS}"
+        "selectLoadBalancer": {
+            "value": "${selectLoadBalancer}"
+        },
+        "enableCookieBasedAffinity": {
+            "value": "${enableCookieBasedAffinity}"
         },
         "ihsVmSize": {
             "value": "${ihsVmSize}"

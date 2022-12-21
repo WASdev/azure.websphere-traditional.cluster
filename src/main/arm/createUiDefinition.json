@@ -285,33 +285,68 @@
                 ]
             },
             {
-                "name": "IHSConfig",
-                "label": "IBM HTTP Server Load Balancer",
+                "name": "LoadBalancerConfig",
+                "label": "Load balancer",
                 "subLabel": {
-                    "preValidation": "Configure the IBM HTTP Server load balancer that routes client requests to IBM WebSphere cluster.",
+                    "preValidation": "Configure the load balancer that routes client requests to IBM WebSphere cluster.",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "IHS configuration",
+                "bladeTitle": "Load balancer configuration",
                 "elements": [
                     {
-                        "name": "configIHS",
+                        "name": "selectLoadBalancer",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Configure an IBM HTTP Server?",
-                        "defaultValue": "Yes",
-                        "toolTip": "Select 'Yes' and provide the required information to configure an IBM HTTP Server. If you select 'No', you will not be able to use this offer to add IBM HTTP Server later to an existing cluster. You either must set up a new cluster or add IBM HTTP Server manually.",
+                        "label": "Select a load balancer",
+                        "defaultValue": "IBM HTTP Server",
+                        "toolTip": "Select 'IBM HTTP Server' or 'Azure Application Gateway' and provide the required information to configure a load balancer. If you select 'No', you will not be able to use this offer to add a load balancer later to an existing cluster. You either must set up a new cluster or add a load balancer manually.",
                         "constraints": {
                             "allowedValues": [
                                 {
-                                    "label": "Yes",
-                                    "value": "true"
+                                    "label": "IBM HTTP Server",
+                                    "value": "ihs"
                                 },
                                 {
-                                    "label": "No",
-                                    "value": "false"
+                                    "label": "Azure Application Gateway",
+                                    "value": "appgw"
+                                },
+                                {
+                                    "label": "None",
+                                    "value": "none"
                                 }
                             ],
                             "required": true
                         }
+                    },
+                    {
+                        "name": "appGwInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Azure Application Gateway settings",
+                        "elements": [
+                            {
+                                "name": "infoConnectToAppGateway",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "This option will provision an Azure Application Gateway (WAF_v2 or later SKU), a public IP, and a backend pool consisting of the worker nodes in the cluster. Not all features of IBM HTTP Server load balancer are available when using Azure Application Gateway. Further configuration may be necessary after deployment. <a href='https://learn.microsoft.com/en-us/azure/application-gateway/overview'>Learn more</a>"
+                                }
+                            },
+                            {
+                                "name": "infoGenerateCertIndentity",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "This option will create a self-signed TLS/SSL certificate for gateway TLS/SSL termination. The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
+                                }
+                            },
+                            {
+                                "name": "enableCookieBasedAffinity",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable cookie based affinity",
+                                "defaultValue": true,
+                                "toolTip": "If checked, enable cookie based affinity"
+                            }
+                        ],
+                        "visible": "[equals(steps('LoadBalancerConfig').selectLoadBalancer, 'appgw')]"
                     },
                     {
                         "name": "ihsInfo",
@@ -427,7 +462,7 @@
                                 }
                             }
                         ],
-                        "visible": "[bool(steps('IHSConfig').configIHS)]"
+                        "visible": "[equals(steps('LoadBalancerConfig').selectLoadBalancer, 'ihs')]"
                     }
                 ]
             },
@@ -441,12 +476,71 @@
                 "bladeTitle": "Networking",
                 "elements": [
                     {
+                        "name": "vnetWithAppGwInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "options": {
+                            "icon": "Info",
+                            "text": "When creating a new virtual network, each subnet's address prefix is calculated automatically based on the virtual network's address prefix. When using an existing virtual network, a minimum virtual network size of /23 with a minimum Applicatino Gateway subnet size of /24 and a minimum cluster subnet size of /29 is required. Additionally, the Application Gateway subnet must be dedicated only for use by the Application Gateway and the cluster subnet must have adequate available addresses for the cluster setup."
+                        },
+                        "visible": "[equals(steps('LoadBalancerConfig').selectLoadBalancer, 'appgw')]"
+                    },
+                    {
+                        "name": "vnetForClusterAppGw",
+                        "type": "Microsoft.Network.VirtualNetworkCombo",
+                        "label": {
+                            "virtualNetwork": "Virtual network",
+                            "subnets": "Subnets"
+                        },
+                        "toolTip": {
+                            "virtualNetwork": "Name of the virtual network",
+                            "subnets": "Subnets for the virtual network"
+                        },
+                        "defaultValue": {
+                            "name": "[concat('twascluster-vnet',take(guid(), 8))]",
+                            "addressPrefixSize": "/23"
+                        },
+                        "constraints": {
+                            "minAddressPrefixSize": "/23"
+                        },
+                        "options": {
+                            "hideExisting": false
+                        },
+                        "subnets": {
+                            "gatewaySubnet": {
+                                "label": "Subnet for Application Gateway",
+                                "defaultValue": {
+                                    "name": "twascluster-appgw-subnet",
+                                    "addressPrefixSize": "/24"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/24",
+                                    "minAddressCount": 250,
+                                    "requireContiguousAddresses": false
+                                }
+                            },
+                            "clusterSubnet": {
+                                "label": "Subnet for cluster",
+                                "defaultValue": {
+                                    "name": "twascluster-subnet",
+                                    "addressPrefixSize": "/27"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/29",
+                                    "minAddressCount": "[add(int(steps('ClusterConfig').numberOfNodes), if(equals(steps('LoadBalancerConfig').selectLoadBalancer, 'ihs'), 2, 0))]",
+                                    "requireContiguousAddresses": false
+                                }
+                            }
+                        },
+                        "visible": "[equals(steps('LoadBalancerConfig').selectLoadBalancer, 'appgw')]"
+                    },
+                    {
                         "name": "vnetInfo",
                         "type": "Microsoft.Common.InfoBox",
                         "options": {
                             "icon": "Info",
                             "text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual network's address prefix. When using an existing virtual network, a minimum virtual network size of /28 and a minimum subnet size of /29 are required. Additionally, the subnet must have adequate available addresses for the cluster setup."
-                        }
+                        },
+                        "visible": "[not(equals(steps('LoadBalancerConfig').selectLoadBalancer, 'appgw'))]"
                     },
                     {
                         "name": "vnetForCluster",
@@ -470,19 +564,20 @@
                             "hideExisting": false
                         },
                         "subnets": {
-                            "subnet1": {
-                                "label": "Subnet",
+                            "clusterSubnet": {
+                                "label": "Subnet for cluster",
                                 "defaultValue": {
-                                    "name": "twas-cluster-subnet",
+                                    "name": "twascluster-subnet",
                                     "addressPrefixSize": "/27"
                                 },
                                 "constraints": {
                                     "minAddressPrefixSize": "/29",
-                                    "minAddressCount": "[add(int(steps('ClusterConfig').numberOfNodes), if(bool(steps('IHSConfig').configIHS), 2, 0))]",
+                                    "minAddressCount": "[add(int(steps('ClusterConfig').numberOfNodes), if(equals(steps('LoadBalancerConfig').selectLoadBalancer, 'ihs'), 2, 0))]",
                                     "requireContiguousAddresses": false
                                 }
                             }
-                        }
+                        },
+                        "visible": "[not(equals(steps('LoadBalancerConfig').selectLoadBalancer, 'appgw'))]"
                     }
                 ]
             },
@@ -672,24 +767,25 @@
             "authenticationType": "[steps('ClusterConfig').adminPasswordOrKey.authenticationType]",
             "wasUsername": "[steps('ClusterConfig').wasUsername]",
             "wasPassword": "[steps('ClusterConfig').wasPassword]",
-            "configureIHS": "[bool(steps('IHSConfig').configIHS)]",
-            "ihsVmSize": "[steps('IHSConfig').ihsInfo.ihsVmSize]",
-            "ihsVMPrefix": "[steps('IHSConfig').ihsInfo.ihsVMPrefix]",
-            "ihsDnsLabelPrefix": "[steps('IHSConfig').ihsInfo.ihsDnsLabelPrefix]",
-            "ihsUnixUsername": "[steps('IHSConfig').ihsInfo.ihsUnixUsername]",
-            "ihsUnixPasswordOrKey": "[if(equals(steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType, 'password'), steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.password, steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.sshPublicKey)]",
-            "ihsAuthenticationType": "[steps('IHSConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType]",
-            "ihsAdminUsername": "[steps('IHSConfig').ihsInfo.ihsAdminUsername]",
-            "ihsAdminPassword": "[steps('IHSConfig').ihsInfo.ihsAdminPassword]",
-            "vnetForCluster": "[steps('NetworkingConfig').vnetForCluster]",
-            "newOrExistingVnetForCluster": "[steps('NetworkingConfig').vnetForCluster.newOrExisting]",
-            "vnetRGNameForCluster": "[steps('NetworkingConfig').vnetForCluster.resourceGroup]",
+            "selectLoadBalancer": "[steps('LoadBalancerConfig').selectLoadBalancer]",
+            "enableCookieBasedAffinity": "[bool(steps('LoadBalancerConfig').appGwInfo.enableCookieBasedAffinity)]",
+            "ihsVmSize": "[steps('LoadBalancerConfig').ihsInfo.ihsVmSize]",
+            "ihsVMPrefix": "[steps('LoadBalancerConfig').ihsInfo.ihsVMPrefix]",
+            "ihsDnsLabelPrefix": "[steps('LoadBalancerConfig').ihsInfo.ihsDnsLabelPrefix]",
+            "ihsUnixUsername": "[steps('LoadBalancerConfig').ihsInfo.ihsUnixUsername]",
+            "ihsUnixPasswordOrKey": "[if(equals(steps('LoadBalancerConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType, 'password'), steps('LoadBalancerConfig').ihsInfo.ihsUnixPasswordOrKey.password, steps('LoadBalancerConfig').ihsInfo.ihsUnixPasswordOrKey.sshPublicKey)]",
+            "ihsAuthenticationType": "[steps('LoadBalancerConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType]",
+            "ihsAdminUsername": "[steps('LoadBalancerConfig').ihsInfo.ihsAdminUsername]",
+            "ihsAdminPassword": "[steps('LoadBalancerConfig').ihsInfo.ihsAdminPassword]",
+            "vnetForCluster": "[if(equals(steps('LoadBalancerConfig').selectLoadBalancer, 'appgw'), steps('NetworkingConfig').vnetForClusterAppGw, steps('NetworkingConfig').vnetForCluster)]",
+            "newOrExistingVnetForCluster": "[if(equals(steps('LoadBalancerConfig').selectLoadBalancer, 'appgw'), steps('NetworkingConfig').vnetForClusterAppGw.newOrExisting, steps('NetworkingConfig').vnetForCluster.newOrExisting)]",
+            "vnetRGNameForCluster": "[if(equals(steps('LoadBalancerConfig').selectLoadBalancer, 'appgw'), steps('NetworkingConfig').vnetForClusterAppGw.resourceGroup, steps('NetworkingConfig').vnetForCluster.resourceGroup)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
             "jdbcDataSourceJNDIName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceJNDIName]",
             "dsConnectionURL": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'oracle'), steps('section_database').databaseConnectionInfo.oracleDsConnectionURL, if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'), steps('section_database').databaseConnectionInfo.sqlserverDsConnectionURL, if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgres'), steps('section_database').databaseConnectionInfo.postgresDsConnectionURL, steps('section_database').databaseConnectionInfo.db2DsConnectionURL)))]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
-            "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]"  
+            "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]"
         }
     }
 }

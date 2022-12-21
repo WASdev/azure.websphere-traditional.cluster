@@ -76,8 +76,16 @@ param wasUsername string
 @secure()
 param wasPassword string
 
-@description('Boolean value indicating, if an IBM HTTP Server load balancer will be configured.')
-param configureIHS bool
+@description('Type of load balancer to deploy.')
+@allowed([
+  'appgw'
+  'ihs'
+  'none'
+])
+param selectLoadBalancer string
+
+@description('true to enable cookie based affinity.')
+param enableCookieBasedAffinity bool = true
 
 @description('The size of virtual machine to provision for each node of the cluster.')
 param ihsVmSize string = 'Standard_D2_v3'
@@ -113,13 +121,22 @@ param ihsAdminPassword string = ''
 param vnetForCluster object = {
   name: 'twascluster-vnet'
   resourceGroup: resourceGroup().name
-  addressPrefixes: [
-    '10.0.0.32/27'
-  ]
-  addressPrefix: '10.0.0.32/27'
+  addressPrefixes: selectLoadBalancer == 'appgw' ? ['10.0.0.0/23'] : ['10.0.0.32/27']
+  addressPrefix: selectLoadBalancer == 'appgw' ? '10.0.0.0/23' : '10.0.0.32/27'
   newOrExisting: 'new'
-  subnets: {
-    subnet1: {
+  subnets: selectLoadBalancer == 'appgw' ? {
+    gatewaySubnet: {
+      name: 'twascluster-appgw-subnet'
+      addressPrefix: '10.0.0.0/24'
+      startAddress: '10.0.0.4'
+    }
+    clusterSubnet: {
+      name: 'twascluster-subnet'
+      addressPrefix: '10.0.1.0/27'
+      startAddress: '10.0.1.4'
+    }
+  } : {
+    clusterSubnet: {
       name: 'twascluster-subnet'
       addressPrefix: '10.0.0.32/27'
       startAddress: '10.0.0.36'
@@ -153,7 +170,7 @@ param dbPassword string = newGuid()
 
 param guidValue string = take(replace(newGuid(), '-', ''), 6)
 
-var const_arguments = format(' {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, enableDB, databaseType, base64(jdbcDataSourceJNDIName), base64(dsConnectionURL), base64(dbUser), base64(dbPassword), configureIHS)
+var const_arguments = format(' {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, enableDB, databaseType, base64(jdbcDataSourceJNDIName), base64(dsConnectionURL), base64(dbUser), base64(dbPassword), const_configureIHS)
 var const_dnsLabelPrefix = format('{0}{1}', dnsLabelPrefix, guidValue)
 var const_ihsArguments1 = format(' {0} {1} {2} {3} {4}', name_dmgrVM, ihsUnixUsername, ihsAdminUsername, ihsAdminPassword, name_storageAccount)
 var const_ihsArguments2 = format(' {0} {1}', name_share, const_mountPointPath)
@@ -192,7 +209,25 @@ var name_publicIPAddress = '${name_dmgrVM}-ip'
 var name_share = 'wasshare'
 var name_storageAccount = 'storage${guidValue}'
 var name_storageAccountPrivateEndpoint = 'storagepe${guidValue}'
-var ref_storageAccountPrivateEndpoint = configureIHS ? reference(name_storageAccountPrivateEndpoint, '2021-05-01').customDnsConfigs[0].ipAddresses[0] : ''
+var ref_storageAccountPrivateEndpoint = const_configureIHS ? reference(name_storageAccountPrivateEndpoint, '2021-05-01').customDnsConfigs[0].ipAddresses[0] : ''
+
+var obj_uamiForDeploymentScript = {
+  type: 'UserAssigned'
+  userAssignedIdentities: {
+    '${uamiDeployment.outputs.uamiIdForDeploymentScript}': {}
+  }
+}
+var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
+var const_configureAppGw = selectLoadBalancer == 'appgw' ? true : false
+var const_configureIHS = selectLoadBalancer == 'ihs' ? true : false
+var name_keyVaultName = format('twasclusterkv{0}', guidValue)
+var name_dnsNameforApplicationGateway = format('twasclustergw{0}', guidValue)
+var name_rgNameWithoutSpecialCharacter = replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
+var name_domainLabelforApplicationGateway = take('${name_dnsNameforApplicationGateway}-${toLower(name_rgNameWithoutSpecialCharacter)}', 63)
+var name_appgwFrontendSSLCertName = 'appGatewaySslCert'
+var name_appGateway = format('appgw{0}', guidValue)
+var name_appGatewayPublicIPAddress = '${name_appGateway}-ip'
+var name_postDeploymentDsName = format('postdeploymentds{0}', guidValue)
 
 // Work around arm-ttk test "Variables Must Be Referenced"
 var configBase64 = loadFileAsBase64('config.json')
@@ -211,7 +246,13 @@ module shareCompanyNamePid './modules/_pids/_empty.bicep' = if (useTrial && shar
 
 module clusterStartPid './modules/_pids/_empty.bicep' = {
   name: (useTrial ? config.clusterTrialStart : config.clusterStart)
+  params: {}
+}
+
+module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureAppGw) {
+  name: 'uami-deployment'
   params: {
+    location: location
   }
 }
 
@@ -224,7 +265,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   kind: 'StorageV2'
 }
 
-resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = if (configureIHS) {
+resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = if (const_configureIHS) {
   name: name_storageAccountPrivateEndpoint
   location: location
   properties: {
@@ -240,22 +281,22 @@ resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-
       }
     ]
     subnet: {
-      id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.subnet1.name) : existingSubnet.id
+      id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name) : existingClusterSubnet.id
     }
   }
   dependsOn: [
     storageAccount
     virtualNetwork
-    existingSubnet
+    existingClusterSubnet
   ]
 }
 
-resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@2021-09-01' = if (configureIHS) {
+resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@2021-09-01' = if (const_configureIHS) {
   parent: storageAccount
   name: 'default'
 }
 
-resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' = if (configureIHS) {
+resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' = if (const_configureIHS) {
   parent: storageAccountFileSvc
   name: name_share
   properties: {
@@ -267,9 +308,43 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2021-08-0
   name: name_networkSecurityGroup
   location: location
   properties: {
-    securityRules: [
+    securityRules: const_configureAppGw ? [
       {
-        name: 'TCP'
+        name: 'ALLOW_APPGW'
+        properties: {
+          protocol: 'TCP'
+          sourcePortRange: '*'
+          destinationPortRange: '65200-65535'
+          sourceAddressPrefix: 'GatewayManager'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 300
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'ALLOW_HTTP_ACCESS'
+        properties: {
+          protocol: 'TCP'
+          sourcePortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 310
+          direction: 'Inbound'
+          destinationPortRanges: [
+            '9060'
+            '9080'
+            '9043'
+            '9443'
+            '80'
+            '443'
+          ]
+        }
+      }
+    ]: [
+      {
+        name: 'ALLOW_HTTP_ACCESS'
         properties: {
           protocol: 'TCP'
           sourcePortRange: '*'
@@ -298,11 +373,30 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-08-01' = if (con
     addressSpace: {
       addressPrefixes: vnetForCluster.addressPrefixes
     }
-    subnets: [
+    subnets: const_configureAppGw ? [
       {
-        name: vnetForCluster.subnets.subnet1.name
+        name: vnetForCluster.subnets.gatewaySubnet.name
         properties: {
-          addressPrefix: vnetForCluster.subnets.subnet1.addressPrefix
+          addressPrefix: vnetForCluster.subnets.gatewaySubnet.addressPrefix
+          networkSecurityGroup: {
+            id: networkSecurityGroup.id
+          }
+        }
+      }
+      {
+        name: vnetForCluster.subnets.clusterSubnet.name
+        properties: {
+          addressPrefix: vnetForCluster.subnets.clusterSubnet.addressPrefix
+          networkSecurityGroup: {
+            id: networkSecurityGroup.id
+          }
+        }
+      }
+    ] : [
+      {
+        name: vnetForCluster.subnets.clusterSubnet.name
+        properties: {
+          addressPrefix: vnetForCluster.subnets.clusterSubnet.addressPrefix
           networkSecurityGroup: {
             id: networkSecurityGroup.id
           }
@@ -317,9 +411,14 @@ resource existingVNet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = 
   scope: resourceGroup(vnetRGNameForCluster)
 }
 
-resource existingSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (!const_newVNet) {
+resource existingAppGwSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (!const_newVNet && const_configureAppGw) {
   parent: existingVNet
-  name: vnetForCluster.subnets.subnet1.name
+  name: vnetForCluster.subnets.gatewaySubnet.name
+}
+
+resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (!const_newVNet) {
+  parent: existingVNet
+  name: vnetForCluster.subnets.clusterSubnet.name
 }
 
 resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (const_newVNet) {
@@ -346,7 +445,7 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01'
             id: publicIPAddress.id
           }
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.subnet1.name)
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name)
           }
         }
       }
@@ -370,7 +469,7 @@ resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: existingSubnet.id
+            id: existingClusterSubnet.id
           }
         }
       }
@@ -388,7 +487,7 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.subnet1.name) : existingSubnet.id
+            id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name) : existingClusterSubnet.id
           }
         }
       }
@@ -399,9 +498,79 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08
   }
   dependsOn: [
     virtualNetwork
-    existingSubnet
+    existingClusterSubnet
   ]
 }]
+
+module appGatewayStartPid './modules/_pids/_empty.bicep' = if (const_configureAppGw) {
+  name: config.appGatewayStart
+  params: {}
+  dependsOn: [
+    uamiDeployment
+  ]
+}
+
+module appgwSecretDeployment 'modules/_azure-resources/_keyvaultForGateway.bicep' = if (const_configureAppGw) {
+  name: 'appgateway-certificates-secrets-deployment'
+  params: {
+    identity: const_configureAppGw ? obj_uamiForDeploymentScript : {}
+    location: location
+    sku: 'Standard'
+    subjectName: format('CN={0}', const_azureSubjectName)
+    keyVaultName: name_keyVaultName
+  }
+  dependsOn: [
+    uamiDeployment
+  ]
+}
+
+module appgwDeployment 'modules/_appgateway.bicep' = if (const_configureAppGw) {
+  name: 'app-gateway-deployment'
+  params: {
+    appGatewayName: name_appGateway
+    dnsNameforApplicationGateway: name_dnsNameforApplicationGateway
+    gatewayPublicIPAddressName: name_appGatewayPublicIPAddress
+    gatewaySubnetId: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.gatewaySubnet.name) : existingAppGwSubnet.id
+    gatewaySslCertName: name_appgwFrontendSSLCertName
+    location: location
+    sslCertDataSecretName: const_configureAppGw ? appgwSecretDeployment.outputs.sslCertDataSecretName : 'kv-ssl-data'
+    keyVaultName: name_keyVaultName
+    enableCookieBasedAffinity: enableCookieBasedAffinity
+    numberOfWorkerNodes: numberOfNodes - 1
+    workerNodePrefix: const_managedVMPrefix
+  }
+  dependsOn: [
+    appgwSecretDeployment
+    existingAppGwSubnet
+    managedVMNetworkInterfaces
+  ]
+}
+
+module appgwPostDeployment 'modules/_deployment-scripts/_dsPostDeployment.bicep' = if (const_configureAppGw) {
+  name: name_postDeploymentDsName
+  params: {
+    name: name_postDeploymentDsName
+    location: location
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    identity: const_configureAppGw ? obj_uamiForDeploymentScript : {}
+    configureAppGw: const_configureAppGw
+    resourceGroupName: resourceGroup().name
+    numberOfWorkerNodes: numberOfNodes - 1
+    workerNodePrefix: const_managedVMPrefix
+  }
+  dependsOn: [
+    appgwDeployment
+  ]
+}
+
+module appGatewayEndPid './modules/_pids/_empty.bicep' = if (const_configureAppGw) {
+  name: config.appGatewayEnd
+  params: {}
+  dependsOn: [
+    appgwPostDeployment
+  ]
+}
 
 resource clusterVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in range(0, numberOfNodes): {
   name: i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}'
@@ -499,7 +668,7 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
+      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, const_configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
     }
   }
   dependsOn: [
@@ -525,13 +694,13 @@ module clusterEndPid './modules/_pids/_empty.bicep' = {
   ]
 }
 
-module ihsStartPid './modules/_pids/_empty.bicep' = if (configureIHS) {
+module ihsStartPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   name: (useTrial ? config.ihsTrialStart : config.ihsStart)
   params: {
   }
 }
 
-resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (configureIHS && const_newVNet) {
+resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (const_configureIHS && const_newVNet) {
   name: name_ihsPublicIPAddress
   location: location
   properties: {
@@ -542,7 +711,7 @@ resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = i
   }
 }
 
-resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = if (configureIHS && const_newVNet) {
+resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = if (const_configureIHS && const_newVNet) {
   name: '${name_ihsVM}-if'
   location: location
   properties: {
@@ -555,7 +724,7 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' 
             id: ihsPublicIPAddress.id
           }
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.subnet1.name)
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name)
           }
         }
       }
@@ -569,7 +738,7 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' 
   ]
 }
 
-resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-08-01' = if (configureIHS && !const_newVNet) {
+resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-08-01' = if (const_configureIHS && !const_newVNet) {
   name: '${name_ihsVM}-no-pub-ip-if'
   location: location
   properties: {
@@ -579,7 +748,7 @@ resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: existingSubnet.id
+            id: existingClusterSubnet.id
           }
         }
       }
@@ -587,7 +756,7 @@ resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-
   }
 }
 
-resource ihsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = if (configureIHS) {
+resource ihsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = if (const_configureIHS) {
   name: name_ihsVM
   location: location
   properties: {
@@ -637,7 +806,7 @@ resource ihsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = if (configureIHS
   }
 }
 
-module ihsVMCreated './modules/_pids/_empty.bicep' = if (configureIHS) {
+module ihsVMCreated './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   name: 'ihsVMCreated'
   params: {
   }
@@ -646,7 +815,7 @@ module ihsVMCreated './modules/_pids/_empty.bicep' = if (configureIHS) {
   ]
 }
 
-resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = if (configureIHS) {
+resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = if (const_configureIHS) {
   parent: ihsVM
   name: 'install'
   location: location
@@ -669,7 +838,7 @@ resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01
   ]
 }
 
-module ihsEndPid './modules/_pids/_empty.bicep' = if (configureIHS) {
+module ihsEndPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   name: (useTrial ? config.ihsTrialEnd : config.ihsEnd)
   params: {
   }
@@ -686,6 +855,8 @@ output coreGroupName string = 'DefaultCoreGroup'
 output dmgrHostName string = name_dmgrVM
 output dmgrPort string = '8879'
 output virtualNetworkName string = vnetForCluster.name
-output subnetName string = vnetForCluster.subnets.subnet1.name
+output subnetName string = vnetForCluster.subnets.clusterSubnet.name
 output adminSecuredConsole string = uri(format('https://{0}:9043/', const_newVNet ? publicIPAddress.properties.dnsSettings.fqdn : reference('${name_dmgrVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), 'ibm/console/logon.jsp')
-output ihsConsole string = configureIHS ? uri(format('http://{0}', const_newVNet ? ihsPublicIPAddress.properties.dnsSettings.fqdn : reference('${name_ihsVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), '') : 'N/A'
+output ihsConsole string = const_configureIHS ? uri(format('http://{0}', const_newVNet ? ihsPublicIPAddress.properties.dnsSettings.fqdn : reference('${name_ihsVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), '') : 'N/A'
+output appGatewayHttpURL string = const_configureAppGw ? uri(format('http://{0}/', appgwDeployment.outputs.appGatewayURL), '/') : 'N/A'
+output appGatewayHttpsURL string = const_configureAppGw ? uri(format('https://{0}/', appgwDeployment.outputs.appGatewaySecuredURL), '/') : 'N/A'
