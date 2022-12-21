@@ -327,7 +327,7 @@
                                 "type": "Microsoft.Common.InfoBox",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "This option will provision an Azure Application Gateway (WAF_v2 or later SKU), a public IP, and a backend pool consisting of the worker nodes in the cluster. Further configuration may be necessary after deployment. <a href='https://learn.microsoft.com/en-us/azure/application-gateway/overview'>Learn more</a>"
+                                    "text": "This option will provision an Azure Application Gateway (WAF_v2 or later SKU), a public IP, and a backend pool consisting of the worker nodes in the cluster. Not all features of IBM HTTP Server load balancer are available when using Azure Application Gateway. Further configuration may be necessary after deployment. <a href='https://learn.microsoft.com/en-us/azure/application-gateway/overview'>Learn more</a>"
                                 }
                             },
                             {
