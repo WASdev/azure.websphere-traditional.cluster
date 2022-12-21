@@ -64,6 +64,7 @@ env:
   testDeploymentName: twasClusterTestDeployment${{ github.run_id }}${{ github.run_number }}
   location: eastus
   scriptLocation: https://raw.githubusercontent.com/${{ secrets.USER_NAME }}/azure.websphere-traditional.cluster/$GITHUB_REF_NAME/test/
+  curlParameters: "--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180"
 jobs:
   integration-test:
     runs-on: ubuntu-latest
@@ -235,14 +236,14 @@ jobs:
         run: |
           outputs=$(az deployment group show -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} --query 'properties.outputs')
           adminSecuredConsole=$(echo $outputs | jq -r '.adminSecuredConsole.value')
-          curl $adminSecuredConsole -k
+          curl ${{ env.curlParameters }} $adminSecuredConsole -k
           if [[ $? -ne 0 ]]; then
             echo "Failed to access ${adminSecuredConsole}."
             exit 1
           fi
           ihsConsole=$(echo $outputs | jq -r '.ihsConsole.value')
           if [[ $selectLoadBalancer == "ihs" ]]; then
-            curl $ihsConsole
+            curl ${{ env.curlParameters }} $ihsConsole
             if [[ $? -ne 0 ]]; then
               echo "Failed to access ${ihsConsole}."
               exit 1
@@ -256,12 +257,12 @@ jobs:
           appGatewayHttpURL=$(echo $outputs | jq -r '.appGatewayHttpURL.value')
           appGatewayHttpsURL=$(echo $outputs | jq -r '.appGatewayHttpsURL.value')
           if [[ $selectLoadBalancer == "appgw" ]]; then
-            curl $appGatewayHttpURL
+            curl ${{ env.curlParameters }} $appGatewayHttpURL
             if [[ $? -ne 0 ]]; then
               echo "Failed to access ${appGatewayHttpURL}."
               exit 1
             fi
-            curl $appGatewayHttpsURL -k
+            curl ${{ env.curlParameters }} $appGatewayHttpsURL -k
             if [[ $? -ne 0 ]]; then
               echo "Failed to access ${appGatewayHttpsURL}."
               exit 1
