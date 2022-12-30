@@ -188,42 +188,6 @@
                         "count": "1"
                     },
                     {
-                        "name": "dmgrVMPrefix",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Deployment manager server prefix",
-                        "toolTip": "The string to prepend to the name of the deployment manager server, default is 'dmgr'.",
-                        "defaultValue": "dmgr",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{3,14}$",
-                            "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
-                        }
-                    },
-                    {
-                        "name": "managedVMPrefix",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Managed server prefix",
-                        "toolTip": "The string to prepend to the name of the managed server, default is 'managed'.",
-                        "defaultValue": "managed",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{3,14}$",
-                            "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
-                        }
-                    },
-                    {
-                        "name": "dnsLabelPrefix",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "DNS label prefix",
-                        "toolTip": "The string to prepend to the DNS label, default is 'wasndcluster'.",
-                        "defaultValue": "wasndcluster",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{3,24}$",
-                            "validationMessage": "The prefix must be between 3 and 24 characters long and contain letters, numbers only."
-                        }
-                    },
-                    {
                         "name": "adminUsername",
                         "type": "Microsoft.Common.TextBox",
                         "label": "VM administrator",
@@ -281,6 +245,59 @@
                             "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
                             "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
                         }
+                    },
+                    {
+                        "name": "advanced",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Advanced",
+                        "elements": [
+                            {
+                                "name": "acceptDefaults",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Accept defaults for advanced configuration",
+                                "defaultValue": true,
+                                "toolTip": "Uncheck to edit advanced configuration."
+                            },
+                            {
+                                "name": "dmgrVMPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Deployment manager server prefix",
+                                "toolTip": "The string to prepend to the name of the deployment manager server, default is 'dmgr'.",
+                                "defaultValue": "dmgr",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,14}$",
+                                    "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
+                                },
+                                "visible": "[not(bool(steps('ClusterConfig').advanced.acceptDefaults))]"
+                            },
+                            {
+                                "name": "managedVMPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Managed server prefix",
+                                "toolTip": "The string to prepend to the name of the managed server, default is 'managed'.",
+                                "defaultValue": "managed",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,14}$",
+                                    "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
+                                },
+                                "visible": "[not(bool(steps('ClusterConfig').advanced.acceptDefaults))]"
+                            },
+                            {
+                                "name": "dnsLabelPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DNS label prefix",
+                                "toolTip": "The string to prepend to the DNS label, default is 'wasndcluster'.",
+                                "defaultValue": "wasndcluster",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,24}$",
+                                    "validationMessage": "The prefix must be between 3 and 24 characters long and contain letters, numbers only."
+                                },
+                                "visible": "[not(bool(steps('ClusterConfig').advanced.acceptDefaults))]"
+                            }
+                        ]
                     }
                 ]
             },
@@ -379,30 +396,6 @@
                                 "count": "1"
                             },
                             {
-                                "name": "ihsVMPrefix",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "IBM HTTP Server prefix",
-                                "toolTip": "The string to prepend to the name of the IBM HTTP Server, default is 'ihs'.",
-                                "defaultValue": "ihs",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{3,14}$",
-                                    "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
-                                }
-                            },
-                            {
-                                "name": "ihsDnsLabelPrefix",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "DNS label prefix",
-                                "toolTip": "The string to prepend to the DNS label, default is 'ihs'.",
-                                "defaultValue": "ihs",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{3,24}$",
-                                    "validationMessage": "The prefix must be between 3 and 24 characters long and contain letters, numbers only."
-                                }
-                            },
-                            {
                                 "name": "ihsUnixUsername",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "VM administrator",
@@ -460,6 +453,47 @@
                                     "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
                                     "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
                                 }
+                            }
+                        ],
+                        "visible": "[equals(steps('LoadBalancerConfig').selectLoadBalancer, 'ihs')]"
+                    },
+                    {
+                        "name": "ihsAdvanced",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Advanced",
+                        "elements": [
+                            {
+                                "name": "acceptDefaults",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Accept defaults for advanced configuration",
+                                "defaultValue": true,
+                                "toolTip": "Uncheck to edit advanced configuration."
+                            },
+                            {
+                                "name": "ihsVMPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "IBM HTTP Server prefix",
+                                "toolTip": "The string to prepend to the name of the IBM HTTP Server, default is 'ihs'.",
+                                "defaultValue": "ihs",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,14}$",
+                                    "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
+                                },
+                                "visible": "[not(bool(steps('LoadBalancerConfig').ihsAdvanced.acceptDefaults))]"
+                            },
+                            {
+                                "name": "ihsDnsLabelPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DNS label prefix",
+                                "toolTip": "The string to prepend to the DNS label, default is 'ihs'.",
+                                "defaultValue": "ihs",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,24}$",
+                                    "validationMessage": "The prefix must be between 3 and 24 characters long and contain letters, numbers only."
+                                },
+                                "visible": "[not(bool(steps('LoadBalancerConfig').ihsAdvanced.acceptDefaults))]"
                             }
                         ],
                         "visible": "[equals(steps('LoadBalancerConfig').selectLoadBalancer, 'ihs')]"
@@ -759,9 +793,9 @@
             "shareCompanyName": "[bool(basics('shareCompanyNameCheck'))]",
             "numberOfNodes": "[int(steps('ClusterConfig').numberOfNodes)]",
             "vmSize": "[steps('ClusterConfig').vmSizeSelect]",
-            "dmgrVMPrefix": "[steps('ClusterConfig').dmgrVMPrefix]",
-            "managedVMPrefix": "[steps('ClusterConfig').managedVMPrefix]",
-            "dnsLabelPrefix": "[steps('ClusterConfig').dnsLabelPrefix]",
+            "dmgrVMPrefix": "[if(empty(steps('ClusterConfig').advanced.dmgrVMPrefix), 'dmgr', steps('ClusterConfig').advanced.dmgrVMPrefix)]",
+            "managedVMPrefix": "[if(empty(steps('ClusterConfig').advanced.managedVMPrefix), 'managed', steps('ClusterConfig').advanced.managedVMPrefix)]",
+            "dnsLabelPrefix": "[if(empty(steps('ClusterConfig').advanced.dnsLabelPrefix), 'wasndcluster', steps('ClusterConfig').advanced.dnsLabelPrefix)]",
             "adminUsername": "[steps('ClusterConfig').adminUsername]",
             "adminPasswordOrKey": "[if(equals(steps('ClusterConfig').adminPasswordOrKey.authenticationType, 'password'), steps('ClusterConfig').adminPasswordOrKey.password, steps('ClusterConfig').adminPasswordOrKey.sshPublicKey)]",
             "authenticationType": "[steps('ClusterConfig').adminPasswordOrKey.authenticationType]",
@@ -770,8 +804,8 @@
             "selectLoadBalancer": "[steps('LoadBalancerConfig').selectLoadBalancer]",
             "enableCookieBasedAffinity": "[bool(steps('LoadBalancerConfig').appGwInfo.enableCookieBasedAffinity)]",
             "ihsVmSize": "[steps('LoadBalancerConfig').ihsInfo.ihsVmSize]",
-            "ihsVMPrefix": "[steps('LoadBalancerConfig').ihsInfo.ihsVMPrefix]",
-            "ihsDnsLabelPrefix": "[steps('LoadBalancerConfig').ihsInfo.ihsDnsLabelPrefix]",
+            "ihsVMPrefix": "[if(empty(steps('LoadBalancerConfig').ihsAdvanced.ihsVMPrefix), 'ihs', steps('LoadBalancerConfig').ihsAdvanced.ihsVMPrefix)]",
+            "ihsDnsLabelPrefix": "[if(empty(steps('LoadBalancerConfig').ihsAdvanced.ihsDnsLabelPrefix), 'ihs', steps('LoadBalancerConfig').ihsAdvanced.ihsDnsLabelPrefix)]",
             "ihsUnixUsername": "[steps('LoadBalancerConfig').ihsInfo.ihsUnixUsername]",
             "ihsUnixPasswordOrKey": "[if(equals(steps('LoadBalancerConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType, 'password'), steps('LoadBalancerConfig').ihsInfo.ihsUnixPasswordOrKey.password, steps('LoadBalancerConfig').ihsInfo.ihsUnixPasswordOrKey.sshPublicKey)]",
             "ihsAuthenticationType": "[steps('LoadBalancerConfig').ihsInfo.ihsUnixPasswordOrKey.authenticationType]",
