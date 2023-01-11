@@ -47,3 +47,47 @@
    1. Navigate to "Deployments > specified_deployment_name > Outputs"
    1. Copy value of property `adminSecuredConsole` and browse it with credentials you specified in cluster creation
    1. Copy value of property `ihsConsole` and open it in your browser if you selected to deploy IBM HTTP Server before
+
+## Deployment Description
+
+The offer provisions the following Azure resources and a WebSphere Application Server ND 9.0.5.x cluster.
+
+* Network resources
+  * A virtual network and one or two subnets. User can also select to bring own virtual network.
+    * Two subnets are created/required if user selects to deploy an Azure Application Gateway.
+  * A network security group if user selects to create a new virtual network.
+  * Several network interfaces:
+    * One network interface for each VM.
+    * One network interface created for private endpoint of the stroage account if user selects to deploy an IBM HTTP Server (IHS) as load balancer.
+  * Azure Application Gateway standing at front of worker nodes of the WebSphere Application Server ND cluster if user selects to deploy an Azure Application Gateway as load balancer.
+  * Several public IP addresses:
+    * One public IP address assigned to the network interface of WebSphere deployment manager VM if user selects to create a new virtual network.
+    * One public IP address assigned to the network interface of IHS VM if user selects to create a new virtual network and deploy an IHS as load balancer.
+    * One public IP address assigned to the Azure Application Gateway if user selects to deploy an Azure Application Gateway as load balancer.
+  * A Private Endpoint for the storage account if user selects to deploy an IHS as load balancer.
+* Storage resources
+  * A storage account for VM boot diagnostics, and sharing files if user selects to deploy an IHS as load balancer.
+  * A keyvault for storing self-assigned certificate if user selects to deploy an Azure Application Gateway as load balancer.  
+* Computing resources
+  * Several RHEL 8.4 VMs consisting of a WebSphere Application Server ND 9.0.5.x cluster:
+    * One VM acting as WebSphere deployment manager.
+    * Other VMs acting as worker nodes of the cluster.
+    * Each VM is attached with an OS disk and a data disk.
+    * Configurables:
+      * Number of VMs consisting of the cluster.
+      * VM size.
+      * VM administrator authentication type and the related credential.
+  * An IHS VM if user selects to deploy an IHS as load balancer, with the followings configurables:
+    * An OS disk and a data disk is attached to the VM.
+    * Configurables:
+      * VM size.
+      * VM administrator authentication type and the related credential.
+* Key software components
+  * A WebSphere Application Server ND 9.0.5.x installed on each VM of the cluster with the followings configurables:
+    * Options to deploy with existing WebSphere entitlement or with evaluation licens.
+    * WebSphere administrator credential.
+    * Database data source connection if user selects to connect a database.
+  * IBM HTTP Server installed on the IHS VM with the followings configurables:
+    * Options to deploy with existing WebSphere entitlement or with evaluation licens.
+    * IHS administrator credential.
+  * IBM Java JDK 8 installed on each VM.
