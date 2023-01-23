@@ -47,3 +47,47 @@
    1. Navigate to "Deployments > specified_deployment_name > Outputs"
    1. Copy value of property `adminSecuredConsole` and browse it with credentials you specified in cluster creation
    1. Copy value of property `ihsConsole` and open it in your browser if you selected to deploy IBM HTTP Server before
+
+## Deployment Description
+
+The offer provisions the following Azure resources and a WebSphere Application Server ND cluster.
+
+* Computing resources
+  * VMs with the followings configurations:
+     * OS: RHEL 8.4
+     * JDK: IBM Java JDK 8
+     * WebSphere Traditional version: 9.0.5.x.
+  * Several VMs consisting of a WebSphere Application Server ND 9.0.5.x cluster with the following configurations:
+    * A VM to run the WebSphere deployment manager and an arbitrary number of VMs to run the worker nodes of the cluster.
+    * Choice of VM size.
+    * An OS disk and a data disk is attached to the VM.
+  * An IHS VM if user selects to deploy an IHS as load balancer, with the following configurations:
+    * Choice of VM size.
+    * An OS disk and a data disk is attached to the VM.
+* Network resources
+  * A virtual network and one or two subnets. User can also choose to deploy into an existing virtual network.
+    * Two subnets are required if user selects to deploy an Azure Application Gateway.
+    * A network security group if you select to create a new virtual network.
+  * Several network interfaces:
+    * One network interface for each VM.
+    * One network interface created for private endpoint of the stroage account if user selects to deploy an IBM HTTP Server (IHS) as load balancer.
+* Load Balancer
+  * Choice of IBM HTTP Server (IHS) or Azure Application Gateway.
+  * Several public IP addresses:
+    * One public IP address assigned to the network interface of WebSphere deployment manager VM if user selects to create a new virtual network.
+    * One public IP address assigned to the network interface of IHS VM if user selects to create a new virtual network and deploy an IHS as load balancer.
+    * One public IP address assigned to the Azure Application Gateway if user selects to deploy an Azure Application Gateway as load balancer.
+  * A Private Endpoint for the storage account if user selects to deploy an IHS as load balancer.
+* Storage resources
+  * A storage account for VM boot diagnostics, and sharing files if user selects to deploy an IHS as load balancer.
+* Key software components
+  * A WebSphere Application Server ND 9.0.5.x installed on each VM of the cluster with the following configurations:
+    * The `WAS_INSTALL_ROOT` is `/datadrive/IBM/WebSphere/ND/V9`.
+    * Options to deploy with existing WebSphere entitlement or with evaluation licens.
+    * WebSphere administrator credential.
+    * Database data source connection if user selects to connect a database.
+  * IBM HTTP Server installed on the IHS VM with the following configurations:
+    * Options to deploy with existing WebSphere entitlement or with evaluation licens.
+    * IHS administrator credential.
+  * IBM Java JDK 8. The `JAVA_HOME` is `${WAS_INSTALL_ROOT}/java/8.0`.
+
