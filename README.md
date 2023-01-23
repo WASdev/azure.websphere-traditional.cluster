@@ -72,7 +72,7 @@ The offer provisions the following Azure resources and a WebSphere Application S
     * One network interface for each VM.
     * One network interface created for private endpoint of the stroage account if user selects to deploy an IBM HTTP Server (IHS) as load balancer.
 * Load Balancer
-  * Choice of IBM Http Server (IHS) or Azure Application Gateway.
+  * Choice of IBM HTTP Server (IHS) or Azure Application Gateway.
   * Several public IP addresses:
     * One public IP address assigned to the network interface of WebSphere deployment manager VM if user selects to create a new virtual network.
     * One public IP address assigned to the network interface of IHS VM if user selects to create a new virtual network and deploy an IHS as load balancer.
