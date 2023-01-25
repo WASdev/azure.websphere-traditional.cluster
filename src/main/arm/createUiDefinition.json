@@ -344,7 +344,7 @@
                                 "type": "Microsoft.Common.InfoBox",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "This option will provision an Azure Application Gateway (WAF_v2 or later SKU), a public IP, and a backend pool consisting of the worker nodes in the cluster. Not all features of IBM HTTP Server load balancer are available when using Azure Application Gateway. Further configuration may be necessary after deployment. <a href='https://learn.microsoft.com/en-us/azure/application-gateway/overview'>Learn more</a>"
+                                    "text": "This option will provision an Azure Application Gateway (WAF_v2 or later SKU), a public IP, and a backend pool<br>consisting of the worker nodes in the cluster. Not all features of IBM HTTP Server load balancer are available when using Azure Application Gateway. Further configuration may be necessary after deployment.<br>For more information, see <a href=\"https://ibm.biz/AzureAAGInfo\" target=\"_blank\">the product documentation</a>."
                                 }
                             },
                             {
@@ -352,7 +352,7 @@
                                 "type": "Microsoft.Common.InfoBox",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "This option will create a self-signed TLS/SSL certificate for gateway TLS/SSL termination. The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
+                                    "text": "This option will create a self-signed TLS/SSL certificate for gateway TLS/SSL termination. The Azure identity deploying<br>this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
                                 }
                             },
                             {
