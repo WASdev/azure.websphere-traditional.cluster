@@ -1,0 +1,80 @@
+<h1>Name</h1>
+<p>IBM WebSphere Application Server Cluster</p>
+<h1>Search results summary</h1>
+<p>IBM WebSphere Application Server (traditional) Network Deployment cluster on Virtual Machines.</p>
+<h1>Short description</h1>
+<p>Provisions an IBM WebSphere Application Server (traditional) Network Deployment cluster on Azure Virtual Machines, including the Deployment Manager, Administrative Console, load-balancer, and a specified number of Server Nodes.</p>
+<h1>Description</h1>
+<p>The offer provisions a WebSphere Application Server (WAS) ND cluster and supporting Azure resources.</p>
+<ul>
+<li>Computing resources<ul>
+<li>VMs with the followings configurations:<ul>
+<li>OS: RHEL 8.4</li>
+<li>JDK: IBM Java JDK 8</li>
+<li>WebSphere Traditional version: 9.0.5.x.</li>
+</ul>
+</li>
+<li>Several VMs consisting of a WebSphere Application Server ND 9.0.5.x cluster with the following configurations:<ul>
+<li>A VM to run the WebSphere deployment manager and an arbitrary number of VMs to run the worker nodes of the cluster.</li>
+<li>Choice of VM size.</li>
+<li>An OS disk and a data disk is attached to the VM.</li>
+</ul>
+</li>
+<li>An IHS VM if user selects to deploy an IHS as load balancer, with the following configurations:<ul>
+<li>Choice of VM size.</li>
+<li>An OS disk and a data disk is attached to the VM.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Network resources<ul>
+<li>A virtual network and one or two subnets. User can also choose to deploy into an existing virtual network.<ul>
+<li>Two subnets are required if user selects to deploy an Azure Application Gateway.</li>
+<li>A network security group if you select to create a new virtual network.</li>
+</ul>
+</li>
+<li>Several network interfaces:<ul>
+<li>One network interface for each VM.</li>
+<li>One network interface created for private endpoint of the stroage account if user selects to deploy an IBM HTTP Server (IHS) as load balancer.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Load Balancer<ul>
+<li>Choice of IBM HTTP Server (IHS) or Azure Application Gateway.</li>
+<li>Several public IP addresses:<ul>
+<li>assigned to the network interface of WebSphere deployment manager VM if user selects to create a new virtual network.</li>
+<li>assigned to the network interface of IHS VM if user selects to create a new virtual network and deploy an IHS as load balancer.</li>
+<li>assigned to the Azure Application Gateway if user selects to deploy an Azure Application Gateway as load balancer.</li>
+</ul>
+</li>
+<li>A Private Endpoint for the storage account if user selects to deploy an IHS as load balancer.</li>
+</ul>
+</li>
+<li>Storage resources<ul>
+<li>A storage account for VM boot diagnostics, and sharing files if user selects to deploy an IHS as load balancer.</li>
+</ul>
+</li>
+<li>Key software components<ul>
+<li>A WebSphere Application Server ND 9.0.5.x installed on each VM of the cluster with the following configurations:<ul>
+<li>The <b>WAS_INSTALL_ROOT</b> is <b>/datadrive/IBM/WebSphere/ND/V9</b>.</li>
+<li>WebSphere administrator credential.</li>
+<li>Database data source connection if user selects to connect a database.</li>
+</ul>
+</li>
+<li>IBM HTTP Server installed on the IHS VM with the following configurations:<ul>
+<li>Options to deploy with existing WebSphere entitlement or with evaluation licens.</li>
+<li>IHS administrator credential.</li>
+</ul>
+</li>
+<li>IBM Java JDK 8. The <b>JAVA_HOME</b> is <b>${WAS_INSTALL_ROOT}/java/8.0</b>.</li>
+</ul>
+</li>
+</ul>
+<p>The Deployment Manager and all servers are started by default, which allows you to begin managing the cluster right away using the Admin Console. For complete instructions, please follow the official <a href="https://www.ibm.com/docs/was-nd/9.0.5">WebSphere documentation</a>.</p>
+<p>This offer includes both Evaluation and Bring-Your-Own-License (BYOL) options for WebSphere. When using BYOL you will be required to enter your registered IBM ID prior to successfully deploying this offer and your IBM ID must have active WebSphere entitlements associated with it. If you find that provisioning fails due to lack of entitlements, please contact the primary or secondary contacts for your IBM Passport Advantage Site who should be able to grant you access. The Evaluation option is limited to 60 days, at which point you must remove the deployment or acquire entitlement. This offer also assumes you are properly licensed to run the software.</p>
+<h1>WebSphere Solutions Overview</h1>
+<p>The IBM WebSphere product portfolio is a set of industry-leading runtimes powering some of the most mission critical enterprise applications across geographies and environments. The WebSphere portfolio includes WebSphere (traditional) Application Server, WebSphere Liberty, and Open Liberty.</p>
+<p>IBM and Microsoft collaborate on supported solutions for the product family. Offers include the ability to run WebSphere on Azure Red Hat OpenShift (ARO), Azure Kubernetes Service (AKS) and VMs.</p>
+<p>If you want to provide feedback or work closely on your migration scenarios with the engineering team developing these offers, select the CONTACT ME button on the marketplace offer <a href="https://ibm.biz/WebSphereOnAzureContactMe">overview page</a>. The opportunity to collaborate on a migration scenario is free while the offers are under active development.
+<p>The currently available offers are listed in the Learn More section at the bottom of the <a href="https://ibm.biz/WebSphereOnAzureContactMe">overview page</a>.</p>
