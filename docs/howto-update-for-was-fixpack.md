@@ -14,7 +14,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 
      Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minor version.
 
-   * For `ihs` and `ihs-cis` images, update the following properties in file [`virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/ihs/src/main/scripts/virtualimage.properties#L22-L25), e.g.:
+   * For `ihs` and `ihs-cis` images, update the following properties in file [`ihs/src/main/scripts/virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/ihs/src/main/scripts/virtualimage.properties#L22-L25) and [ihs-cis/src/main/scripts/virtualimage.properties](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/ihs-cis/src/main/scripts/virtualimage.properties#L14-L17), e.g.:
 
      ```bash
      IBM_HTTP_SERVER=com.ibm.websphere.IHS.v90
