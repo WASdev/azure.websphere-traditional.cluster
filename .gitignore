@@ -5,6 +5,7 @@ target
 .classpath
 *.versionsBackup
 .vscode
+changebundle.txt
 
 **/test-files
 **/target
