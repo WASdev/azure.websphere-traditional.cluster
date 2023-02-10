@@ -1,100 +1,84 @@
 <h1>CONTACT ME offer</h1>
-
 <h2>Name</h2>
-
-<p>IBM WebSphere Product Family on Azure Overview</p>
-
+<p>IBM WebSphere Product Family on Azure</p>
 <h2>Search results summary</h2>
-
 <p>The IBM WebSphere product family is a suite of enterprise Java application servers.</p>
-
-<h2>Description (5000 characters, including basic HTML markup (2023-02-08 2334 characters)</h2>
-
-<p>The WebSphere product family powers some of the most mission critical enterprise applications across the globe and includes WebSphere (Traditional) Application Server, WebSphere Liberty and Open Liberty.</p>
-<p>WebSphere products are key components in enabling enterprise Java workloads on Azure. IBM and Microsoft are collaborating on a set of jointly developed and supported solutions for the product family. The offers cover a range of use cases from mission critical existing traditional workloads to cloud-native applications. Offers include Open Liberty on Azure Red Hat OpenShift (ARO), WebSphere Liberty on ARO, Open Liberty on the Azure Kubernetes Service (AKS), WebSphere Liberty on AKS, and WebSphere Application Server (Traditional) on Virtual Machines. The offers make it as easier to migrate your application to the cloud by automating most boilerplate Azure and Java resource provisioning and configuration tasks. Once initial provisioning is complete, you are completely free to customize deployments further. </p>
+<h2>Description (5000 characters, including basic HTML markup)</h2>
+<p>The WebSphere product family powers some of the most mission critical enterprise applications across the globe and includes
+WebSphere (traditional) Application Server, WebSphere Liberty and Open Liberty. IBM and Microsoft are collaborating on a set of jointly
+developed and supported solutions for the product family. The offers cover a range of use cases from mission critical existing
+traditional workloads to cloud-native applications.</p>
+<p>Solutions include the following.</p>
+<ul>
+<li>WebSphere Liberty/Open Liberty on Azure Red Hat OpenShift (ARO)</li>
+<li>WebSphere Liberty/Open Liberty on the Azure Kubernetes Service (AKS)</li>
+<li>WebSphere Application Server (traditional) on Virtual Machines - cluster or single instance</li>
+</ul>
+<p>The offers make it easier to migrate your application to the cloud by automating most boilerplate Azure and Java resource
+provisioning and configuration tasks. Once initial provisioning is complete, you are completely free to customize deployments further.</p>
 <p>The currently available offers are linked in the learn more section at the bottom of this page.</p>
-<p>IBM and Microsoft also provide basic step-by-step guidance on getting started with <a href="https://techcommunity.microsoft.com/t5/apps-on-azure/run-websphere-liberty-and-open-liberty-on-openshift/ba-p/1951071">Liberty and ARO</a>, <a href="https://techcommunity.microsoft.com/t5/apps-on-azure/run-websphere-liberty-and-open-liberty-on-aks/ba-p/2156486" class="hide-focus">Liberty and AKS</a> and <a href="https://community.ibm.com/community/user/wasdevops/blogs/ryan-storey/2021/10/12/twas-azure" class="hide-focus">WebSphere Traditional on Azure VMs</a>. The offers automate Azure and WebSphere/Liberty infrastructure provisioning tasks that you can also do manually. The guidance covers both the Marketplace and manual approaches.</p>
-<p><i>If you want to provide feedback on these offers, stay-up-date on the roadmap, or work closely on your migration scenarios with the engineering team developing these offers, just hit the CONTACT ME button</i>. Program managers, architects and engineers will reach back out to you shortly and initiate collaboration. The opportunity to collaborate on a migration scenario is completely free while the offers are under active development.</p>
+<p><i>You can reach out to the engineering team developing these offers by clicking the CONTACT ME button. Program managers,
+    architects and engineers will get in touch and can assist you for free with your Azure migration.</i></p>
+<h2>Links</h2>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/developer/java/ee/websphere-family">WebSphere on Azure</a></li>
+<li><a href="">WebSphere Single Instance on Azure VM</a></li>
+<li><a href="">WebSphere Cluster on Azure VMs</a></li>
+<li><a href="">WebSphere Liberty/Open Liberty on ARO</a></li>
+<li><a href="">WebSphere Liberty/Open Liberty on AKS</a></li>
+</ul>
 
 <h1>Azure Application Offer</h1>
-
 <h2>Name</h2>
-<p>IBM WebSphere Application Server Cluster</p>
+<p>IBM WebSphere Application Server Cluster on Azure VMs</p>
 <h2>Search results summary</h2>
-<p>IBM WebSphere Application Server (traditional) Network Deployment cluster on Virtual Machines.</p>
+<p>Run IBM WebSphere Application Server (traditional) Network Deployment cluster on Azure VMs.</p>
 <h2>Short description</h2>
-<p>Provisions an IBM WebSphere Application Server (traditional) Network Deployment cluster on Azure Virtual Machines, including the Deployment Manager, Administrative Console, load-balancer, and a specified number of Server Nodes.</p>
+<p>Provisions an IBM WebSphere Application Server (traditional) Network Deployment cluster on Azure Virtual Machines, including the
+Deployment Manager, Administrative Console, load-balancer, and a specified number of Server Nodes.</p>
 <h2>Description</h2>
-<p>The offer provisions a WebSphere Application Server (WAS) ND cluster and supporting Azure resources.</p>
+<p>IBM WebSphere Application Server (traditional) is an industry-leading Java runtime powering some of the most mission critical
+enterprise applications across geographies and environments. This solution automates most boilerplate steps to provision a WebSphere
+cluster on Azure VMs. Once initial provisioning is complete, you are completely free to customize deployments
+further. The solution is jointly developed by IBM and Microsoft.</p>
+<p>The following resources are automatically provisioned by the offer.</p>
 <ul>
-<li>Computing resources<ul>
-<li>VMs with the followings configurations:<ul>
-<li>OS: RHEL 8.4</li>
-<li>JDK: IBM Java JDK 8</li>
-<li>WebSphere Traditional version: 9.0.5.x.</li>
+<li>Latest Red Hat Enterprise Linux (RHEL) VMs with fixes (you can choose the number of VMs
+- all Worker Nodes will have private IP addresses)</li>
+<li>Latest WebSphere Application Server ND 9.0.5.x on each VM with fixes
+(<b>WAS_INSTALL_ROOT</b> is <b>/datadrive/IBM/WebSphere/ND/V9</b>).</li>
+<li>Latest IBM JDK 8 with fixes on each VM (<strong>JAVA_HOME</strong> is <strong>${WAS_INSTALL_ROOT}/java/8.0</strong>)</li>
+<li>Deployment Manager on one of the VMs with Administrative Console enabled - with a public IP address</li>
+<li>IBM HTTP Server (IHS) or Azure Application Gateway as load balancer over Worker Nodes - you can also skip
+provisioning a load balancer</li>
+<li>IHS on a VM with a public IP address</li>
+<li>Azure App Gateway instance with a public IP address</li>
+<li>Configured data source connection (Db2, Oracle DB, Azure SQL) - optional</li>
+<li>Virtual network and at least one subnet -
+two subnets are needed to use Azure Application Gateway (alternatively, you can deploy to an existing virtual network)</li>
+<li>Network security group</li>
+<li>OS and data disks attached to each VM</li>
+<li>Storage account for VM boot diagnostics, and sharing files if using IHS</li>
 </ul>
-</li>
-<li>Several VMs consisting of a WebSphere Application Server ND 9.0.5.x cluster with the following configurations:<ul>
-<li>A VM to run the WebSphere deployment manager and an arbitrary number of VMs to run the worker nodes of the cluster.</li>
-<li>Choice of VM size.</li>
-<li>An OS disk and a data disk is attached to the VM.</li>
+<p>This offer supports both evaluation and Bring-Your-Own-License (BYOL) options for WebSphere. When using BYOL you will be required to
+enter your registered IBM ID prior to successfully deploying this offer and your IBM ID must have active WebSphere entitlements
+associated with it. If you find that provisioning fails due to lack of entitlements, please contact the primary or secondary contacts for
+your IBM Passport Advantage Site who should be able to grant you access. The evaluation option is limited to 60 days, at which point you
+must remove the deployment or acquire entitlement.</p>
+<p>IBM and Microsoft also provide basic step-by-step instructions on getting started with WebSphere and RHEL without automated
+provisioning.</p>
+<p>IBM and Microsoft provide similar solutions targeting WebSphere single instance on an Azure VM,
+WebSphere Liberty/Open Liberty on Azure Red Hat OpenShift (ARO) and WebSphere Liberty/Open Liberty on Azure Kubernetes Service (AKS).
+These options are linked in the <i>Learn more</i> section below.</p>
+<p><i>You can reach out to the engineering team developing these offers by clicking the CONTACT ME button on the
+<a href="https://ibm.biz/WebSphereOnAzureContactMe">marketplace
+WebSphere on Azure overview</a> page. Program managers, architects and engineers will get in touch and can assist you for free with
+your Azure migration.</i></p>
+<h2>Links</h2>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/developer/java/ee/websphere-family">WebSphere on Azure</a></li>
+<li><a href="https://ibm.biz/WebSphereOnAzureContactMe">WebSphere on Azure Marketplace Overview</a></li>
+<li><a href="">WebSphere Single Instance on an Azure VM</a></li>
+<li><a href="">WebSphere Liberty/Open Liberty on ARO</a></li>
+<li><a href="">WebSphere Liberty/Open Liberty on AKS</a></li>
 </ul>
-</li>
-<li>An IHS VM if user selects to deploy an IHS as load balancer, with the following configurations:<ul>
-<li>Choice of VM size.</li>
-<li>An OS disk and a data disk is attached to the VM.</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Network resources<ul>
-<li>A virtual network and one or two subnets. User can also choose to deploy into an existing virtual network.<ul>
-<li>Two subnets are required if user selects to deploy an Azure Application Gateway.</li>
-<li>A network security group if you select to create a new virtual network.</li>
-</ul>
-</li>
-<li>Several network interfaces:<ul>
-<li>One network interface for each VM.</li>
-<li>One network interface created for private endpoint of the stroage account if user selects to deploy an IBM HTTP Server (IHS) as load balancer.</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Load Balancer<ul>
-<li>Choice of IBM HTTP Server (IHS) or Azure Application Gateway.</li>
-<li>Several public IP addresses:<ul>
-<li>assigned to the network interface of WebSphere deployment manager VM if user selects to create a new virtual network.</li>
-<li>assigned to the network interface of IHS VM if user selects to create a new virtual network and deploy an IHS as load balancer.</li>
-<li>assigned to the Azure Application Gateway if user selects to deploy an Azure Application Gateway as load balancer.</li>
-</ul>
-</li>
-<li>A Private Endpoint for the storage account if user selects to deploy an IHS as load balancer.</li>
-</ul>
-</li>
-<li>Storage resources<ul>
-<li>A storage account for VM boot diagnostics, and sharing files if user selects to deploy an IHS as load balancer.</li>
-</ul>
-</li>
-<li>Key software components<ul>
-<li>A WebSphere Application Server ND 9.0.5.x installed on each VM of the cluster with the following configurations:<ul>
-<li>The <b>WAS_INSTALL_ROOT</b> is <b>/datadrive/IBM/WebSphere/ND/V9</b>.</li>
-<li>WebSphere administrator credential.</li>
-<li>Database data source connection if user selects to connect a database.</li>
-</ul>
-</li>
-<li>IBM HTTP Server installed on the IHS VM with the following configurations:<ul>
-<li>Options to deploy with existing WebSphere entitlement or with evaluation licens.</li>
-<li>IHS administrator credential.</li>
-</ul>
-</li>
-<li>IBM Java JDK 8. The <b>JAVA_HOME</b> is <b>${WAS_INSTALL_ROOT}/java/8.0</b>.</li>
-</ul>
-</li>
-</ul>
-<p>The Deployment Manager and all servers are started by default, which allows you to begin managing the cluster right away using the Admin Console. For complete instructions, please follow the official <a href="https://www.ibm.com/docs/was-nd/9.0.5">WebSphere documentation</a>.</p>
-<p>This offer includes both Evaluation and Bring-Your-Own-License (BYOL) options for WebSphere. When using BYOL you will be required to enter your registered IBM ID prior to successfully deploying this offer and your IBM ID must have active WebSphere entitlements associated with it. If you find that provisioning fails due to lack of entitlements, please contact the primary or secondary contacts for your IBM Passport Advantage Site who should be able to grant you access. The Evaluation option is limited to 60 days, at which point you must remove the deployment or acquire entitlement. This offer also assumes you are properly licensed to run the software.</p>
-<h1>WebSphere Solutions Overview</h1>
-<p>The IBM WebSphere product portfolio is a set of industry-leading runtimes powering some of the most mission critical enterprise applications across geographies and environments. The WebSphere portfolio includes WebSphere (traditional) Application Server, WebSphere Liberty, and Open Liberty.</p>
-<p>IBM and Microsoft collaborate on supported solutions for the product family. Offers include the ability to run WebSphere on Azure Red Hat OpenShift (ARO), Azure Kubernetes Service (AKS) and VMs.</p>
-<p>If you want to provide feedback or work closely on your migration scenarios with the engineering team developing these offers, select the CONTACT ME button on the marketplace offer <a href="https://ibm.biz/WebSphereOnAzureContactMe">overview page</a>. The opportunity to collaborate on a migration scenario is free while the offers are under active development.
-<p>The currently available offers are listed in the Learn More section at the bottom of the <a href="https://ibm.biz/WebSphereOnAzureContactMe">overview page</a>.</p>
