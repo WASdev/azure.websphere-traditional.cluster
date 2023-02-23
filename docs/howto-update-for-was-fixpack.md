@@ -4,8 +4,8 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 
 ## Updating the image
 
-1. Which file to update for WAS version?
-   * For `twas-nd` image, update the following properties in file [`virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/twas-nd/src/main/scripts/virtualimage.properties#L14-L15), e.g.:
+1. Which file to update for WAS, IHS and BigFix client versions?
+   * For WAS version in `twas-nd` image, update the following properties in file [`virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/twas-nd/src/main/scripts/virtualimage.properties#L14-L15), e.g.:
 
      ```bash
      WAS_ND_TRADITIONAL=com.ibm.websphere.ND.v90
@@ -14,7 +14,17 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 
      Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minor version.
 
-   * For `ihs` and `ihs-cis` images, update the following properties in file [`ihs/src/main/scripts/virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/ihs/src/main/scripts/virtualimage.properties#L22-L25) and [ihs-cis/src/main/scripts/virtualimage.properties](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/ihs-cis/src/main/scripts/virtualimage.properties#L14-L17), e.g.:
+   * For BigFix client version in `twas-nd` image, update the following properties in file [`virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/twas-nd/src/main/scripts/virtualimage.properties#L32-L34), e.g.:
+
+     ```bash
+     BES_AGENT_RPM=BESAgent-10.0.8.37-rhe6.x86_64.rpm
+     BES_AGENT_RPM_URL=https://software.bigfix.com/download/bes/100/${BES_AGENT_RPM}
+     GPG_RPM_PUBLIC_KEY_URL=https://software.bigfix.com/download/bes/95/RPM-GPG-KEY-BigFix-9-V2
+     ```
+
+     Note: these properties shouldn't be updated unless there're new versions/updates available.
+
+   * For IHS version in `ihs` image, update the following properties in file [`virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/ihs/src/main/scripts/virtualimage.properties#L14-L17), e.g.:
 
      ```bash
      IBM_HTTP_SERVER=com.ibm.websphere.IHS.v90
@@ -25,23 +35,6 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 
      Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minor version.
 
-   * For `twas-nd-cis` image, update the following properties in file [`virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/twas-base-cis/src/main/scripts/virtualimage.properties#L14-L18), e.g.:
-
-     ```bash
-     WAS_BASE_TRADITIONAL=com.ibm.websphere.BASE.v90
-     IBM_JAVA_SDK=com.ibm.java.jdk.v8
-     ```
-
-     Note: only the major version should be specified, the minor version should not be hard-coded as the Installation Manager will intelligently install the latest available minor version.
-
-     ```bash
-     BES_AGENT_RPM=BESAgent-10.0.8.37-rhe6.x86_64.rpm
-     BES_AGENT_RPM_URL=https://software.bigfix.com/download/bes/100/${BES_AGENT_RPM}
-     GPG_RPM_PUBLIC_KEY_URL=https://software.bigfix.com/download/bes/95/RPM-GPG-KEY-BigFix-9-V2
-     ```
-
-     Note: these properties shouldn't be updated unless there're new versions/updates available.
-
 1. When to update the images?
 - For new tWAS fixpack, try to update the image soon after the fixpack GA but no longer than one week after the GA.
 - Images may also need to updated to fix a critical WebSphere or OS fixes.
@@ -49,8 +42,6 @@ Please follow sections below in order to update the solution for next tWAS fixpa
 3. How to run CI/CD?
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `twas-nd CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
    * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `ihs CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
-   * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `twas-nd-cis CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
-   * Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.image/actions) > Click `ihs-cis CICD` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page
    * If Workflow does not kick off from the UI, try the command line:
    ```
    PERSONAL_ACCESS_TOKEN=<access-token>
@@ -63,22 +54,20 @@ Please follow sections below in order to update the solution for next tWAS fixpa
    * However, if CI/CD failed, please look at error messages from the CI/CD logs, and [access the source VM](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/docs/howto-access-source-vm.md) for troubleshooting if necessary.
 
 1. How to publish the image in marketplace and who can do it?
-   1. For `twas-nd` image: Wait until the CI/CD workflow for `twas-nd CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
-   1. For `ihs` image: Wait until the CI/CD workflow for `ihs CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl` to download the zip file `sasurl.zip` > Unzip and open file `sas-url.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
-   1. For `twas-nd-cis` image: Wait until the CI/CD workflow for `twas-nd-cis CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl-twasnd-cis` to download the zip file `sasurl-twasnd-cis.zip` > Unzip and open file `sas-url-twasnd-cis.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
-   1. For `ihs-cis` image: Wait until the CI/CD workflow for `ihs-cis CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl-ihs-cis` to download the zip file `sasurl-ihs-cis.zip` > Unzip and open file `sas-url-ihs-cis.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
+   1. For `twas-nd` image: Wait until the CI/CD workflow for `twas-nd CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl-twasnd` to download the zip file `sasurl-twasnd.zip` > Unzip and open file `sas-url-twasnd.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
+   1. For `ihs` image: Wait until the CI/CD workflow for `ihs CICD` successfully completes > Click to open details of the workflow run > Scroll to the bottom of the page > Click `sasurl-ihs` to download the zip file `sasurl-ihs.zip` > Unzip and open file `sas-url-ihs.txt` > Find values for `osDiskSasUrl` and `dataDiskSasUrl`;
    1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview): Repeat these steps for ND and IHS images.
       * Select the Directory `IBM-Alliance-Microsoft Partner Network-Global-Tenant`
       * Expand `Build solutions` and choose `Publish your solution`.  
-      * Click to open the offer for `<date>-twas-cluster-base-image` ND base image (`<date>-ihs-base-image` for IHS base image, `<date>-twas-cluster-cis-base-image` for ND CIS base image, `<date>-ihs-cis-base-image` for IHS CIS base image)
+      * Click to open the offer for `<date>-twas-cluster-base-image` ND base image (`<date>-ihs-base-image` for IHS base image)
       * Click `Plan overview` the click to open the plan 
       * Click `Technical configuration` 
       * Scroll down and click `+` under "VM images" > Specify a new value for `Version number`, following the convention \<major version\>.YYYYMMDD, e.g. 9.0.20210929 and write it down (We deliberately do not specify the minor verson because the pipeline gets the latest at the time it is run). 
-      * Under `SAS URI` > `Add OS Disk`. Copy and paste value of `osDiskSasUrl` for `twas-nd` or `ihs` / `twas-nd-cis` / `ihs-cis` (from the earlier steps) to the textbox `OS VHD Link` 
-      * Click `+ Add data disk` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` or `ihs` / `twas-nd-cis` / `ihs-cis`  (from the earlier steps) to the textbox `Data disk VHD link`
+      * Under `SAS URI` > `Add OS Disk`. Copy and paste value of `osDiskSasUrl` for `twas-nd` or `ihs` (from the earlier steps) to the textbox `OS VHD Link` 
+      * Click `+ Add data disk` > Select `Data disk 0` > Copy and paste value of `dataDiskSasUrl` for `twas-nd` or `ihs` (from the earlier steps) to the textbox `Data disk VHD link`
       * Scroll to the bottom of the page and click `Save draft`
       * Click `Review and publish`
-      * In the "Notes for certification" section enter the twas-nd or ihs / twas-nd-cis / ihs-cis CICD URL
+      * In the "Notes for certification" section enter the twas-nd or ihs CICD URL
       * Click `Publish`;
       * Wait for few hours to a day, keep refreshing the page until "Go Live" button appears
       * Click on "Go Live" and wait again (for few hours) for the image to be published. See [screenshots](https://github.com/WASdev/azure.websphere-traditional.cluster/issues/138#issuecomment-1034053293)
