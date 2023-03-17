@@ -189,13 +189,13 @@ create_custom_profile() {
     dmgrAdminPassword=$7
     
     echo "$(date): Check if dmgr is ready."
-    curl $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
+    curl --http0.9 $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
     rtnCode=$?
     while [ $rtnCode -ne 0 ] && [ $rtnCode -ne 56 ]
     do
         sleep 5
         echo "dmgr is not ready"
-        curl $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
+        curl --http0.9 $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
         rtnCode=$?
     done
     sleep 60
