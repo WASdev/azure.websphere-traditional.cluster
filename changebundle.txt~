@@ -1,10 +1,10 @@
-On branch patch-1
-Your branch is up to date with 'm-reza-rahman/patch-1'.
+On branch edburns-msft-ibm-100
+Your branch is up to date with 'origin/edburns-msft-ibm-100'.
 
 Changes not staged for commit:
   (use "git add/rm <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
 	deleted:    changebundle.txt~
-	modified:   src/main/resources/marketing-artifacts/partner-center.html
+	modified:   src/main/bicep/config.json
 
 no changes added to commit (use "git add" and/or "git commit -a")
