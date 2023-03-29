@@ -59,7 +59,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
    1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview): Repeat these steps for ND and IHS images.
       * Select the Directory `IBM-Alliance-Microsoft Partner Network-Global-Tenant`
       * Expand `Build solutions` and choose `Publish your solution`.  
-      * Click to open the offer for `2023-03-23-twas-cluster-base-image` ND base image (`2021-06-03-ihs-base-image` for IHS base image)
+      * Click to open the offer for `2023-03-27-twas-cluster-base-image` ND base image (`2023-03-27-ihs-base-image` for IHS base image)
       * Click `Plan overview` then click to open the plan
       * **IMPORTANT** Click `Pricing and availability` to verify the plan is NOT hidden from the marketplace
          * Ensure the `Hide plan` checkbox is NOT checked
