@@ -15,6 +15,9 @@ env:
   repoName: "azure.websphere-traditional.cluster"
   offerName: "2021-04-08-twas-cluster"
   planName: "cluster"
+  clientId: ${{ secrets.CLIENT_ID }}
+  secretValue: ${{ secrets.SECRET_VALUE }}
+  tenantId: ${{ secrets.TENANT_ID }}
 
 jobs:
   package:
