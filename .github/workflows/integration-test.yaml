@@ -77,10 +77,11 @@ jobs:
           echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
           echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
           echo "refJavaee=${AZURE_JAVAEE_IAAS_REFERENCE}" >> $GITHUB_ENV
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
         with:
-          java-version: 1.8
+          distribution: 'temurin'
+          java-version: '11'
       - name: Set up bicep
         run: |
           curl -Lo bicep https://github.com/Azure/bicep/releases/download/${{ env.bicepVersion }}/bicep-linux-x64
@@ -88,22 +89,27 @@ jobs:
           sudo mv ./bicep /usr/local/bin/bicep
           bicep --version
       - name: Checkout azure-javaee-iaas
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: Azure/azure-javaee-iaas
           path: azure-javaee-iaas
           ref: ${{ env.refJavaee }}
       - name: Checkout arm-ttk
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: Azure/arm-ttk
           path: arm-ttk
           ref: ${{ env.refArmttk }}
       - name: Checkout ${{ env.repoName }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ${{ env.repoName }}
           ref: ${{ github.event.inputs.ref }}
+      - name: Checkout websphere-cafe
+        uses: actions/checkout@v3
+        with:
+          repository: Azure-Samples/websphere-cafe
+          path: websphere-cafe
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
       - uses: azure/login@v1
@@ -210,6 +216,7 @@ jobs:
             dsConnectionURL="jdbc:postgresql://${{ env.postgresqlHost }}:5432/testdb"
             dbUser=testuser@${{ env.dbInstanceName }}
           fi
+          echo "enableDB=${enableDB}" >> $GITHUB_ENV
           selectLoadBalancer=none
           if ${{ inputs.selectLoadBalancer == 'ihs' || github.event.client_payload.selectLoadBalancer == 'ihs' }}; then
             selectLoadBalancer=ihs
@@ -274,6 +281,65 @@ jobs:
             fi
             if [[ $appGatewayHttpsURL != "N/A" ]]; then
               echo "appGatewayHttpsURL is ${appGatewayHttpsURL}, but it should be N/A as application gateway is not enabled."
+              exit 1
+            fi
+          fi
+      - name: Install and verify websphere-cafe
+        run: |
+          nsgName=$(az network nsg list -g ${testResourceGroup} --query [0].name -o tsv)
+          publicIp=$(az vm list -g ${testResourceGroup} -d --query "[?contains(name, 'dmgr')].publicIps" -o tsv)
+          vmName=$(az vm list -g ${testResourceGroup} --query "[?contains(name, 'dmgr')].name" -o tsv)
+          # Open port 22 in the nsg
+          az network nsg rule create \
+            --name port-22 \
+            --nsg-name ${nsgName} \
+            --priority 100 \
+            --resource-group ${testResourceGroup} \
+            --access Allow \
+            --destination-address-prefixes "*" \
+            --destination-port-ranges 22 \
+            --direction Inbound \
+            --protocol Tcp \
+            --source-address-prefixes "*"
+          sleep 1m
+          # Build and package websphere-cafe
+          if [ ${enableDB} != true ]; then
+            sed -i "s/WebSphereCafeDB/built-in-derby-datasource/g" websphere-cafe/websphere-cafe-web/src/main/resources/META-INF/persistence.xml
+          fi
+          mvn clean install --file websphere-cafe/pom.xml
+          if [ ${enableDB} != true ]; then
+            sed -i "s/built-in-derby-datasource/WebSphereCafeDB/g" websphere-cafe/websphere-cafe-web/src/main/resources/META-INF/persistence.xml
+          fi
+          # Upload websphere-cafe.ear to the VM
+          sudo apt-get install -y sshpass
+          timeout 1m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${publicIp} 22
+          sshpass -p ${vmAdminPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveCountMax=20 -o ServerAliveInterval=15 -o ConnectTimeout=100 -v -tt ${vmAdminId}@${publicIp} 'ls /tmp'
+          sshpass -p ${vmAdminPassword} scp websphere-cafe/websphere-cafe-application/target/websphere-cafe.ear ${vmAdminId}@${publicIp}:/tmp
+          # Close port 22 in the nsg
+          az network nsg rule delete \
+            --name port-22 \
+            --nsg-name ${nsgName} \
+            --resource-group ${testResourceGroup}
+          # Install and start websphere-cafe
+          az vm extension set --name CustomScript \
+            --extension-instance-name deploy-websphere-cafe \
+            --resource-group ${testResourceGroup} --vm-name ${vmName} \
+            --publisher Microsoft.Azure.Extensions --version 2.0 \
+            --settings "{\"fileUris\": [\"${{ env.scriptLocation }}deploy-app.sh\", \"${{ env.scriptLocation }}deploy-app.py.template\"]}" \
+            --protected-settings "{\"commandToExecute\": \"bash deploy-app.sh /tmp/websphere-cafe.ear websphere-cafe ${selectLoadBalancer}\"}"
+          
+          # Verify if websphere-cafe is accessible
+          websphereCafeUrl=
+          outputs=$(az deployment group show -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} --query 'properties.outputs')
+          if [[ $selectLoadBalancer == "ihs" ]]; then
+            websphereCafeUrl=$(echo $outputs | jq -r '.ihsConsole.value')websphere-cafe
+          elif [[ $selectLoadBalancer == "appgw" ]]; then
+            websphereCafeUrl=$(echo $outputs | jq -r '.appGatewayHttpURL.value')websphere-cafe
+          fi
+          if [ -n "$websphereCafeUrl" ]; then
+            curl $websphereCafeUrl
+            if [[ $? -ne 0 ]]; then
+              echo "Failed to access ${websphereCafeUrl}."
               exit 1
             fi
           fi
