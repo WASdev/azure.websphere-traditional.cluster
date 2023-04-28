@@ -27,6 +27,14 @@ on:
         required: true
         type: boolean
         default: true
+      ndImageResourceId:
+        description: 'Private ND vm image resource id. Only requried for ND VM image cicd, ignore it otherwise.'
+        required: true
+        default: 'NA'
+      ihsImageResourceId:
+        description: 'Private IHS vm image resource id. Only requried for IHS VM image cicd, ignore it otherwise.'
+        required: true
+        default: 'NA'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
@@ -238,7 +246,7 @@ jobs:
         run: |
           cd ${{ env.repoName }}/target/cli
           chmod a+x deploy.azcli
-          ./deploy.azcli -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} -l ${{ env.location }}
+          ./deploy.azcli -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} -l ${{ env.location }} -d ${{ inputs.ndImageResourceId }} -i ${{ inputs.ihsImageResourceId }}
       - name: Verify the deployment
         run: |
           outputs=$(az deployment group show -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} --query 'properties.outputs')
@@ -350,7 +358,7 @@ jobs:
         with:
           azcliversion: ${{ env.azCliVersion }}
           inlineScript: |
-            az group delete -n ${{ env.testResourceGroup }} --yes
+            az group delete -n ${{ env.testResourceGroup }} --yes --no-wait
       - name: Generate artifact file name and path
         id: artifact_file
         run: |
