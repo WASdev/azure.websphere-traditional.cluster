@@ -120,6 +120,12 @@ Note: **Wait for images to be published before proceeding with this step.** The 
 
    Note: Currently Graham Charters has privilege to update the solution in marketplace, contact him for more information.
 
+   There is another approach to automate all the steps before `Review and publish`, with `Package ARM` workflow.
+
+   1. Go to [Actions](https://github.com/WASdev/azure.websphere-traditional.cluster/actions) > Click `Package ARM` > Click to expand `Run workflow` > Click `Run workflow` > Refresh the page.
+   1. Wait until the CI/CD workflow for `Package ARM` successfully completes. The workflow will update the offer with the generated artifact and save it as draft. 
+   1. Sign into [Microsoft Partner Center](https://partner.microsoft.com/dashboard/commercial-marketplace/overview) and complete the same steps above starting from **_Click `Review and publish`_**.
+
 1. Create a [release](https://github.com/WASdev/azure.websphere-traditional.cluster/releases) for this GA code and tag with the pom.xml version number.
 
 
