@@ -18,6 +18,7 @@ env:
   clientId: ${{ secrets.CLIENT_ID }}
   secretValue: ${{ secrets.SECRET_VALUE }}
   tenantId: ${{ secrets.TENANT_ID }}
+  offerType: 'application_offer'
 
 jobs:
   package:
@@ -80,7 +81,7 @@ jobs:
           name: ${{steps.artifact_file.outputs.artifactName}}
           path: ${{steps.artifact_file.outputs.artifactPath}}
       - name: Update offer artifact
-        uses: microsoft/microsoft-partner-center-github-action@v1
+        uses: microsoft/microsoft-partner-center-github-action@v2
         if: ${{ github.repository_owner  == 'WASdev' }}
         with:
           offerName: ${{ env.offerName }}
@@ -90,3 +91,4 @@ jobs:
           clientId: ${{ env.clientId }}
           secretValue: ${{ env.secretValue }}
           tenantId: ${{ env.tenantId }}
+          offerType: ${{ env.offerType }}
