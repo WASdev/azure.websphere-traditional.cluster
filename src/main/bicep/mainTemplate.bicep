@@ -265,7 +265,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   kind: 'StorageV2'
 }
 
-resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = if (const_configureIHS) {
+resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = if (const_configureIHS) {
   name: name_storageAccountPrivateEndpoint
   location: location
   properties: {
