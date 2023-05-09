@@ -34,7 +34,6 @@
     <name>${project.artifactId}</name>
 
     <properties>
-        <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
         <git.repo>WASdev</git.repo>
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo}/${project.artifactId}/${git.tag}</artifactsLocationBase>
     </properties>

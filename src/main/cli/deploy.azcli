@@ -26,9 +26,11 @@ usage() { echo "Usage: $0 -n <deploymentName> -g <resourceGroupName> -l <resourc
 declare deploymentName=""
 declare resourceGroupName=""
 declare resourceGroupLocation=""
+declare ndImageResourceId=""
+declare ihsImageResourceId=""
 
 # Initialize parameters specified from command line
-while getopts ":n:i:g:l:" arg; do
+while getopts ":n:i:g:l:d:" arg; do
 	case "${arg}" in
 		n)
 			deploymentName=${OPTARG}
@@ -38,6 +40,12 @@ while getopts ":n:i:g:l:" arg; do
 			;;
 		l)
 			resourceGroupLocation=${OPTARG}
+			;;
+		d)
+			ndImageResourceId=${OPTARG}
+			;;
+		i)
+			ihsImageResourceId=${OPTARG}
 			;;
 		esac
 done
@@ -76,6 +84,22 @@ templateFilePath="../arm/mainTemplate.json"
 if [ ! -f "$templateFilePath" ]; then
 	echo "$templateFilePath not found"
 	exit 1
+fi
+
+# use ndImageResourceId in template if provided
+if [ -n "$ndImageResourceId" ] && [ "$ndImageResourceId" != NA ]; then
+	templateJson=$(cat $templateFilePath | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM")) | .plan)')
+	templateJson=$(echo $templateJson | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM")) | .properties.storageProfile.imageReference)')
+	templateJson=$(echo $templateJson | jq --arg ndImageResourceId "$ndImageResourceId" '(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM"))).properties.storageProfile.imageReference.id |= $ndImageResourceId')
+	echo $templateJson | jq . > $templateFilePath
+fi
+
+# use ihsImageResourceId in template if provided
+if [ -n "$ihsImageResourceId" ] && [ "$ihsImageResourceId" != NA ]; then
+	templateJson=$(cat $templateFilePath | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM")) | .plan)')
+	templateJson=$(echo $templateJson | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM")) | .properties.storageProfile.imageReference)')
+	templateJson=$(echo $templateJson | jq --arg ihsImageResourceId "$ihsImageResourceId" '(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM"))).properties.storageProfile.imageReference.id |= $ihsImageResourceId')
+	echo $templateJson | jq . > $templateFilePath
 fi
 
 #parameter file path

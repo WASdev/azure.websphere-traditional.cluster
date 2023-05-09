@@ -18,6 +18,7 @@ env:
   clientId: ${{ secrets.CLIENT_ID }}
   secretValue: ${{ secrets.SECRET_VALUE }}
   tenantId: ${{ secrets.TENANT_ID }}
+  offerType: 'application_offer'
 
 jobs:
   package:
@@ -47,12 +48,10 @@ jobs:
           repository: Azure/azure-javaee-iaas
           path: azure-javaee-iaas
           ref: ${{ env.refJavaee }}
-      - name: Checkout arm-ttk
-        uses: actions/checkout@v2
-        with:
-          repository: Azure/arm-ttk
-          path: arm-ttk
-          ref: ${{ env.refArmttk }}
+      - name: Download arm-ttk used in partner center pipeline
+        run: |
+          wget -O arm-template-toolkit.zip https://aka.ms/arm-ttk-azureapps
+          unzip arm-template-toolkit.zip -d arm-ttk
       - name: Checkout ${{ env.repoName }}
         uses: actions/checkout@v2
         with:
@@ -80,7 +79,7 @@ jobs:
           name: ${{steps.artifact_file.outputs.artifactName}}
           path: ${{steps.artifact_file.outputs.artifactPath}}
       - name: Update offer artifact
-        uses: microsoft/microsoft-partner-center-github-action@v1
+        uses: microsoft/microsoft-partner-center-github-action@v2
         if: ${{ github.repository_owner  == 'WASdev' }}
         with:
           offerName: ${{ env.offerName }}
@@ -90,3 +89,4 @@ jobs:
           clientId: ${{ env.clientId }}
           secretValue: ${{ env.secretValue }}
           tenantId: ${{ env.tenantId }}
+          offerType: ${{ env.offerType }}
