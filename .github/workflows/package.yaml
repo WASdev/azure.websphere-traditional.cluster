@@ -13,8 +13,8 @@ on:
   # curl --verbose -X POST https://api.github.com/repos/${REPO_NAME}/dispatches -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${PERSONAL_ACCESS_TOKEN}" --data '{"event_type": "package"}'
 env:
   repoName: "azure.websphere-traditional.cluster"
-  offerName: "2021-04-08-twas-cluster"
-  planName: "cluster"
+  offerId: "2021-04-08-twas-cluster"
+  planId: "cluster"
   clientId: ${{ secrets.CLIENT_ID }}
   secretValue: ${{ secrets.SECRET_VALUE }}
   tenantId: ${{ secrets.TENANT_ID }}
@@ -79,11 +79,11 @@ jobs:
           name: ${{steps.artifact_file.outputs.artifactName}}
           path: ${{steps.artifact_file.outputs.artifactPath}}
       - name: Update offer artifact
-        uses: microsoft/microsoft-partner-center-github-action@v2
+        uses: microsoft/microsoft-partner-center-github-action@v3
         if: ${{ github.repository_owner  == 'WASdev' }}
         with:
-          offerName: ${{ env.offerName }}
-          planName: ${{ env.planName }}
+          offerId: ${{ env.offerId }}
+          planId: ${{ env.planId }}
           filePath: ${{ env.repoName }}/target/${{steps.artifact_file.outputs.artifactName}}.zip 
           artifactVersion: ${{steps.artifact_file.outputs.artifactVersion}}
           clientId: ${{ env.clientId }}
