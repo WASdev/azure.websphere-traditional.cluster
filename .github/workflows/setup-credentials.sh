@@ -33,6 +33,12 @@ VM_ADMIN_ID=
 VM_ADMIN_PASSWORD=
 # Password for database user db2inst1 (IBM DB2) and testuser (other database types)
 DATABASE_PASSWORD=
+# Client ID for an Azure AD application registered in the Partner Center
+CLIENT_ID=
+# Secret value of the Azure AD application registered in the Partner Center
+SECRET_VALUE=
+# Tenant ID of the Azure AD application registered in the Partner Center
+TENANT_ID=
 # Optional: Web hook for Microsoft Teams channel
 MSTEAMS_WEBHOOK=
 
@@ -102,6 +108,21 @@ if [ "$DATABASE_PASSWORD" == '' ] ; then
     read -r -p "Enter password for database user db2inst1 (IBM DB2) and testuser (other database types): " DATABASE_PASSWORD
 fi
 
+# get CLIENT_ID if not set at the beginning of this file
+if [ "$CLIENT_ID" == '' ] ; then
+    read -r -p "Enter client ID for an Azure AD application registered in the Partner Center: " CLIENT_ID
+fi
+
+# get SECRET_VALUE if not set at the beginning of this file
+if [ "$SECRET_VALUE" == '' ] ; then
+    read -r -p "Enter secret value for the Azure AD application registered in the Partner Center: " SECRET_VALUE
+fi
+
+# get TENANT_ID if not set at the beginning of this file
+if [ "$TENANT_ID" == '' ] ; then
+    read -r -p "Enter tenant ID for the Azure AD application registered in the Partner Center: " TENANT_ID
+fi
+
 # Optional: get MSTEAMS_WEBHOOK if not set at the beginning of this file
 if [ "$MSTEAMS_WEBHOOK" == '' ] ; then
     read -r -p "[Optional] Enter Web hook for Microsoft Teams channel, or press 'Enter' to ignore: " MSTEAMS_WEBHOOK
@@ -167,6 +188,9 @@ if $USE_GITHUB_CLI; then
     gh ${GH_FLAGS} secret set VM_ADMIN_ID -b"${VM_ADMIN_ID}"
     gh ${GH_FLAGS} secret set VM_ADMIN_PASSWORD -b"${VM_ADMIN_PASSWORD}"
     gh ${GH_FLAGS} secret set DATABASE_PASSWORD -b"${DATABASE_PASSWORD}"
+    gh ${GH_FLAGS} secret set CLIENT_ID -b"${CLIENT_ID}"
+    gh ${GH_FLAGS} secret set SECRET_VALUE -b"${SECRET_VALUE}"
+    gh ${GH_FLAGS} secret set TENANT_ID -b"${TENANT_ID}"
     gh ${GH_FLAGS} secret set MSTEAMS_WEBHOOK -b"${MSTEAMS_WEBHOOK}"
     msg "${GREEN}Secrets configured"
   } || {
@@ -189,6 +213,12 @@ if [ $USE_GITHUB_CLI == false ]; then
   msg "${GREEN}${VM_ADMIN_PASSWORD}"
   msg "${YELLOW}\"DATABASE_PASSWORD\""
   msg "${GREEN}${DATABASE_PASSWORD}"
+  msg "${YELLOW}\"CLIENT_ID\""
+  msg "${GREEN}${CLIENT_ID}"
+  msg "${YELLOW}\"SECRET_VALUE\""
+  msg "${GREEN}${SECRET_VALUE}"
+  msg "${YELLOW}\"TENANT_ID\""
+  msg "${GREEN}${TENANT_ID}"
   msg "${YELLOW}\"MSTEAMS_WEBHOOK\""
   msg "${GREEN}${MSTEAMS_WEBHOOK}"
   msg "${NOFORMAT}========================================================================"
