@@ -77,6 +77,9 @@ if $USE_GITHUB_CLI; then
     gh ${GH_FLAGS} secret remove VM_ADMIN_ID
     gh ${GH_FLAGS} secret remove VM_ADMIN_PASSWORD
     gh ${GH_FLAGS} secret remove DATABASE_PASSWORD
+    gh ${GH_FLAGS} secret remove CLIENT_ID
+    gh ${GH_FLAGS} secret remove SECRET_VALUE
+    gh ${GH_FLAGS} secret remove TENANT_ID
     gh ${GH_FLAGS} secret remove MSTEAMS_WEBHOOK
     msg "${GREEN}Secrets removed"
   } || {
@@ -94,6 +97,9 @@ if [ $USE_GITHUB_CLI == false ]; then
   msg "${YELLOW}\"VM_ADMIN_ID\""
   msg "${YELLOW}\"VM_ADMIN_PASSWORD\""
   msg "${YELLOW}\"DATABASE_PASSWORD\""
+  msg "${YELLOW}\"CLIENT_ID\""
+  msg "${YELLOW}\"SECRET_VALUE\""
+  msg "${YELLOW}\"TENANT_ID\""
   msg "${YELLOW}\"MSTEAMS_WEBHOOK\""
   msg "${NOFORMAT}========================================================================"
 fi
