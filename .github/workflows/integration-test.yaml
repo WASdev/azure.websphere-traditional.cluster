@@ -294,7 +294,7 @@ jobs:
           fi
       - name: Install and verify websphere-cafe
         run: |
-          nsgName=$(az network nsg list -g ${testResourceGroup} --query [0].name -o tsv)
+          nsgName=$(az network nsg list -g ${testResourceGroup} --query "[?contains(name, '-nsg')].name" -o tsv)
           publicIp=$(az vm list -g ${testResourceGroup} -d --query "[?contains(name, 'dmgr')].publicIps" -o tsv)
           vmName=$(az vm list -g ${testResourceGroup} --query "[?contains(name, 'dmgr')].name" -o tsv)
           # Open port 22 in the nsg
