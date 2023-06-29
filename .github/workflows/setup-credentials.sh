@@ -42,8 +42,7 @@ SECRET_VALUE=
 # Tenant ID of the Azure AD application registered in the Partner Center
 TENANT_ID=
 # Optional: Web hook for Microsoft Teams channel
-#      Copyright (c) IBM Corporation.STEAMS_WEBHOOK=
-#
+MSTEAMS_WEBHOOK=
 
 # End set environment variables
 ################################################
