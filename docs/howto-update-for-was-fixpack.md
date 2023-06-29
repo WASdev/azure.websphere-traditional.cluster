@@ -22,7 +22,7 @@ Please follow sections below in order to update the solution for next tWAS fixpa
      GPG_RPM_PUBLIC_KEY_URL=https://software.bigfix.com/download/bes/95/RPM-GPG-KEY-BigFix-9-V2
      ```
 
-     Note: these properties shouldn't be updated unless there're new versions/updates available.
+     Note: these properties shouldn't be updated unless there are new versions/updates available.
 
    * For IHS version in `ihs` image, update the following properties in file [`virtualimage.properties`](https://github.com/WASdev/azure.websphere-traditional.image/blob/main/ihs/src/main/scripts/virtualimage.properties#L14-L17), e.g.:
 
