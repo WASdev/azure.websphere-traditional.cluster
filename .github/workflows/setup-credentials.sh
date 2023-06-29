@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#      Copyright (c) IBM Corporation.
+#      Copyright (c) Microsoft Corporation.
 ################################################
 # This script is invoked by a human who:
 # - has done az login.
@@ -40,7 +42,8 @@ SECRET_VALUE=
 # Tenant ID of the Azure AD application registered in the Partner Center
 TENANT_ID=
 # Optional: Web hook for Microsoft Teams channel
-MSTEAMS_WEBHOOK=
+#      Copyright (c) IBM Corporation.STEAMS_WEBHOOK=
+#
 
 # End set environment variables
 ################################################
