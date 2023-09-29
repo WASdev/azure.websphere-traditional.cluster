@@ -210,7 +210,7 @@ var name_publicIPAddress = '${name_dmgrVM}-ip'
 var name_share = 'wasshare'
 var name_storageAccount = 'storage${guidValue}'
 var name_storageAccountPrivateEndpoint = 'storagepe${guidValue}'
-var ref_storageAccountPrivateEndpoint = const_configureIHS ? reference(name_storageAccountPrivateEndpoint, '2021-05-01').customDnsConfigs[0].ipAddresses[0] : ''
+var ref_storageAccountPrivateEndpoint = const_configureIHS ? reference(name_storageAccountPrivateEndpoint, '2023-01-01').customDnsConfigs[0].ipAddresses[0] : ''
 
 var obj_uamiForDeploymentScript = {
   type: 'UserAssigned'
@@ -257,7 +257,7 @@ module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureA
   }
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: name_storageAccount
   location: location
   sku: {
@@ -266,7 +266,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   kind: 'StorageV2'
 }
 
-resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = if (const_configureIHS) {
+resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-06-01' = if (const_configureIHS) {
   name: name_storageAccountPrivateEndpoint
   location: location
   properties: {
@@ -292,12 +292,12 @@ resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-
   ]
 }
 
-resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@2021-09-01' = if (const_configureIHS) {
+resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' = if (const_configureIHS) {
   parent: storageAccount
   name: 'default'
 }
 
-resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-09-01' = if (const_configureIHS) {
+resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = if (const_configureIHS) {
   parent: storageAccountFileSvc
   name: name_share
   properties: {
@@ -305,7 +305,7 @@ resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices
   }
 }
 
-resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2021-08-01' = if (const_newVNet) {
+resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-06-01' = if (const_newVNet) {
   name: name_networkSecurityGroup
   location: location
   properties: {
@@ -367,7 +367,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2021-08-0
   }
 }
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-08-01' = if (const_newVNet) {
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-06-01' = if (const_newVNet) {
   name: vnetForCluster.name
   location: location
   properties: {
@@ -407,22 +407,22 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-08-01' = if (con
   }
 }
 
-resource existingVNet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = if (!const_newVNet) {
+resource existingVNet 'Microsoft.Network/virtualNetworks@2023-06-01' existing = if (!const_newVNet) {
   name: vnetForCluster.name
   scope: resourceGroup(vnetRGNameForCluster)
 }
 
-resource existingAppGwSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (!const_newVNet && const_configureAppGw) {
+resource existingAppGwSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-06-01' existing = if (!const_newVNet && const_configureAppGw) {
   parent: existingVNet
   name: vnetForCluster.subnets.gatewaySubnet.name
 }
 
-resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (!const_newVNet) {
+resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-06-01' existing = if (!const_newVNet) {
   parent: existingVNet
   name: vnetForCluster.subnets.clusterSubnet.name
 }
 
-resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (const_newVNet) {
+resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (const_newVNet) {
   name: name_publicIPAddress
   location: location
   properties: {
@@ -433,7 +433,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (
   }
 }
 
-resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = if (const_newVNet) {
+resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2023-06-01' = if (const_newVNet) {
   name: '${name_dmgrVM}-if'
   location: location
   properties: {
@@ -460,7 +460,7 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01'
   ]
 }
 
-resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-08-01' = if (!const_newVNet) {
+resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2023-06-01' = if (!const_newVNet) {
   name: '${name_dmgrVM}-no-pub-ip-if'
   location: location
   properties: {
@@ -478,7 +478,7 @@ resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021
   }
 }
 
-resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2021-08-01' = [for i in range(0, (numberOfNodes - 1)): {
+resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2023-06-01' = [for i in range(0, (numberOfNodes - 1)): {
   name: '${const_managedVMPrefix}${(i + 1)}-if'
   location: location
   properties: {
@@ -573,7 +573,7 @@ module appGatewayEndPid './modules/_pids/_empty.bicep' = if (const_configureAppG
   ]
 }
 
-resource clusterVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in range(0, numberOfNodes): {
+resource clusterVMs 'Microsoft.Compute/virtualMachines@2023-07-01' = [for i in range(0, numberOfNodes): {
   name: i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}'
   location: location
   properties: {
@@ -612,7 +612,7 @@ resource clusterVMs 'Microsoft.Compute/virtualMachines@2022-03-01' = [for i in r
     diagnosticsProfile: {
       bootDiagnostics: {
         enabled: true
-        storageUri: reference(storageAccount.id, '2021-09-01').primaryEndpoints.blob
+        storageUri: reference(storageAccount.id, '2023-01-01').primaryEndpoints.blob
       }
     }
   }
@@ -645,7 +645,7 @@ module dbConnectionStartPid './modules/_pids/_empty.bicep' = if (enableDB) {
   ]
 }
 
-resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = [for i in range(0, numberOfNodes): {
+resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2023-07-01' = [for i in range(0, numberOfNodes): {
   name: format('{0}/install', i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}')
   location: location
   properties: {
@@ -669,7 +669,7 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2022-
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, const_configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
+      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, const_configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2023-01-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
     }
   }
   dependsOn: [
@@ -701,7 +701,7 @@ module ihsStartPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   }
 }
 
-resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = if (const_configureIHS && const_newVNet) {
+resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (const_configureIHS && const_newVNet) {
   name: name_ihsPublicIPAddress
   location: location
   properties: {
@@ -712,7 +712,7 @@ resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2021-08-01' = i
   }
 }
 
-resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' = if (const_configureIHS && const_newVNet) {
+resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2023-06-01' = if (const_configureIHS && const_newVNet) {
   name: '${name_ihsVM}-if'
   location: location
   properties: {
@@ -739,7 +739,7 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2021-08-01' 
   ]
 }
 
-resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-08-01' = if (const_configureIHS && !const_newVNet) {
+resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2023-06-01' = if (const_configureIHS && !const_newVNet) {
   name: '${name_ihsVM}-no-pub-ip-if'
   location: location
   properties: {
@@ -757,7 +757,7 @@ resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2021-
   }
 }
 
-resource ihsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = if (const_configureIHS) {
+resource ihsVM 'Microsoft.Compute/virtualMachines@2023-07-01' = if (const_configureIHS) {
   name: name_ihsVM
   location: location
   properties: {
@@ -796,7 +796,7 @@ resource ihsVM 'Microsoft.Compute/virtualMachines@2022-03-01' = if (const_config
     diagnosticsProfile: {
       bootDiagnostics: {
         enabled: true
-        storageUri: reference(storageAccount.id, '2021-09-01').primaryEndpoints.blob
+        storageUri: reference(storageAccount.id, '2023-01-01').primaryEndpoints.blob
       }
     }
   }
@@ -816,7 +816,7 @@ module ihsVMCreated './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   ]
 }
 
-resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = if (const_configureIHS) {
+resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2023-07-01' = if (const_configureIHS) {
   parent: ihsVM
   name: 'install'
   location: location
@@ -831,7 +831,7 @@ resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2022-03-01
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '2021-09-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint)
+      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '2023-01-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint)
     }
   }
   dependsOn: [
