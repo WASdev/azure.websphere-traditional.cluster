@@ -257,7 +257,7 @@ module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureA
   }
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-06-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: name_storageAccount
   location: location
   sku: {
@@ -292,12 +292,12 @@ resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-
   ]
 }
 
-resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@2023-06-01' = if (const_configureIHS) {
+resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' = if (const_configureIHS) {
   parent: storageAccount
   name: 'default'
 }
 
-resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-06-01' = if (const_configureIHS) {
+resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = if (const_configureIHS) {
   parent: storageAccountFileSvc
   name: name_share
   properties: {
@@ -612,7 +612,7 @@ resource clusterVMs 'Microsoft.Compute/virtualMachines@2023-07-01' = [for i in r
     diagnosticsProfile: {
       bootDiagnostics: {
         enabled: true
-        storageUri: reference(storageAccount.id, '2023-06-01').primaryEndpoints.blob
+        storageUri: reference(storageAccount.id, '2023-01-01').primaryEndpoints.blob
       }
     }
   }
@@ -669,7 +669,7 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2023-
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, const_configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2023-06-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
+      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, const_configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2023-01-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
     }
   }
   dependsOn: [
@@ -796,7 +796,7 @@ resource ihsVM 'Microsoft.Compute/virtualMachines@2023-07-01' = if (const_config
     diagnosticsProfile: {
       bootDiagnostics: {
         enabled: true
-        storageUri: reference(storageAccount.id, '2023-06-01').primaryEndpoints.blob
+        storageUri: reference(storageAccount.id, '2023-01-01').primaryEndpoints.blob
       }
     }
   }
@@ -831,7 +831,7 @@ resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2023-07-01
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '2023-06-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint)
+      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '2023-01-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint)
     }
   }
   dependsOn: [
