@@ -14,7 +14,7 @@
     "twasNdImageSkuDescription": "This is the twas-nd 'Plan ID' of the plan within the 'Azure Virtual Machine' offer",
     "twasNdImageSku": "2023-03-27-twas-cluster-base-image",
     "twasNdImageVersionDescription": "This is the twas-nd 'Disk version' of the VM image of the plan within the 'Azure Virtual Machine' offer",
-    "twasNdImageVersion": "9.0.20231213",
+    "twasNdImageVersion": "9.0.20231221",
     "ihsImageOfferDescription": "This is the ihs 'Offer ID' of the 'Azure Virtual Machine' offer type",
     "ihsImageOffer": "2023-03-27-ihs-base-image",
     "ihsImageSkuDescription": "This is the ihs 'Plan ID' of the plan within the 'Azure Virtual Machine' offer",
