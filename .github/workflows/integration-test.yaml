@@ -399,7 +399,6 @@ jobs:
                 echo "Job integration-test succeeded."
             fi
 
-
   delete-resources:
     needs: notification
     runs-on: ubuntu-latest
