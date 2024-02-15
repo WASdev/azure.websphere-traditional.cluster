@@ -235,7 +235,7 @@ var configBase64 = loadFileAsBase64('config.json')
 var config = base64ToJson(configBase64)
 
 module partnerCenterPid './modules/_pids/_empty.bicep' = {
-  name: 'pid-fb16aee1-039d-45dc-a476-806224793a6c-partnercenter'
+  name: 'pid-83c32565-42aa-43d9-92e9-9c02289c7fbd-partnercenter'
   params: {
   }
 }
