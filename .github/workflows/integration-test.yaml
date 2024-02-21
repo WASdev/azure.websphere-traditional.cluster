@@ -68,8 +68,8 @@ env:
   vmAdminPassword: ${{ secrets.VM_ADMIN_PASSWORD }}
   dbInstanceName: db${{ github.run_id }}${{ github.run_number }}
   dbPassword: ${{ secrets.DATABASE_PASSWORD }}
-  testResourceGroup: twasClusterTestRG${{ github.run_id }}${{ github.run_number }}
-  testDeploymentName: twasClusterTestDeployment${{ github.run_id }}${{ github.run_number }}
+  testResourceGroup: twasClusterTestRG-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+  testDeploymentName: twasClusterTestDeployment-${{ github.run_id }}-${{ github.run_number }}
   location: eastus
   scriptLocation: https://raw.githubusercontent.com/${{ secrets.USER_NAME }}/azure.websphere-traditional.cluster/$GITHUB_REF_NAME/test/
   curlParameters: "--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180"
