@@ -27,7 +27,7 @@
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.22</version>
+        <version>${version.azure.websphere-traditional.cluster}</version>
         <relativePath></relativePath>
     </parent>
 
@@ -37,6 +37,7 @@
     <properties>
         <git.repo>WASdev</git.repo>
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo}/${project.artifactId}/${git.tag}</artifactsLocationBase>
+        <version.azure.websphere-traditional.cluster>1.0.22</version.azure.websphere-traditional.cluster>
     </properties>
 
     <repositories>
