@@ -27,10 +27,10 @@
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.19</version>
+        <version>1.0.22</version>
         <relativePath></relativePath>
     </parent>
-    
+
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
@@ -38,4 +38,20 @@
         <git.repo>WASdev</git.repo>
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo}/${project.artifactId}/${git.tag}</artifactsLocationBase>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
