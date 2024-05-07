@@ -257,7 +257,7 @@ module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureA
   }
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionForStorage}' = {
   name: name_storageAccount
   location: location
   sku: {
@@ -266,7 +266,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   kind: 'StorageV2'
 }
 
-resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = if (const_configureIHS) {
+resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@${azure.apiVersionForPrivateEndpoint}' = if (const_configureIHS) {
   name: name_storageAccountPrivateEndpoint
   location: location
   properties: {
@@ -292,12 +292,12 @@ resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-
   ]
 }
 
-resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@2023-05-01' = if (const_configureIHS) {
+resource storageAccountFileSvc 'Microsoft.Storage/storageAccounts/fileServices@${azure.apiVersionForStorageFileService}' = if (const_configureIHS) {
   parent: storageAccount
   name: 'default'
 }
 
-resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-05-01' = if (const_configureIHS) {
+resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@${azure.apiVersionForStorageFileService}' = if (const_configureIHS) {
   parent: storageAccountFileSvc
   name: name_share
   properties: {
@@ -305,7 +305,7 @@ resource storageAccountFileShare 'Microsoft.Storage/storageAccounts/fileServices
   }
 }
 
-resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-11-01' = if (const_newVNet) {
+resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@${azure.apiVersionForNetworkSecurityGroups}' = if (const_newVNet) {
   name: name_networkSecurityGroup
   location: location
   properties: {
@@ -367,7 +367,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-11-0
   }
 }
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = if (const_newVNet) {
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@${azure.apiVersionForVirtualNetworks}' = if (const_newVNet) {
   name: vnetForCluster.name
   location: location
   properties: {
@@ -407,22 +407,22 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = if (con
   }
 }
 
-resource existingVNet 'Microsoft.Network/virtualNetworks@2023-11-01' existing = if (!const_newVNet) {
+resource existingVNet 'Microsoft.Network/virtualNetworks@${azure.apiVersionForVirtualNetworks}' existing = if (!const_newVNet) {
   name: vnetForCluster.name
   scope: resourceGroup(vnetRGNameForCluster)
 }
 
-resource existingAppGwSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-11-01' existing = if (!const_newVNet && const_configureAppGw) {
+resource existingAppGwSubnet 'Microsoft.Network/virtualNetworks/subnets@${azure.apiVersionForVirtualNetworks}' existing = if (!const_newVNet && const_configureAppGw) {
   parent: existingVNet
   name: vnetForCluster.subnets.gatewaySubnet.name
 }
 
-resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-11-01' existing = if (!const_newVNet) {
+resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@${azure.apiVersionForVirtualNetworks}' existing = if (!const_newVNet) {
   parent: existingVNet
   name: vnetForCluster.subnets.clusterSubnet.name
 }
 
-resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-11-01' = if (const_newVNet) {
+resource publicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = if (const_newVNet) {
   name: name_publicIPAddress
   location: location
   properties: {
@@ -433,7 +433,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-11-01' = if (
   }
 }
 
-resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2023-11-01' = if (const_newVNet) {
+resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_newVNet) {
   name: '${name_dmgrVM}-if'
   location: location
   properties: {
@@ -460,7 +460,7 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@2023-11-01'
   ]
 }
 
-resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2023-11-01' = if (!const_newVNet) {
+resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (!const_newVNet) {
   name: '${name_dmgrVM}-no-pub-ip-if'
   location: location
   properties: {
@@ -478,7 +478,7 @@ resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2023
   }
 }
 
-resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@2023-11-01' = [for i in range(0, (numberOfNodes - 1)): {
+resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = [for i in range(0, (numberOfNodes - 1)): {
   name: '${const_managedVMPrefix}${(i + 1)}-if'
   location: location
   properties: {
@@ -573,7 +573,7 @@ module appGatewayEndPid './modules/_pids/_empty.bicep' = if (const_configureAppG
   ]
 }
 
-resource clusterVMs 'Microsoft.Compute/virtualMachines@2024-03-01' = [for i in range(0, numberOfNodes): {
+resource clusterVMs 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMachines}' = [for i in range(0, numberOfNodes): {
   name: i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}'
   location: location
   properties: {
@@ -645,7 +645,8 @@ module dbConnectionStartPid './modules/_pids/_empty.bicep' = if (enableDB) {
   ]
 }
 
-resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2024-03-01' = [for i in range(0, numberOfNodes): {
+resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@${azure.apiVersionForVirtualMachineExtensions}' = [for i in range(0, numberOfNodes): {
+ from azure-common.properties)
   name: format('{0}/install', i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}')
   location: location
   properties: {
@@ -701,7 +702,7 @@ module ihsStartPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   }
 }
 
-resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2023-11-01' = if (const_configureIHS && const_newVNet) {
+resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = if (const_configureIHS && const_newVNet) {
   name: name_ihsPublicIPAddress
   location: location
   properties: {
@@ -712,7 +713,7 @@ resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@2023-11-01' = i
   }
 }
 
-resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2023-11-01' = if (const_configureIHS && const_newVNet) {
+resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_configureIHS && const_newVNet) {
   name: '${name_ihsVM}-if'
   location: location
   properties: {
@@ -739,7 +740,7 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@2023-11-01' 
   ]
 }
 
-resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2023-11-01' = if (const_configureIHS && !const_newVNet) {
+resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_configureIHS && !const_newVNet) {
   name: '${name_ihsVM}-no-pub-ip-if'
   location: location
   properties: {
@@ -757,7 +758,8 @@ resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2023-
   }
 }
 
-resource ihsVM 'Microsoft.Compute/virtualMachines@2024-03-01' = if (const_configureIHS) {
+resource ihsVM 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMachines}' = if (const_configureIHS) {
+ from azure-common.properties)
   name: name_ihsVM
   location: location
   properties: {
@@ -816,7 +818,8 @@ module ihsVMCreated './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   ]
 }
 
-resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2024-03-01' = if (const_configureIHS) {
+resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@${azure.apiVersionForVirtualMachineExtensions}' = if (const_configureIHS) {
+ from azure-common.properties)
   parent: ihsVM
   name: 'install'
   location: location
