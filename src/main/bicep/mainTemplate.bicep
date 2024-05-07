@@ -210,7 +210,7 @@ var name_publicIPAddress = '${name_dmgrVM}-ip'
 var name_share = 'wasshare'
 var name_storageAccount = 'storage${guidValue}'
 var name_storageAccountPrivateEndpoint = 'storagepe${guidValue}'
-var ref_storageAccountPrivateEndpoint = const_configureIHS ? reference(name_storageAccountPrivateEndpoint, '2023-06-01').customDnsConfigs[0].ipAddresses[0] : ''
+var ref_storageAccountPrivateEndpoint = const_configureIHS ? reference(name_storageAccountPrivateEndpoint, '${azure.apiVersionForStorage}').customDnsConfigs[0].ipAddresses[0] : ''
 
 var obj_uamiForDeploymentScript = {
   type: 'UserAssigned'
@@ -612,7 +612,7 @@ resource clusterVMs 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirt
     diagnosticsProfile: {
       bootDiagnostics: {
         enabled: true
-        storageUri: reference(storageAccount.id, '2023-01-01').primaryEndpoints.blob
+        storageUri: reference(storageAccount.id, '${azure.apiVersionForStorage}').primaryEndpoints.blob
       }
     }
   }
@@ -670,7 +670,7 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@${azu
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, const_configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '2023-01-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
+      commandToExecute: format('sh install.sh {0}{1}{2}', i == 0, const_arguments, const_configureIHS ? format(' {0} {1}{2} {3}', name_storageAccount, listKeys(storageAccount.id, '${azure.apiVersionForStorage}').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint) : '')
     }
   }
   dependsOn: [
@@ -798,7 +798,7 @@ resource ihsVM 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMa
     diagnosticsProfile: {
       bootDiagnostics: {
         enabled: true
-        storageUri: reference(storageAccount.id, '2023-01-01').primaryEndpoints.blob
+        storageUri: reference(storageAccount.id, '${azure.apiVersionForStorage}').primaryEndpoints.blob
       }
     }
   }
@@ -834,7 +834,7 @@ resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@${azure.ap
       ]
     }
     protectedSettings: {
-      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '2023-01-01').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint)
+      commandToExecute: format('sh configure-ihs.sh{0} {1}{2} {3}', const_ihsArguments1, listKeys(storageAccount.id, '${azure.apiVersionForStorage}').keys[0].value, const_ihsArguments2, ref_storageAccountPrivateEndpoint)
     }
   }
   dependsOn: [
