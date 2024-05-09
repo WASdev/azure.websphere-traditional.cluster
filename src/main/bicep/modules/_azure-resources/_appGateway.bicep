@@ -83,7 +83,7 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@${azure.apiVersion
   }
 }
 
-resource wafv2AppGateway 'Microsoft.Network/applicationGateways3-11-01' = {
+resource wafv2AppGateway 'Microsoft.Network/applicationGateways@${azure.apiVersionForApplicationGateways}$' = {
   name: name_appGateway
   location: location
   properties: {
