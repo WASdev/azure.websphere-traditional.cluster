@@ -645,7 +645,7 @@ module dbConnectionStartPid './modules/_pids/_empty.bicep' = if (enableDB) {
   ]
 }
 
-resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2024-04-01' = [for i in range(0, numberOfNodes): {
+resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@2024-03-01' = [for i in range(0, numberOfNodes): {
   name: format('{0}/install', i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}')
   location: location
   properties: {
@@ -757,7 +757,7 @@ resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@2023-
   }
 }
 
-resource ihsVM 'Microsoft.Compute/virtualMachines@2024-04-01' = if (const_configureIHS) {
+resource ihsVM 'Microsoft.Compute/virtualMachines@2024-03-01' = if (const_configureIHS) {
   name: name_ihsVM
   location: location
   properties: {
@@ -816,7 +816,7 @@ module ihsVMCreated './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   ]
 }
 
-resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2024-04-01' = if (const_configureIHS) {
+resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@2024-03-01' = if (const_configureIHS) {
   parent: ihsVM
   name: 'install'
   location: location
