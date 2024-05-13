@@ -210,7 +210,7 @@ var name_publicIPAddress = '${name_dmgrVM}-ip'
 var name_share = 'wasshare'
 var name_storageAccount = 'storage${guidValue}'
 var name_storageAccountPrivateEndpoint = 'storagepe${guidValue}'
-var ref_storageAccountPrivateEndpoint = const_configureIHS ? reference(name_storageAccountPrivateEndpoint, '${azure.apiVersionForStorage}').customDnsConfigs[0].ipAddresses[0] : ''
+var ref_storageAccountPrivateEndpoint = const_configureIHS ? reference(name_storageAccountPrivateEndpoint, '${azure.apiVersionForPrivateEndpoint}').customDnsConfigs[0].ipAddresses[0] : ''
 
 var obj_uamiForDeploymentScript = {
   type: 'UserAssigned'
