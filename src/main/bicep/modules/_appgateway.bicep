@@ -33,7 +33,7 @@ param workerNodePrefix string
 var name_appGateway = appGatewayName
 
 // get key vault object from a resource group
-resource existingKeyvault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+resource existingKeyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' existing = {
   name: keyVaultName
   scope: resourceGroup()
 }

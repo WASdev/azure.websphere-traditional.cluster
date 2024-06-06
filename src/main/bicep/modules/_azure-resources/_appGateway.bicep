@@ -69,7 +69,7 @@ var obj_frontendIPConfigurations1 = [
   }
 ]
 
-resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2023-11-01' = {
+resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = {
   name: gatewayPublicIPAddressName
   sku: {
     name: 'Standard'
@@ -83,7 +83,7 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2023-11-01' = {
   }
 }
 
-resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2023-11-01' = {
+resource wafv2AppGateway 'Microsoft.Network/applicationGateways@${azure.apiVersionForApplicationGateways}' = {
   name: name_appGateway
   location: location
   properties: {
@@ -129,7 +129,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2023-11-01' = {
         name: name_managedBackendAddressPool
         properties: {
           backendAddresses: [for i in range(1, numberOfWorkerNodes): {
-            ipAddress: reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '2021-08-01').ipConfigurations[0].properties.privateIPAddress
+            ipAddress: reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress
           }]
         }
       }
@@ -225,7 +225,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2023-11-01' = {
             conditions: [
               {
                 variable: 'http_resp_Location'
-                pattern: format('(https?):\\/\\/{0}:{1}(.*)$', reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '2021-08-01').ipConfigurations[0].properties.privateIPAddress, const_backendPort)
+                pattern: format('(https?):\\/\\/{0}:{1}(.*)$', reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress, const_backendPort)
                 ignoreCase: true
                 negate: false
               }
@@ -250,7 +250,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2023-11-01' = {
             conditions: [
               {
                 variable: 'http_resp_Location'
-                pattern: format('(https?):\\/\\/{0}:{1}(.*)$', reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '2021-08-01').ipConfigurations[0].properties.privateIPAddress, const_backendPort)
+                pattern: format('(https?):\\/\\/{0}:{1}(.*)$', reference(resourceId('Microsoft.Network/networkInterfaces', '${workerNodePrefix}${i}-if'), '${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress, const_backendPort)
                 ignoreCase: true
                 negate: false
               }
