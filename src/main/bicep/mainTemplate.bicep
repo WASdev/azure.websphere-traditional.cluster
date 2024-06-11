@@ -646,7 +646,6 @@ module dbConnectionStartPid './modules/_pids/_empty.bicep' = if (enableDB) {
 }
 
 resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@${azure.apiVersionForVirtualMachineExtensions}' = [for i in range(0, numberOfNodes): {
- from azure-common.properties)
   name: format('{0}/install', i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}')
   location: location
   properties: {
@@ -759,7 +758,6 @@ resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@${azu
 }
 
 resource ihsVM 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMachines}' = if (const_configureIHS) {
- from azure-common.properties)
   name: name_ihsVM
   location: location
   properties: {
@@ -819,7 +817,6 @@ module ihsVMCreated './modules/_pids/_empty.bicep' = if (const_configureIHS) {
 }
 
 resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@${azure.apiVersionForVirtualMachineExtensions}' = if (const_configureIHS) {
- from azure-common.properties)
   parent: ihsVM
   name: 'install'
   location: location
