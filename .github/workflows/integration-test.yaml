@@ -35,6 +35,11 @@ on:
       ihsImageResourceId:
         description: 'Private IHS vm image resource id. Only requried for IHS VM image cicd, ignore it otherwise.'
         required: false
+      location:
+        description: 'Location of the Azure resources'
+        required: true
+        type: string
+        default: 'eastus'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
@@ -70,7 +75,7 @@ env:
   dbPassword: ${{ secrets.DATABASE_PASSWORD }}
   testResourceGroup: twasClusterTestRG-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
   testDeploymentName: twasClusterTestDeployment-${{ github.run_id }}-${{ github.run_number }}
-  location: eastus
+  location: ${{ github.event.inputs.location || 'eastus' }}
   scriptLocation: https://raw.githubusercontent.com/${{ secrets.USER_NAME }}/azure.websphere-traditional.cluster/$GITHUB_REF_NAME/test/
   curlParameters: "--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180"
 jobs:
