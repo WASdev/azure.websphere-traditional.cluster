@@ -314,7 +314,7 @@ JDBC_DRIVER_CLASS_PATH=
 
 # Create cluster by creating deployment manager, node agent & add nodes to be managed
 if [ "$dmgr" = True ]; then
-    create_dmgr_profile Dmgr001 $(hostname) Dmgr001Node Dmgr001NodeCell "$adminUserName" "$adminPassword"
+    create_dmgr_profile Dmgr001 $(hostname -A) Dmgr001Node Dmgr001NodeCell "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Dmgr001 "$adminUserName" "$adminPassword"
     create_was_service dmgr Dmgr001
     ${WAS_ND_INSTALL_DIRECTORY}/profiles/Dmgr001/bin/startServer.sh dmgr
@@ -341,7 +341,7 @@ if [ "$dmgr" = True ]; then
         fi
     fi
 else
-    create_custom_profile Custom $(hostname) $(hostname)Node01 $dmgrHostName 8879 "$adminUserName" "$adminPassword"
+    create_custom_profile Custom $(hostname -A) $(hostname)Node01 $dmgrHostName.$(hostname -A | cut -d'.' -f2-) 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
     create_was_service nodeagent Custom
 
