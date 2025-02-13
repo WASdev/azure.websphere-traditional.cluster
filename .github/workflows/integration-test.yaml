@@ -346,11 +346,7 @@ jobs:
             websphereCafeUrl=$(echo $outputs | jq -r '.appGatewayHttpURL.value')websphere-cafe
           fi
           if [ -n "$websphereCafeUrl" ]; then
-            curl $websphereCafeUrl
-            if [[ $? -ne 0 ]]; then
-              echo "Failed to access ${websphereCafeUrl}."
-              exit 1
-            fi
+            curl $websphereCafeUrl -k --fail
           fi
       - name: Generate artifact file name and path
         id: artifact_file
