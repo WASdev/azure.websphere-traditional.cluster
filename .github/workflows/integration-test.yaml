@@ -35,6 +35,11 @@ on:
       ihsImageResourceId:
         description: 'Private IHS vm image resource id. Only requried for IHS VM image cicd, ignore it otherwise.'
         required: false
+      location:
+        description: 'Location of the Azure resources'
+        required: true
+        type: string
+        default: 'eastus'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
@@ -70,7 +75,7 @@ env:
   dbPassword: ${{ secrets.DATABASE_PASSWORD }}
   testResourceGroup: twasClusterTestRG-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
   testDeploymentName: twasClusterTestDeployment-${{ github.run_id }}-${{ github.run_number }}
-  location: eastus
+  location: ${{ github.event.inputs.location || 'eastus' }}
   scriptLocation: https://raw.githubusercontent.com/${{ secrets.USER_NAME }}/azure.websphere-traditional.cluster/$GITHUB_REF_NAME/test/
   curlParameters: "--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180"
 jobs:
@@ -177,23 +182,19 @@ jobs:
             --resource-group ${{ env.testResourceGroup }} --server ${{ env.dbInstanceName }} \
             --name "AllowAllAzureIps" --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
           az sql db create --resource-group ${{ env.testResourceGroup }} --server ${{ env.dbInstanceName }} --name testdb
-      - name: Deploy an instance of Azure Database for PostgreSQL
+      - name: Deploy an instance of Azure Database for PostgreSQL Flexible Server
         if: ${{ inputs.databaseType == 'postgres' || github.event.client_payload.databaseType == 'postgres' }}
         run: |
           az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
-          az postgres server create \
-            --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
-            --admin-user testuser --admin-password ${{ env.dbPassword }} \
-            --location ${{ env.location }}
-          host=$(az postgres server show \
+          # Create a PostgreSQL Flexible Server that allows Azure services to access
+          az postgres flexible-server create \
+            --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} --database-name testdb \
+            --admin-user testuser --admin-password ${{ env.dbPassword }} --public-access 0.0.0.0 \
+            --location ${{ env.location }} --sku-name Standard_B1ms --tier Burstable
+          host=$(az postgres flexible-server show \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
             --query "fullyQualifiedDomainName" -o tsv)
           echo "postgresqlHost=${host}" >> $GITHUB_ENV
-          # Allow Azure services to access
-          az postgres server firewall-rule create \
-            --resource-group ${{ env.testResourceGroup }} --server ${{ env.dbInstanceName }} \
-            --name "AllowAllAzureIps" --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
-          az postgres db create --resource-group ${{ env.testResourceGroup }} --server ${{ env.dbInstanceName }} --name testdb
       - name: Build ${{ env.repoName }}
         run: |
           enableDB=false
@@ -221,7 +222,7 @@ jobs:
             enableDB=true
             databaseType=postgres
             dsConnectionURL="jdbc:postgresql://${{ env.postgresqlHost }}:5432/testdb"
-            dbUser=testuser@${{ env.dbInstanceName }}
+            dbUser=testuser
           fi
           echo "enableDB=${enableDB}" >> $GITHUB_ENV
           selectLoadBalancer=none
