@@ -14,3 +14,4 @@ changebundle.txt
 **/.classpath
 **/*.versionsBackup
 .DS_Store
+/.idea/*
