@@ -24,23 +24,28 @@ provider = ['providerType', 'Microsoft SQL Server JDBC Driver']
 jdbcAttrs = [n1,  implCN, cls, provider]
 jdbCProvider = AdminConfig.create('JDBCProvider', cluster, jdbcAttrs)
 
-# JASS Auth entry
+# Define user alias
 userAlias = 'wasnd-cluster/sqlserver'
-alias = ['alias', userAlias]
-userid = ['userId', '${SQLSERVER_DATABASE_USER_NAME}']
-password = ['password', '${SQLSERVER_DATABASE_USER_PASSWORD}']
-jaasAttrs = [alias, userid, password]
-security = AdminConfig.getid('/Security:/')
-j2cUser = AdminConfig.create('JAASAuthData', security, jaasAttrs)
+
+# JASS Auth entry
+enablePswlessConnection = ${ENABLE_PASSWORDLESS_CONNECTION}
+if not enablePswlessConnection:
+    alias = ['alias', userAlias]
+    userid = ['userId', '${SQLSERVER_DATABASE_USER_NAME}']
+    password = ['password', '${SQLSERVER_DATABASE_USER_PASSWORD}']
+    jaasAttrs = [alias, userid, password]
+    security = AdminConfig.getid('/Security:/')
+    j2cUser = AdminConfig.create('JAASAuthData', security, jaasAttrs)
 
 # Data Source
 newjdbc = AdminConfig.getid('/JDBCProvider:SQLServerJDBCProvider/')
-name = ['name', '${SQLSERVER_DATASOURCE_NAME}']
-jndi = ['jndiName', '${SQLSERVER_DATASOURCE_JNDI_NAME}']
-auth = ['authDataAlias', userAlias]
-authMechanism = ['authMechanismPreference', 'BASIC_PASSWORD']
-helper = ['datasourceHelperClassname', 'com.ibm.websphere.rsadapter.MicrosoftSQLServerDataStoreHelper']
-dsAttrs = [name, jndi, auth, authMechanism, helper]
+dsAttrs = []
+dsAttrs.append(['name', '${SQLSERVER_DATASOURCE_NAME}'])
+dsAttrs.append(['jndiName', '${SQLSERVER_DATASOURCE_JNDI_NAME}'])
+dsAttrs.append(['datasourceHelperClassname', 'com.ibm.websphere.rsadapter.MicrosoftSQLServerDataStoreHelper'])
+if not enablePswlessConnection:
+    dsAttrs.append(['authDataAlias', userAlias])
+    dsAttrs.append(['authMechanismPreference', 'BASIC_PASSWORD'])
 newds = AdminConfig.create('DataSource', newjdbc, dsAttrs)
 
 # Data Source properties
@@ -48,14 +53,18 @@ propSet = AdminConfig.create('J2EEResourcePropertySet', newds, [])
 AdminConfig.create('J2EEResourceProperty', propSet, [["name", "databaseName"], ["value", "${SQLSERVER_DATABASE_NAME}"]])
 AdminConfig.create('J2EEResourceProperty', propSet, [["name", "serverName"], ["value", "${SQLSERVER_SERVER_NAME}"]])
 AdminConfig.create('J2EEResourceProperty', propSet, [["name", "portNumber"], ["value", "${SQLSERVER_PORT_NUMBER}"]])
+if enablePswlessConnection:
+    AdminConfig.create('J2EEResourceProperty', propSet, [["name", "authentication"], ["value", "ActiveDirectoryMSI"]])
+    AdminConfig.create('J2EEResourceProperty', propSet, [["name", "MSIClientId"], ["value", "${MSI_CLIENT_ID}"]])
 
 # Create CMP Connection factory
 rra = AdminConfig.getid("/ServerCluster:${CLUSTER_NAME}/J2CResourceAdapter:WebSphere Relational Resource Adapter/")
 cmpAttrs = []
 cmpAttrs.append(["name", "SQLServerDataSource_CF"])
-cmpAttrs.append(["authMechanismPreference", "BASIC_PASSWORD"])
-cmpAttrs.append(["authDataAlias", userAlias])
 cmpAttrs.append(["cmpDatasource", newds])
+if not enablePswlessConnection:
+    cmpAttrs.append(["authDataAlias", userAlias])
+    cmpAttrs.append(["authMechanismPreference", "BASIC_PASSWORD"])
 cf = AdminConfig.create("CMPConnectorFactory", rra, cmpAttrs)
 
 # Save configuratoin changes and sync to active nodes
