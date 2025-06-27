@@ -168,10 +168,15 @@ param dbUser string = 'contosoDbUser'
 @secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
+@description('Enable passwordless datasource connection.')
+param enablePswlessConnection bool = false
+@description('Managed identity that has access to database')
+param dbIdentity object = {}
 
 param guidValue string = take(replace(newGuid(), '-', ''), 6)
 
-var const_arguments = format(' {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, enableDB, databaseType, base64(jdbcDataSourceJNDIName), base64(dsConnectionURL), base64(dbUser), base64(dbPassword), const_configureIHS)
+var uamiClientId = enablePswlessConnection ? reference(items(dbIdentity.userAssignedIdentities)[0].key, '${azure.apiVersionForIdentity}', 'full').properties.clientId : 'NA'
+var const_arguments = format(' {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, enableDB, databaseType, base64(jdbcDataSourceJNDIName), base64(dsConnectionURL), base64(dbUser), base64(dbPassword), enablePswlessConnection, uamiClientId, const_configureIHS)
 var const_dnsLabelPrefix = format('{0}{1}', dnsLabelPrefix, guidValue)
 var const_ihsArguments1 = format(' {0} {1} {2} {3} {4}', name_dmgrVM, ihsUnixUsername, ihsAdminUsername, ihsAdminPassword, name_storageAccount)
 var const_ihsArguments2 = format(' {0} {1}', name_share, const_mountPointPath)
@@ -576,6 +581,7 @@ module appGatewayEndPid './modules/_pids/_empty.bicep' = if (const_configureAppG
 resource clusterVMs 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMachines}' = [for i in range(0, numberOfNodes): {
   name: i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}'
   location: location
+  identity: enablePswlessConnection ? dbIdentity : null
   properties: {
     hardwareProfile: {
       vmSize: vmSize
