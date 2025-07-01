@@ -40,6 +40,10 @@ on:
         required: true
         type: string
         default: 'eastus'
+      configurations_for_ci:
+        description: "JSON string of environment variables used for CI"
+        required: false
+        default: '{}'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
@@ -81,6 +85,7 @@ env:
 jobs:
   integration-test:
     runs-on: ubuntu-latest
+    env: ${{ fromJson(inputs.configurations_for_ci) }}
     steps:
       - name: Get versions of external dependencies
         run: |
@@ -232,8 +237,24 @@ jobs:
             selectLoadBalancer=appgw
           fi
           echo "selectLoadBalancer=${selectLoadBalancer}" >> $GITHUB_ENV
+          
+          if ${{ env.entitled == 'true' }}; then
+            echo "Deploy with existing WebSphere entitlement license"
+            useTrial=false
+            ibmUserId=${{ secrets.IBM_USER_ID }}
+            ibmUserPwd=${{ secrets.IBM_USER_PWD }}
+          else
+            echo "Trial user, use evaluation license"
+            useTrial=true
+            ibmUserId=""
+            ibmUserPwd=""
+          fi
+          
           cd ${{ env.repoName }}
-          mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME -DuseTrial=true \
+          mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME \
+            -DuseTrial=${useTrial} \
+            -DibmUserId=${ibmUserId} \
+            -DibmUserPwd=${ibmUserPwd} \
             -DnumberOfNodes=3 -DvmSize=Standard_D2_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
             -DadminUsername=${{ env.vmAdminId }} -DadminPasswordOrKey=${{ env.vmAdminPassword }} \
             -DauthenticationType=password -DwasUsername=${{ env.vmAdminId }} -DwasPassword=${{ env.vmAdminPassword }} \
