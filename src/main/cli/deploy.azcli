@@ -141,6 +141,7 @@ parametersJson=$( cat $parametersFilePath | jq '.parameters' )
 newOrExistingVnetForCluster=$( echo $parametersJson | jq '.newOrExistingVnetForCluster.value' | sed 's/"//g' )
 if [ "newOrExistingVnetForCluster" != "existing" ]; then
     parametersJson=$( echo $parametersJson | jq 'del(.vnetForCluster)' )
+    parametersJson=$( echo $parametersJson | jq 'del(.newOrExistingVnetForCluster)' )
 fi
 useTrial=$( echo $parametersJson | jq '.useTrial.value' | sed 's/"//g' )
 parametersJson=$( echo $parametersJson | jq --argjson useTrial "$useTrial" '.useTrial.value = $useTrial' )
