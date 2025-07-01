@@ -85,8 +85,14 @@ env:
 jobs:
   integration-test:
     runs-on: ubuntu-latest
-    env: ${{ fromJson(inputs.configurations_for_ci) }}
     steps:
+      - name: Set dynamic env from configurations_for_ci
+        run: |
+          echo "${{ inputs.configurations_for_ci }}" > config.json
+          for key in $(jq -r 'to_entries|map("\(.key)")|.[]' config.json); do
+            value=$(jq -r --arg k "$key" '.[$k]' config.json)
+            echo "$key=$value" >> $GITHUB_ENV
+          done
       - name: Get versions of external dependencies
         run: |
           curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
