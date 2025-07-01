@@ -137,6 +137,11 @@ resourceGroupLocation=$( az group show --name $resourceGroupName | jq -r '.locat
 
 #parameters JSON
 parametersJson=$( cat $parametersFilePath | jq '.parameters' )
+# get the value of newOrExistingVnetForCluster and check if it is "existing", if not,remove the vnetForCluster from the parameters
+newOrExistingVnetForCluster=$( echo $parametersJson | jq '.newOrExistingVnetForCluster.value' | sed 's/"//g' )
+if [ "newOrExistingVnetForCluster" != "existing" ]; then
+    parametersJson=$( echo $parametersJson | jq 'del(.vnetForCluster)' )
+fi
 useTrial=$( echo $parametersJson | jq '.useTrial.value' | sed 's/"//g' )
 parametersJson=$( echo $parametersJson | jq --argjson useTrial "$useTrial" '.useTrial.value = $useTrial' )
 numberOfNodes=$( echo $parametersJson | jq '.numberOfNodes.value' | sed 's/"//g' )

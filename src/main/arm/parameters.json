@@ -91,6 +91,12 @@
         },
         "dbPassword": {
             "value": "${dbPassword}"
+        },
+        "newOrExistingVnetForCluster" : {
+            "value": "${newOrExistingVnetForCluster}"
+        },
+        "vnetForCluster":{
+            "value": "${vnetForCluster}"
         }
     }
 }
