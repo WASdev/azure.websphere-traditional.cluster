@@ -4,9 +4,10 @@
       "workflow": "integration-test.yaml",
       "scenarios": [
         {
-          "scenario": "Deploy with existing WebSphere entitlement",
+          "scenario": "Deploy with existing WebSphere entitlement with ihs load balancer",
           "inputs": {
             "databaseType": "none",
+            "selectLoadBalancer": "ihs",
             "configurations_for_ci": {
               "entitled": "true"
             }
@@ -16,6 +17,12 @@
           "scenario": "Deploy with passwordless SQL Server",
           "inputs": {
             "databaseType": "sqlserver-passwordless"
+          }
+        },
+        {
+          "scenario": "Select LoadBalancer application gateway",
+          "inputs": {
+            "selectLoadBalancer": "appgw"
           }
         },
         {
