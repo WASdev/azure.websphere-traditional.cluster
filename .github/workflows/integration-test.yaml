@@ -162,7 +162,7 @@ jobs:
           az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
           az vm create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
-            --image "Canonical:UbuntuServer:18.04-LTS:latest" \
+            --image "Canonical:UbuntuServer:22.04-LTS:latest" \
             --admin-username azureuser --generate-ssh-keys \
             --nsg-rule NONE --enable-agent true \
             --vnet-name ${{ env.dbInstanceName }}VNET --enable-auto-update false \
