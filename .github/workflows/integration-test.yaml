@@ -98,11 +98,22 @@ jobs:
             echo "Invalid JSON in configurations_for_ci"
             exit 1
           fi
-          for key in $(jq -r 'to_entries|map("\(.key)")|.[]' config.json); do
-            value=$(jq -r --arg k "$key" '.[$k]' config.json | tr -d '"')
-            echo "$key=$value"
-            echo "$key=$value" >> $GITHUB_ENV
+          
+          # Set environment variables for top-level keys only (non-nested)
+          for key in $(jq -r 'to_entries | map(select(.value | type != "object")) | map(.key) | .[]' config.json); do
+            value=$(jq -r --arg k "$key" '.[$k]' config.json)
+            # Only set valid environment variable names
+            if [[ "$key" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+              echo "$key=$value"
+              echo "$key=$value" >> $GITHUB_ENV
+            fi
           done
+          
+          # Set nested objects as JSON strings for jq access
+          if jq -e '.vnetForCluster' config.json > /dev/null 2>&1; then
+            vnetForClusterJson=$(jq -c '.vnetForCluster' config.json)
+            echo "vnetForCluster=${vnetForClusterJson}" >> $GITHUB_ENV
+          fi
 
       - name: Get versions of external dependencies
         run: |
@@ -155,17 +166,21 @@ jobs:
         if: ${{ env.newOrExistingVnetForCluster == 'existing' }}
         run: |
           echo "Provisioning Azure Vnet with subnet"
+          vnetName=$(echo '${{ env.vnetForCluster }}' | jq -r '.name')
+          gatewaySubnetName=$(echo '${{ env.vnetForCluster }}' | jq -r '.subnets.gatewaySubnet.name')
+          clusterSubnetName=$(echo '${{ env.vnetForCluster }}' | jq -r '.subnets.clusterSubnet.name')
+          
           az network vnet create \
             --resource-group ${{ env.resourceGroup }} \
-            --name ${{ env.vnetForCluster.name }} \
+            --name "${vnetName}" \
             --address-prefix 10.0.0.0/28 \
-            --subnet-name ${{ env.vnetForCluster.subnets.gatewaySubnet.name }} \
+            --subnet-name "${gatewaySubnetName}" \
             --subnet-prefix 10.0.0.0/29
 
           az network vnet subnet create \
             --resource-group ${{ env.resourceGroup }} \
-            --name ${{ env.vnetForCluster.name }} \
-            --subnet-name ${{ env.vnetForCluster.subnets.clusterSubnet.name }} \
+            --vnet-name "${vnetName}" \
+            --name "${clusterSubnetName}" \
             --address-prefix 10.0.0.0/30
       - name: Deploy an IBM DB2 server on Azure VM
         if: ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}
