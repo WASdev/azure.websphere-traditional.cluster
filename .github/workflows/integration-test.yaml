@@ -161,6 +161,12 @@ jobs:
         id: azure-login
         with:
           creds: ${{ env.azureCredentials }}
+      - name: Create Azure resource group
+        id: create-resource-group
+        run: |
+          echo "Creating Azure resource group: ${{ env.testResourceGroup }}"
+          az group create --name ${{ env.testResourceGroup }} --location ${{ env.location }}
+
       - name: Provision Azure Vnet
         id: vnet-provision
         if: ${{ env.newOrExistingVnetForCluster == 'existing' }}
@@ -171,21 +177,22 @@ jobs:
           clusterSubnetName=$(echo '${{ env.vnetForCluster }}' | jq -r '.subnets.clusterSubnet.name')
           
           az network vnet create \
-            --resource-group ${{ env.resourceGroup }} \
+            --resource-group ${{ env.testResourceGroup }} \
+            --location ${{ env.location }} \
             --name "${vnetName}" \
             --address-prefix 10.0.0.0/28 \
             --subnet-name "${gatewaySubnetName}" \
             --subnet-prefix 10.0.0.0/29
 
           az network vnet subnet create \
-            --resource-group ${{ env.resourceGroup }} \
+            --resource-group ${{ env.testResourceGroup }} \
             --vnet-name "${vnetName}" \
             --name "${clusterSubnetName}" \
             --address-prefix 10.0.0.0/30
       - name: Deploy an IBM DB2 server on Azure VM
         if: ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}
         run: |
-          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          
           az vm create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
             --image "Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest" \
@@ -203,7 +210,7 @@ jobs:
       - name: Deploy an Oracle database server on Azure VM
         if: ${{ inputs.databaseType == 'oracle' || github.event.client_payload.databaseType == 'oracle' }}
         run: |
-          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          
           az vm create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
             --image Oracle:oracle-database-19-3:oracle-database-19-0904:latest --size Standard_DS2_v2 \
@@ -222,7 +229,7 @@ jobs:
       - name: Deploy an instance of Azure SQL Database
         if: ${{ inputs.databaseType == 'sqlserver' || github.event.client_payload.databaseType == 'sqlserver' }}
         run: |
-          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          
           az sql server create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
             --admin-user testuser --admin-password ${{ env.dbPassword }} \
@@ -239,7 +246,7 @@ jobs:
       - name: Deploy an instance of Azure Database for PostgreSQL Flexible Server
         if: ${{ inputs.databaseType == 'postgres' || github.event.client_payload.databaseType == 'postgres' }}
         run: |
-          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          
           # Create a PostgreSQL Flexible Server that allows Azure services to access
           az postgres flexible-server create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} --database-name testdb \
