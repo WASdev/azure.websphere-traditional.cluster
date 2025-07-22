@@ -86,6 +86,10 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
       - name: Set dynamic env from configurations_for_ci
         run: |
           echo '${{ inputs.configurations_for_ci }}' > config.json
@@ -95,10 +99,11 @@ jobs:
             exit 1
           fi
           for key in $(jq -r 'to_entries|map("\(.key)")|.[]' config.json); do
-            value=$(jq -r --arg k "$key" '.[$k]' config.json)
+            value=$(jq -r --arg k "$key" '.[$k]' config.json | tr -d '"')
             echo "$key=$value"
             echo "$key=$value" >> $GITHUB_ENV
           done
+
       - name: Get versions of external dependencies
         run: |
           curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
