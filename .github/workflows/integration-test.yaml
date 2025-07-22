@@ -88,9 +88,15 @@ jobs:
     steps:
       - name: Set dynamic env from configurations_for_ci
         run: |
-          echo "${{ inputs.configurations_for_ci }}" > config.json
+          echo '${{ inputs.configurations_for_ci }}' > config.json
+          # return error if the json is not valid
+          if ! jq empty config.json; then
+            echo "Invalid JSON in configurations_for_ci"
+            exit 1
+          fi
           for key in $(jq -r 'to_entries|map("\(.key)")|.[]' config.json); do
             value=$(jq -r --arg k "$key" '.[$k]' config.json)
+            echo "$key=$value"
             echo "$key=$value" >> $GITHUB_ENV
           done
       - name: Get versions of external dependencies
