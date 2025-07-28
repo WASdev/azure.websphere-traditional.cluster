@@ -188,7 +188,7 @@ jobs:
             --resource-group ${{ env.testResourceGroup }} \
             --vnet-name "${vnetName}" \
             --name "${clusterSubnetName}" \
-            --address-prefix 10.0.0.0/30
+            --address-prefix 10.0.0.8/29
       - name: Deploy an IBM DB2 server on Azure VM
         if: ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}
         run: |
