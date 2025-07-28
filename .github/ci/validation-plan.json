@@ -12,39 +12,6 @@
               "entitled": "true"
             }
           }
-        },
-        {
-          "scenario": "Deploy with passwordless SQL Server",
-          "inputs": {
-            "databaseType": "sqlserver-passwordless"
-          }
-        },
-        {
-          "scenario": "Select LoadBalancer application gateway",
-          "inputs": {
-            "selectLoadBalancer": "appgw"
-          }
-        },
-        {
-          "scenario": "Bring your own VNET",
-            "inputs": {
-              "databaseType": "none",
-              "configurations_for_ci": {
-                "newOrExistingVnetForCluster": "existing",
-                "vnetForCluster": {
-                  "name": "existingvnet-twascluster",
-                  "newOrExisting": "new",
-                  "subnets": {
-                    "gatewaySubnet": {
-                      "name": "subnet-for-twascluster-appgw"
-                    },
-                    "clusterSubnet": {
-                      "name": "subnet-for-twascluster"
-                    }
-                  }
-                }
-              }
-            }
         }
       ]
     }
