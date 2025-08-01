@@ -477,6 +477,9 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
+      - name: sleep 30m
+        run: |
+          sleep 30m
       - uses: azure/login@v1
         id: azure-login
         with:
