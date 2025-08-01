@@ -86,10 +86,6 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          detached: true
       - name: Set dynamic env from configurations_for_ci
         run: |
           echo '${{ inputs.configurations_for_ci }}' > config.json
