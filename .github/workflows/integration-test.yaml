@@ -40,8 +40,8 @@ on:
         required: true
         type: string
         default: 'eastus'
-      configurations_for_ci:
-        description: "JSON string of environment variables used for CI"
+      configurations_for_it:
+        description: "JSON string of environment variables used for IT"
         required: false
         default: '{}'
   # Allows you to run this workflow using GitHub APIs
@@ -86,12 +86,12 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Set dynamic env from configurations_for_ci
+      - name: Set dynamic env from configurations_for_it
         run: |
-          echo '${{ inputs.configurations_for_ci }}' > config.json
+          echo '${{ inputs.configurations_for_it }}' > config.json
           # return error if the json is not valid
           if ! jq empty config.json; then
-            echo "Invalid JSON in configurations_for_ci"
+            echo "Invalid JSON in configurations_for_it"
             exit 1
           fi
           
