@@ -235,6 +235,7 @@ var name_appgwFrontendSSLCertName = 'appGatewaySslCert'
 var name_appGateway = format('appgw{0}', guidValue)
 var name_appGatewayPublicIPAddress = '${name_appGateway}-ip'
 var name_appGWPostDeploymentDsName = format('appgwpostdeploymentds{0}', guidValue)
+var name_clusterPostDeploymentDsName = format('clusterpostdeploymentds{0}', guidValue)
 
 // Work around arm-ttk test "Variables Must Be Referenced"
 var configBase64 = loadFileAsBase64('config.json')
@@ -256,7 +257,7 @@ module clusterStartPid './modules/_pids/_empty.bicep' = {
   params: {}
 }
 
-module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureAppGw) {
+module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = {
   name: 'uami-deployment'
   params: {
     location: location
@@ -840,6 +841,24 @@ module ihsEndPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   params: {
   }
   dependsOn: [
+    ihsVMExtension
+  ]
+}
+
+module clusterPostDeployment 'modules/_deployment-scripts/_dsClusterPostDeployment.bicep' = {
+  name: name_clusterPostDeploymentDsName
+  params: {
+    name: name_clusterPostDeploymentDsName
+    location: location
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    identity: obj_uamiForDeploymentScript
+    resourceGroupName: resourceGroup().name
+    guidTag: guidTag
+  }
+  dependsOn: [
+    appgwPostDeployment
+    clusterVMsExtension
     ihsVMExtension
   ]
 }

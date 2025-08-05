@@ -25,6 +25,3 @@ if [[ "${CONFIGURE_APPGW,,}" == "true" ]]; then
     az network nic ip-config update -g ${RESOURCE_GROUP_NAME} --nic-name ${nicName} -n ${ipConfigName} --set privateIpAllocationMethod=Static
   done
 fi
-
-# Delete uami generated before
-az identity delete --ids ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY}
