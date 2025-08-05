@@ -55,7 +55,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: workerNodePrefix
       }
     ]
-    primaryScriptUri: uri(const_scriptLocation, 'post-deployment.sh${_artifactsLocationSasToken}')
+    primaryScriptUri: uri(const_scriptLocation, 'appgw-post-deployment.sh${_artifactsLocationSasToken}')
 
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'

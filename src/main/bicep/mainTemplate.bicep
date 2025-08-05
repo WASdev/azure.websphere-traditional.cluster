@@ -234,7 +234,7 @@ var name_domainLabelforApplicationGateway = take('${name_dnsNameforApplicationGa
 var name_appgwFrontendSSLCertName = 'appGatewaySslCert'
 var name_appGateway = format('appgw{0}', guidValue)
 var name_appGatewayPublicIPAddress = '${name_appGateway}-ip'
-var name_postDeploymentDsName = format('postdeploymentds{0}', guidValue)
+var name_appGWPostDeploymentDsName = format('appgwpostdeploymentds{0}', guidValue)
 
 // Work around arm-ttk test "Variables Must Be Referenced"
 var configBase64 = loadFileAsBase64('config.json')
@@ -557,10 +557,10 @@ module appgwDeployment 'modules/_appgateway.bicep' = if (const_configureAppGw) {
   ]
 }
 
-module appgwPostDeployment 'modules/_deployment-scripts/_dsPostDeployment.bicep' = if (const_configureAppGw) {
-  name: name_postDeploymentDsName
+module appgwPostDeployment 'modules/_deployment-scripts/_dsAppGWPostDeployment.bicep' = if (const_configureAppGw) {
+  name: name_appGWPostDeploymentDsName
   params: {
-    name: name_postDeploymentDsName
+    name: name_appGWPostDeploymentDsName
     location: location
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
