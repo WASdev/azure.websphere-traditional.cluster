@@ -22,6 +22,7 @@ on:
         - db2
         - oracle
         - sqlserver
+        - sqlserver-passwordless
         - postgres
         - none
       deleteAzureResources:
@@ -39,7 +40,7 @@ on:
         description: 'Location of the Azure resources'
         required: true
         type: string
-        default: 'eastus'
+        default: 'eastus2'
       configurations_for_it:
         description: "JSON string of environment variables used for IT"
         required: false
@@ -77,9 +78,10 @@ env:
   vmAdminPassword: ${{ secrets.VM_ADMIN_PASSWORD }}
   dbInstanceName: db${{ github.run_id }}${{ github.run_number }}
   dbPassword: ${{ secrets.DATABASE_PASSWORD }}
+  uamiName: uami${{ github.run_id }}${{ github.run_number }}
   testResourceGroup: twasClusterTestRG-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
   testDeploymentName: twasClusterTestDeployment-${{ github.run_id }}-${{ github.run_number }}
-  location: ${{ github.event.inputs.location || 'eastus' }}
+  location: ${{ github.event.inputs.location || 'eastus2' }}
   scriptLocation: https://raw.githubusercontent.com/${{ secrets.USER_NAME }}/azure.websphere-traditional.cluster/$GITHUB_REF_NAME/test/
   curlParameters: "--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180"
 jobs:
@@ -191,7 +193,7 @@ jobs:
           
           az vm create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
-            --image "Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest" \
+            --image "Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest" \
             --admin-username azureuser --generate-ssh-keys \
             --nsg-rule NONE --enable-agent true \
             --vnet-name ${{ env.dbInstanceName }}VNET --enable-auto-update false \
@@ -223,12 +225,20 @@ jobs:
             --settings "{\"fileUris\": [\"${{ env.scriptLocation }}install-oracle-main.sh\", \"${{ env.scriptLocation }}install-oracle.sh\"]}" \
             --protected-settings "{\"commandToExecute\":\"bash install-oracle-main.sh ${{ env.dbPassword }}\"}"
       - name: Deploy an instance of Azure SQL Database
-        if: ${{ inputs.databaseType == 'sqlserver' || github.event.client_payload.databaseType == 'sqlserver' }}
+        if: ${{ inputs.databaseType == 'sqlserver' || inputs.databaseType == 'sqlserver-passwordless' || github.event.client_payload.databaseType == 'sqlserver' || github.event.client_payload.databaseType == 'sqlserver-passwordless' }}
         run: |
+
+          # Extract service principal details from the credentials
+          SP_CLIENT_ID=$(echo '${{ env.azureCredentials }}' | jq -r '.clientId')
           
+          # Create an Azure SQL server with system-assigned managed identity and assign the service principal logged into the Azure CLI as an Entra admin
           az sql server create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
             --admin-user testuser --admin-password ${{ env.dbPassword }} \
+            --assign-identity \
+            --external-admin-principal-type Application \
+            --external-admin-name $SP_CLIENT_ID \
+            --external-admin-sid $(az ad sp show --id $SP_CLIENT_ID --query id -o tsv) \
             --location ${{ env.location }}
           host=$(az sql server show \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
@@ -239,6 +249,34 @@ jobs:
             --resource-group ${{ env.testResourceGroup }} --server ${{ env.dbInstanceName }} \
             --name "AllowAllAzureIps" --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
           az sql db create --resource-group ${{ env.testResourceGroup }} --server ${{ env.dbInstanceName }} --name testdb
+
+          if [[ "${{ inputs.databaseType }}" == "sqlserver-passwordless" || "${{ github.event.client_payload.databaseType }}" == "sqlserver-passwordless" ]]; then
+            # Assign Directory Readers permission to the SQL Server's system-assigned managed identity
+            # Get the SQL Server's system-assigned managed identity's principal ID
+            SQL_SERVER_IDENTITY_PRINCIPAL_ID=$(az sql server show \
+              --resource-group ${{ env.testResourceGroup }} \
+              --name ${{ env.dbInstanceName }} \
+              --query "identity.principalId" -o tsv)
+            
+            # Add the SQL Server managed identity to the Directory Readers role
+            # https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#all-roles
+            DIRECTORY_READERS_ROLE_TEMPLATE_ID=88d8e3e3-8f55-4a1e-953a-9b9898b8876b
+            az rest --method POST \
+              --uri "https://graph.microsoft.com/v1.0/directoryRoles/roleTemplateId=$DIRECTORY_READERS_ROLE_TEMPLATE_ID/members/\$ref" \
+              --headers "Content-Type=application/json" \
+              --body "{\"@odata.id\":\"https://graph.microsoft.com/v1.0/directoryObjects/$SQL_SERVER_IDENTITY_PRINCIPAL_ID\"}"
+            # Create a user-assigned managed identity
+            az identity create --name ${{ env.uamiName }} --resource-group ${{ env.testResourceGroup }}
+            # Export the resource ID of the user-assigned managed identity as an environment variable
+            uamiId=$(az identity show --name ${{ env.uamiName }} --resource-group ${{ env.testResourceGroup }} --query id -o tsv)
+            echo "uamiId=${uamiId}" >> $GITHUB_ENV
+            # Create a SQL user for the managed identity for Microsoft Entra authentication
+            export SERVER_NAME=${host}
+            export DATABASE_NAME=testdb
+            export SQL_QUERY="CREATE USER \"${{ env.uamiName }}\" FROM EXTERNAL PROVIDER;GRANT CONTROL ON DATABASE::\"${DATABASE_NAME}\" TO \"${{ env.uamiName }}\";"
+            mvn clean package --file websphere-cafe/util/azure-sql-query/pom.xml
+            java -jar websphere-cafe/util/azure-sql-query/target/azure-sql-query-1.0-SNAPSHOT-jar-with-dependencies.jar
+          fi
       - name: Deploy an instance of Azure Database for PostgreSQL Flexible Server
         if: ${{ inputs.databaseType == 'postgres' || github.event.client_payload.databaseType == 'postgres' }}
         run: |
@@ -258,6 +296,7 @@ jobs:
           databaseType=db2
           dsConnectionURL=jdbc:db2://contoso.db2.database:50000/sample
           dbUser=contosoDbUser
+          enablePswlessConnection=false
           if ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}; then
             enableDB=true
             databaseType=db2
@@ -275,6 +314,11 @@ jobs:
             databaseType=sqlserver
             dsConnectionURL="jdbc:sqlserver://${{ env.sqlserverHost }}:1433;database=testdb"
             dbUser=testuser@${{ env.dbInstanceName }}
+          elif ${{ inputs.databaseType == 'sqlserver-passwordless' || github.event.client_payload.databaseType == 'sqlserver-passwordless' }}; then
+            enableDB=true
+            databaseType=sqlserver
+            dsConnectionURL="jdbc:sqlserver://${{ env.sqlserverHost }}:1433;database=testdb"
+            enablePswlessConnection=true
           elif ${{ inputs.databaseType == 'postgres' || github.event.client_payload.databaseType == 'postgres' }}; then
             enableDB=true
             databaseType=postgres
@@ -314,6 +358,7 @@ jobs:
             -DihsUnixUsername=${{ env.vmAdminId }} -DihsUnixPasswordOrKey=${{ env.vmAdminPassword }} \
             -DihsAuthenticationType=password -DihsAdminUsername=${{ env.vmAdminId }} -DihsAdminPassword=${{ env.vmAdminPassword }} \
             -DenableDB=${enableDB} -DdatabaseType=${databaseType} -DjdbcDataSourceJNDIName=jdbc/WebSphereCafeDB -DdsConnectionURL=${dsConnectionURL} -DdbUser=${dbUser} -DdbPassword=${{ env.dbPassword }} \
+            -DenablePswlessConnectionParam=${enablePswlessConnection} \
             -Dtest.args="-Test All" -Pbicep -Passembly -Ptemplate-validation-tests clean install
       - name: Deploy a twas-cluster on Azure VMs
         run: |
@@ -321,7 +366,7 @@ jobs:
           chmod a+x deploy.azcli
           ndImageResourceId=${{ inputs.ndImageResourceId }}
           ihsImageResourceId=${{ inputs.ihsImageResourceId }}
-          ./deploy.azcli -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} -l ${{ env.location }} -d "${ndImageResourceId:-NA}" -i "${ihsImageResourceId:-NA}"
+          ./deploy.azcli -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} -l ${{ env.location }} -u ${{ env.uamiId || 'NA' }} -d "${ndImageResourceId:-NA}" -i "${ihsImageResourceId:-NA}"
       - name: Verify the deployment
         run: |
           outputs=$(az deployment group show -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} --query 'properties.outputs')
@@ -431,7 +476,7 @@ jobs:
           echo "##[set-output name=artifactName;]${artifactName}"
           echo "##[set-output name=artifactPath;]${{ env.repoName }}/target/$artifactName"
       - name: Archive ${{ env.repoName }} template
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         if: success()
         with:
           name: ${{steps.artifact_file.outputs.artifactName}}

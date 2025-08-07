@@ -25,8 +25,10 @@ jdbcDSJNDIName=$(echo "${6}" | base64 -d)           # JDBC Datasource JNDI name
 dsConnectionString=$(echo "${7}" | base64 -d)       # JDBC Datasource connection String
 databaseUser=$(echo "${8}" | base64 -d)             # Database username
 databasePassword=$(echo "${9}" | base64 -d)         # Database user password
-jdbcDriverPath=${10}                                # JDBC driver path
-jdbcDriverClassPath=${11}                           # JDBC driver class path
+enablePswlessConnection=${10}                       # If passwordless connection to database is enabled
+uamiClientId=${11}                                  # Managed identity client ID
+jdbcDriverPath=${12}                                # JDBC driver path
+jdbcDriverClassPath=${13}                           # JDBC driver class path
 
 echo "$(date): Start to create JDBC provider and data source."
 
@@ -86,6 +88,8 @@ elif [ $dbType == "sqlserver" ]; then
     sed -i "s#\${SQLSERVER_DATASOURCE_JNDI_NAME}#${jdbcDSJNDIName}#g" $createDsScript
     sed -i "s/\${SQLSERVER_SERVER_NAME}/${sqlServerServerName}/g" $createDsScript
     sed -i "s/\${SQLSERVER_PORT_NUMBER}/${sqlServerPortNumber}/g" $createDsScript
+    sed -i "s/\${ENABLE_PASSWORDLESS_CONNECTION}/${enablePswlessConnection}/g" $createDsScript
+    sed -i "s/\${MSI_CLIENT_ID}/${uamiClientId}/g" $createDsScript
 elif [ $dbType == "postgres" ]; then
     # Replace placeholder strings with user-input parameters
     sed -i "s/\${CLUSTER_NAME}/${wasClusterName}/g" $createDsScript

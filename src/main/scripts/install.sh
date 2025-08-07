@@ -278,13 +278,13 @@ if [ ${result} != $ENTITLED ] && [ ${result} != $EVALUATION ]; then
 fi
 
 # Check required parameters
-if [ "$7" = True ] && [ "${13}" = True ] && [ "${18}" == "" ]; then 
+if [ "$7" = True ] && [ "${15}" = True ] && [ "${20}" == "" ]; then 
   echo "Usage:"
-  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [dbType] [jdbcDSJNDIName] [dsConnectionString] [databaseUser] [databasePassword] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] True [dbType] [jdbcDSJNDIName] [dsConnectionString] [databaseUser] [databasePassword] [enablePswlessConnection] [uamiClientId] True [storageAccountName] [storageAccountKey] [fileShareName] [mountpointPath] [storageAccountPrivateIp]"
   exit 1
-elif [ "${13}" == "" ]; then 
+elif [ "${15}" == "" ]; then 
   echo "Usage:"
-  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] <True|False> [dbType] [jdbcDSJNDIName] [dsConnectionString] [databaseUser] [databasePassword] False"
+  echo "  ./install.sh [dmgr] [adminUserName] [adminPassword] [dmgrHostName] [members] [dynamic] <True|False> [dbType] [jdbcDSJNDIName] [dsConnectionString] [databaseUser] [databasePassword] [enablePswlessConnection] [uamiClientId] False"
   exit 1
 fi
 dmgr=$1
@@ -300,13 +300,15 @@ jdbcDSJNDIName=$9
 dsConnectionString=${10}
 databaseUser=${11}
 databasePassword=${12}
+enablePswlessConnection=${13}
+uamiClientId=${14}
 
-configureIHS=${13}
-storageAccountName=${14}
-storageAccountKey=${15}
-fileShareName=${16}
-mountpointPath=${17}
-storageAccountPrivateIp=${18}
+configureIHS=${15}
+storageAccountName=${16}
+storageAccountKey=${17}
+fileShareName=${18}
+mountpointPath=${19}
+storageAccountPrivateIp=${20}
 
 # Jdbc driver path/class path
 jdbcDriverPath=${WAS_ND_INSTALL_DIRECTORY}/${dbType}/java
@@ -330,7 +332,7 @@ if [ "$dmgr" = True ]; then
         copy_jdbc_drivers $jdbcDriverPath $dbType
 
         jdbcDataSourceName=dataSource-$dbType
-        ./create-ds.sh ${WAS_ND_INSTALL_DIRECTORY} Dmgr001 MyCluster "$dbType" "$jdbcDataSourceName" "$jdbcDSJNDIName" "$dsConnectionString" "$databaseUser" "$databasePassword" "$jdbcDriverPath" "$JDBC_DRIVER_CLASS_PATH"
+        ./create-ds.sh ${WAS_ND_INSTALL_DIRECTORY} Dmgr001 MyCluster "$dbType" "$jdbcDataSourceName" "$jdbcDSJNDIName" "$dsConnectionString" "$databaseUser" "$databasePassword" "$enablePswlessConnection" "$uamiClientId" "$jdbcDriverPath" "$JDBC_DRIVER_CLASS_PATH"
 
         # Test connection for the created data source
         ${WAS_ND_INSTALL_DIRECTORY}/profiles/Dmgr001/bin/wsadmin.sh -lang jython -c "AdminControl.testConnection(AdminConfig.getid('/DataSource:${jdbcDataSourceName}/'))"

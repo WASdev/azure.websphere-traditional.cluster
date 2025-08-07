@@ -92,6 +92,9 @@
         "dbPassword": {
             "value": "${dbPassword}"
         },
+        "enablePswlessConnection": {
+            "value": "${enablePswlessConnectionParam}"
+        },
         "newOrExistingVnetForCluster" : {
             "value": "${newOrExistingVnetForCluster}"
         },

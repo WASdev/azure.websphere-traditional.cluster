@@ -22,100 +22,108 @@ IFS=$'\n\t'
 # -o: prevents errors in a pipeline from being masked
 # IFS new value is less likely to cause confusing bugs when looping arrays or arguments (e.g. $@)
 
-usage() { echo "Usage: $0 -n <deploymentName> -g <resourceGroupName> -l <resourceGroupLocation>" 1>&2; exit 1; }
+usage() { echo "Usage: $0 -n <deploymentName> -g <resourceGroupName> -l <resourceGroupLocation> -u <uamiId> -d <ndImageResourceId> -i <ihsImageResourceId>" 1>&2; exit 1; }
 
 declare deploymentName=""
 declare resourceGroupName=""
 declare resourceGroupLocation=""
+declare uamiId=""
 declare ndImageResourceId=""
 declare ihsImageResourceId=""
 
 # Initialize parameters specified from command line
-while getopts ":n:i:g:l:d:" arg; do
-	case "${arg}" in
-		n)
-			deploymentName=${OPTARG}
-			;;
-		g)
-			resourceGroupName=${OPTARG}
-			;;
-		l)
-			resourceGroupLocation=${OPTARG}
-			;;
-		d)
-			ndImageResourceId=${OPTARG}
-			;;
-		i)
-			ihsImageResourceId=${OPTARG}
-			;;
-		esac
+while getopts ":n:g:l:u:d:i:" arg; do
+    case "${arg}" in
+        n)
+            deploymentName=${OPTARG}
+            ;;
+        g)
+            resourceGroupName=${OPTARG}
+            ;;
+        l)
+            resourceGroupLocation=${OPTARG}
+            ;;
+        u)
+            uamiId=${OPTARG}
+            ;;
+        d)
+            ndImageResourceId=${OPTARG}
+            ;;
+        i)
+            ihsImageResourceId=${OPTARG}
+            ;;
+        esac
 done
 shift $((OPTIND-1))
 
+echo uamiId: $uamiId
+echo ndImageResourceId: $ndImageResourceId
+echo ihsImageResourceId: $ihsImageResourceId
+
 #Prompt for parameters is some required parameters are missing
 if [[ -z "$deploymentName" ]]; then
-	echo "Enter a name for this deployment:"
-	read deploymentName
+    echo "Enter a name for this deployment:"
+    read deploymentName
 fi
 
 if [[ -z "$resourceGroupName" ]]; then
-	echo "This script will look for an existing resource group, otherwise a new one will be created "
-	echo "You can create new resource groups with the CLI using: az group create "
-	echo "Enter a resource group name:"
-	read resourceGroupName
-	[[ "${resourceGroupName:?}" ]]
+    echo "This script will look for an existing resource group, otherwise a new one will be created "
+    echo "You can create new resource groups with the CLI using: az group create "
+    echo "Enter a resource group name:"
+    read resourceGroupName
+    [[ "${resourceGroupName:?}" ]]
 fi
 
 if [[ -z "$resourceGroupLocation" ]]; then
-	echo "If creating a *new* resource group, you need to set a location "
-	echo "You can lookup locations with the CLI using: az account list-locations "
-	
-	echo "Enter resource group location:"
-	read resourceGroupLocation
+    echo "If creating a *new* resource group, you need to set a location "
+    echo "You can lookup locations with the CLI using: az account list-locations "
+    
+    echo "Enter resource group location:"
+    read resourceGroupLocation
 fi
 
 if [ -z "$deploymentName" ] || [ -z "$resourceGroupName" ]; then
-	echo "Either one of deploymentName and resourceGroupName is empty"
-	usage
+    echo "Either one of deploymentName and resourceGroupName is empty"
+    usage
 fi
 
 #templateFile Path - template file to be used
 templateFilePath="../arm/mainTemplate.json"
 
 if [ ! -f "$templateFilePath" ]; then
-	echo "$templateFilePath not found"
-	exit 1
+    echo "$templateFilePath not found"
+    exit 1
 fi
 
 # use ndImageResourceId in template if provided
 if [ -n "$ndImageResourceId" ] && [ "$ndImageResourceId" != NA ]; then
-	templateJson=$(cat $templateFilePath | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM")) | .plan)')
-	templateJson=$(echo $templateJson | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM")) | .properties.storageProfile.imageReference)')
-	templateJson=$(echo $templateJson | jq --arg ndImageResourceId "$ndImageResourceId" '(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM"))).properties.storageProfile.imageReference.id |= $ndImageResourceId')
-	echo $templateJson | jq . > $templateFilePath
+    templateJson=$(cat $templateFilePath | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM")) | .plan)')
+    templateJson=$(echo $templateJson | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM")) | .properties.storageProfile.imageReference)')
+    templateJson=$(echo $templateJson | jq --arg ndImageResourceId "$ndImageResourceId" '(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_dmgrVM"))).properties.storageProfile.imageReference.id |= $ndImageResourceId')
+    echo $templateJson | jq . > $templateFilePath
 fi
 
 # use ihsImageResourceId in template if provided
 if [ -n "$ihsImageResourceId" ] && [ "$ihsImageResourceId" != NA ]; then
-	templateJson=$(cat $templateFilePath | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM")) | .plan)')
-	templateJson=$(echo $templateJson | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM")) | .properties.storageProfile.imageReference)')
-	templateJson=$(echo $templateJson | jq --arg ihsImageResourceId "$ihsImageResourceId" '(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM"))).properties.storageProfile.imageReference.id |= $ihsImageResourceId')
-	echo $templateJson | jq . > $templateFilePath
+    templateJson=$(cat $templateFilePath | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM")) | .plan)')
+    templateJson=$(echo $templateJson | jq 'del(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM")) | .properties.storageProfile.imageReference)')
+    templateJson=$(echo $templateJson | jq --arg ihsImageResourceId "$ihsImageResourceId" '(.resources[] | select(.type == "Microsoft.Compute/virtualMachines") | select(.name | contains("name_ihsVM"))).properties.storageProfile.imageReference.id |= $ihsImageResourceId')
+    echo $templateJson | jq . > $templateFilePath
 fi
 
 #parameter file path
 parametersFilePath="../arm/parameters.json"
 
 if [ ! -f "$parametersFilePath" ]; then
-	echo "$parametersFilePath not found"
-	exit 1
+    echo "$parametersFilePath not found"
+    exit 1
 fi
 
 #login to azure using your credentials
 az account show 1> /dev/null
 
 if [ $? != 0 ]; then
-	az login
+    az login
 fi
 
 set +e
@@ -124,16 +132,30 @@ set +e
 az group show --name $resourceGroupName 1> /dev/null
 
 if [ $? != 0 ]; then
-	echo "Resource group with name" $resourceGroupName "could not be found. Creating new resource group..."
-	set -e
-	(
-		set -x
-		az group create --name $resourceGroupName --location $resourceGroupLocation 1> /dev/null
-	)
+    echo "Resource group with name" $resourceGroupName "could not be found. Creating new resource group..."
+    set -e
+    (
+        set -x
+        az group create --name $resourceGroupName --location $resourceGroupLocation 1> /dev/null
+    )
 else
-	echo "Using existing resource group..."
+    echo "Using existing resource group..."
 fi
 resourceGroupLocation=$( az group show --name $resourceGroupName | jq -r '.location' )
+
+# Convert uamiId to a JSON object with the required structure for user assigned managed identity
+dbIdentity="{}"
+if [ -n "$uamiId" ] && [ "$uamiId" != "NA" ]; then
+    # Only create the managed identity structure if uamiId is provided and not "NA"
+    dbIdentity=$(jq -n \
+        --arg uamiId "$uamiId" \
+        '{
+            "type": "UserAssigned",
+            "userAssignedIdentities": {
+                ($uamiId): {}
+            }
+        }')
+fi
 
 #parameters JSON
 parametersJson=$( cat $parametersFilePath | jq '.parameters' )
@@ -151,15 +173,18 @@ enableCookieBasedAffinity=$( echo $parametersJson | jq '.enableCookieBasedAffini
 parametersJson=$( echo $parametersJson | jq --argjson enableCookieBasedAffinity "$enableCookieBasedAffinity" '.enableCookieBasedAffinity.value = $enableCookieBasedAffinity' )
 enableDB=$( echo $parametersJson | jq '.enableDB.value' | sed 's/"//g' )
 parametersJson=$( echo $parametersJson | jq --argjson enableDB "$enableDB" '.enableDB.value = $enableDB' )
+enablePswlessConnection=$( echo $parametersJson | jq '.enablePswlessConnection.value' | sed 's/"//g' )
+parametersJson=$( echo $parametersJson | jq --argjson enablePswlessConnection "$enablePswlessConnection" '.enablePswlessConnection.value = $enablePswlessConnection' )
+parametersJson=$( echo $parametersJson | jq --argjson dbIdentity "$dbIdentity" '{"dbIdentity": {"value":$dbIdentity}} + .' )
 parametersJson=$( echo "$parametersJson" | jq -c '.' )
 
 #Start deployment
 echo "Starting deployment..."
 (
-	az deployment group create --name "$deploymentName" --resource-group "$resourceGroupName" \
-		--template-file "$templateFilePath" --parameters "$parametersJson"
+    az deployment group create --name "$deploymentName" --resource-group "$resourceGroupName" \
+        --template-file "$templateFilePath" --parameters "$parametersJson"
 )
 
 if [[ $? -eq 0 ]]; then
-	echo "Template has been successfully deployed"
+    echo "Template has been successfully deployed"
 fi
