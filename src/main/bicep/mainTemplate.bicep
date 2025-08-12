@@ -760,7 +760,7 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiV
             id: ihsPublicIPAddress.id
           }
           subnet: {
-            id: resourceId('Microsoft.Network/ /subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name)
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name)
           }
         }
       }
@@ -791,7 +791,7 @@ resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@${azu
       }
     ]
   }
-  tags: _objTagsByResource['${identifier.networkInterfaces}']   6  
+  tags: _objTagsByResource['${identifier.networkInterfaces}']   
 }
 
 resource ihsVM 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMachines}' = if (const_configureIHS) {
