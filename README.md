@@ -7,6 +7,9 @@
 * [Liberty on ARO](https://github.com/WASdev/azure.liberty.aro)
 * [Liberty on AKS](https://github.com/WASdev/azure.liberty.aks)
 
+# Integration tests report
+[![IT Validation Workflows](https://github.com/azure-javaee/azure.websphere-traditional.cluster/actions/workflows/it-validation-workflows.yaml/badge.svg)](https://github.com/azure-javaee/azure.websphere-traditional.cluster/actions/workflows/it-validation-workflows.yaml)
+
 # Deploy RHEL 8.4 VMs on Azure with IBM WebSphere Application Server ND Traditional V9.0.5 cluster and IBM HTTP Server V9.0 pre-installed
 
 ## Prerequisites

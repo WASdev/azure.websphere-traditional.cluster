@@ -94,6 +94,12 @@
         },
         "enablePswlessConnection": {
             "value": "${enablePswlessConnectionParam}"
+        },
+        "newOrExistingVnetForCluster" : {
+            "value": "${newOrExistingVnetForCluster}"
+        },
+        "vnetForCluster":{
+            "value": "${vnetForCluster}"
         }
     }
 }

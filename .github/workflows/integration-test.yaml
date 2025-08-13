@@ -41,6 +41,10 @@ on:
         required: true
         type: string
         default: 'eastus2'
+      configurations_for_it:
+        description: "JSON string of environment variables used for IT"
+        required: false
+        default: '{}'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=WASdev/azure.websphere-traditional.cluster
@@ -84,6 +88,31 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     steps:
+      - name: Set dynamic env from configurations_for_it
+        run: |
+          echo '${{ inputs.configurations_for_it }}' > config.json
+          # return error if the json is not valid
+          if ! jq empty config.json; then
+            echo "Invalid JSON in configurations_for_it"
+            exit 1
+          fi
+          
+          # Set environment variables for top-level keys only (non-nested)
+          for key in $(jq -r 'to_entries | map(select(.value | type != "object")) | map(.key) | .[]' config.json); do
+            value=$(jq -r --arg k "$key" '.[$k]' config.json)
+            # Only set valid environment variable names
+            if [[ "$key" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+              echo "$key=$value"
+              echo "$key=$value" >> $GITHUB_ENV
+            fi
+          done
+          
+          # Set nested objects as JSON strings for jq access
+          if jq -e '.vnetForCluster' config.json > /dev/null 2>&1; then
+            vnetForClusterJson=$(jq -c '.vnetForCluster' config.json)
+            echo "vnetForCluster=${vnetForClusterJson}" >> $GITHUB_ENV
+          fi
+
       - name: Get versions of external dependencies
         run: |
           curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
@@ -130,10 +159,38 @@ jobs:
         id: azure-login
         with:
           creds: ${{ env.azureCredentials }}
+      - name: Create Azure resource group
+        id: create-resource-group
+        run: |
+          echo "Creating Azure resource group: ${{ env.testResourceGroup }}"
+          az group create --name ${{ env.testResourceGroup }} --location ${{ env.location }}
+
+      - name: Provision Azure Vnet
+        id: vnet-provision
+        if: ${{ env.newOrExistingVnetForCluster == 'existing' }}
+        run: |
+          echo "Provisioning Azure Vnet with subnet"
+          vnetName=$(echo '${{ env.vnetForCluster }}' | jq -r '.name')
+          gatewaySubnetName=$(echo '${{ env.vnetForCluster }}' | jq -r '.subnets.gatewaySubnet.name')
+          clusterSubnetName=$(echo '${{ env.vnetForCluster }}' | jq -r '.subnets.clusterSubnet.name')
+          
+          az network vnet create \
+            --resource-group ${{ env.testResourceGroup }} \
+            --location ${{ env.location }} \
+            --name "${vnetName}" \
+            --address-prefix 10.0.0.0/28 \
+            --subnet-name "${gatewaySubnetName}" \
+            --subnet-prefix 10.0.0.0/29
+
+          az network vnet subnet create \
+            --resource-group ${{ env.testResourceGroup }} \
+            --vnet-name "${vnetName}" \
+            --name "${clusterSubnetName}" \
+            --address-prefix 10.0.0.8/29
       - name: Deploy an IBM DB2 server on Azure VM
         if: ${{ inputs.databaseType == 'db2' || github.event.client_payload.databaseType == 'db2' }}
         run: |
-          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          
           az vm create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
             --image "Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest" \
@@ -151,7 +208,7 @@ jobs:
       - name: Deploy an Oracle database server on Azure VM
         if: ${{ inputs.databaseType == 'oracle' || github.event.client_payload.databaseType == 'oracle' }}
         run: |
-          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          
           az vm create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} \
             --image Oracle:oracle-database-19-3:oracle-database-19-0904:latest --size Standard_DS2_v2 \
@@ -170,7 +227,6 @@ jobs:
       - name: Deploy an instance of Azure SQL Database
         if: ${{ inputs.databaseType == 'sqlserver' || inputs.databaseType == 'sqlserver-passwordless' || github.event.client_payload.databaseType == 'sqlserver' || github.event.client_payload.databaseType == 'sqlserver-passwordless' }}
         run: |
-          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
 
           # Extract service principal details from the credentials
           SP_CLIENT_ID=$(echo '${{ env.azureCredentials }}' | jq -r '.clientId')
@@ -224,7 +280,7 @@ jobs:
       - name: Deploy an instance of Azure Database for PostgreSQL Flexible Server
         if: ${{ inputs.databaseType == 'postgres' || github.event.client_payload.databaseType == 'postgres' }}
         run: |
-          az group create -n ${{ env.testResourceGroup }} -l ${{ env.location }}
+          
           # Create a PostgreSQL Flexible Server that allows Azure services to access
           az postgres flexible-server create \
             --resource-group ${{ env.testResourceGroup }} --name ${{ env.dbInstanceName }} --database-name testdb \
@@ -277,8 +333,24 @@ jobs:
             selectLoadBalancer=appgw
           fi
           echo "selectLoadBalancer=${selectLoadBalancer}" >> $GITHUB_ENV
+          
+          if ${{ env.entitled == 'true' }}; then
+            echo "Deploy with existing WebSphere entitlement license"
+            useTrial=false
+            ibmUserId=${{ secrets.IBM_USER_ID }}
+            ibmUserPwd=${{ secrets.IBM_USER_PWD }}
+          else
+            echo "Trial user, use evaluation license"
+            useTrial=true
+            ibmUserId=""
+            ibmUserPwd=""
+          fi
+          
           cd ${{ env.repoName }}
-          mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME -DuseTrial=true \
+          mvn -Dgit.repo=${{ env.userName }} -Dgit.tag=$GITHUB_REF_NAME \
+            -DuseTrial=${useTrial} \
+            -DibmUserId=${ibmUserId} \
+            -DibmUserPwd=${ibmUserPwd} \
             -DnumberOfNodes=3 -DvmSize=Standard_D2_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
             -DadminUsername=${{ env.vmAdminId }} -DadminPasswordOrKey=${{ env.vmAdminPassword }} \
             -DauthenticationType=password -DwasUsername=${{ env.vmAdminId }} -DwasPassword=${{ env.vmAdminPassword }} \
