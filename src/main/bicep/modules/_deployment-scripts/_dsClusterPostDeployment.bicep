@@ -21,10 +21,8 @@ param _artifactsLocationSasToken string = ''
 param location string
 param name string = ''
 param identity object = {}
-param configureAppGw bool
 param resourceGroupName string
-param numberOfWorkerNodes int
-param workerNodePrefix string
+param guidTag string
 
 param utcValue string = utcNow()
 
@@ -37,25 +35,17 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
   identity: identity
   properties: {
     azCliVersion: '2.41.0'
-    environmentVariables: [  
-      {
-        name: 'CONFIGURE_APPGW'
-        value: string(configureAppGw)
-      }
+    environmentVariables: [
       {
         name: 'RESOURCE_GROUP_NAME'
         value: resourceGroupName
-      }   
-      {
-        name: 'NUMBER_OF_WORKER_NODES'
-        value: string(numberOfWorkerNodes)
       }
       {
-        name: 'WORKER_NODE_PREFIX'
-        value: workerNodePrefix
+        name: 'GUID_TAG'
+        value: guidTag
       }
     ]
-    primaryScriptUri: uri(const_scriptLocation, 'post-deployment.sh${_artifactsLocationSasToken}')
+    primaryScriptUri: uri(const_scriptLocation, 'cluster-post-deployment.sh${_artifactsLocationSasToken}')
 
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'

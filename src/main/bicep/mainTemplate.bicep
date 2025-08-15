@@ -177,6 +177,7 @@ param dbIdentity object = {}
 param tagsByResource object = {}
 
 param guidValue string = take(replace(newGuid(), '-', ''), 6)
+param guidTag string = newGuid()
 
 var uamiClientId = enablePswlessConnection ? reference(items(dbIdentity.userAssignedIdentities)[0].key, '${azure.apiVersionForIdentity}', 'full').properties.clientId : 'NA'
 var const_arguments = format(' {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}', wasUsername, wasPassword, name_dmgrVM, numberOfNodes - 1, dynamic, enableDB, databaseType, base64(jdbcDataSourceJNDIName), base64(dsConnectionURL), base64(dbUser), base64(dbPassword), enablePswlessConnection, uamiClientId, const_configureIHS)
@@ -236,7 +237,8 @@ var name_domainLabelforApplicationGateway = take('${name_dnsNameforApplicationGa
 var name_appgwFrontendSSLCertName = 'appGatewaySslCert'
 var name_appGateway = format('appgw{0}', guidValue)
 var name_appGatewayPublicIPAddress = '${name_appGateway}-ip'
-var name_postDeploymentDsName = format('postdeploymentds{0}', guidValue)
+var name_appGWPostDeploymentDsName = format('appgwpostdeploymentds{0}', guidValue)
+var name_clusterPostDeploymentDsName = format('clusterpostdeploymentds{0}', guidValue)
 
 // Work around arm-ttk test "Variables Must Be Referenced"
 var configBase64 = loadFileAsBase64('config.json')
@@ -274,7 +276,7 @@ module clusterStartPid './modules/_pids/_empty.bicep' = {
   params: {}
 }
 
-module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = if (const_configureAppGw) {
+module uamiDeployment 'modules/_uami/_uamiAndRoles.bicep' = {
   name: 'uami-deployment'
   params: {
     location: location
@@ -449,9 +451,12 @@ resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@${azur
   name: vnetForCluster.subnets.clusterSubnet.name
 }
 
-resource publicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = if (const_newVNet) {
+resource publicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = {
   name: name_publicIPAddress
   location: location
+  tags: const_newVNet ? {} : {
+    '${guidTag}': ''
+  }
   properties: {
     publicIPAllocationMethod: 'Dynamic'
     dnsSettings: {
@@ -461,7 +466,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersion
   tags: _objTagsByResource['${identifier.publicIPAddresses}']  
 }
 
-resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_newVNet) {
+resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = {
   name: '${name_dmgrVM}-if'
   location: location
   properties: {
@@ -474,7 +479,7 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.api
             id: publicIPAddress.id
           }
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name)
+            id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name) : existingClusterSubnet.id
           }
         }
       }
@@ -485,28 +490,26 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.api
   }
   dependsOn: [
     virtualNetwork
+    existingClusterSubnet
   ]
   tags: _objTagsByResource['${identifier.networkInterfaces}']  
 }
 
-resource dmgrVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (!const_newVNet) {
-  name: '${name_dmgrVM}-no-pub-ip-if'
+resource managedVMPublicIPAddresses 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = [for i in range(0, (numberOfNodes - 1)): {
+  name: '${const_managedVMPrefix}${(i + 1)}-ip'
   location: location
+  tags: {
+    '${guidTag}': ''
+  }
   properties: {
-    ipConfigurations: [
-      {
-        name: 'ipconfig1'
-        properties: {
-          privateIPAllocationMethod: 'Dynamic'
-          subnet: {
-            id: existingClusterSubnet.id
-          }
-        }
-      }
-    ]
+    publicIPAllocationMethod: 'Dynamic'
+    dnsSettings: {
+      domainNameLabel: concat(toLower('${const_dnsLabelPrefix}${(i + 1)}'))
+    }
   }
   tags: _objTagsByResource['${identifier.networkInterfaces}']  
-}
+  }
+}]
 
 resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = [for i in range(0, (numberOfNodes - 1)): {
   name: '${const_managedVMPrefix}${(i + 1)}-if'
@@ -517,6 +520,9 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@${azure
         name: 'ipconfig1'
         properties: {
           privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: {
+            id: resourceId('Microsoft.Network/publicIPAddresses', '${const_managedVMPrefix}${(i + 1)}-ip')
+          }
           subnet: {
             id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name) : existingClusterSubnet.id
           }
@@ -530,6 +536,7 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@${azure
   dependsOn: [
     virtualNetwork
     existingClusterSubnet
+    managedVMPublicIPAddresses
   ]
   tags: _objTagsByResource['${identifier.networkInterfaces}']    
 }]
@@ -578,10 +585,10 @@ module appgwDeployment 'modules/_appgateway.bicep' = if (const_configureAppGw) {
   ]
 }
 
-module appgwPostDeployment 'modules/_deployment-scripts/_dsPostDeployment.bicep' = if (const_configureAppGw) {
-  name: name_postDeploymentDsName
+module appgwPostDeployment 'modules/_deployment-scripts/_dsAppGWPostDeployment.bicep' = if (const_configureAppGw) {
+  name: name_appGWPostDeploymentDsName
   params: {
-    name: name_postDeploymentDsName
+    name: name_appGWPostDeploymentDsName
     location: location
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
@@ -637,7 +644,7 @@ resource clusterVMs 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirt
     networkProfile: {
       networkInterfaces: [
         {
-          id: resourceId('Microsoft.Network/networkInterfaces', format('{0}-if', i == 0 ? (const_newVNet ? name_dmgrVM : '${name_dmgrVM}-no-pub-ip') : '${const_managedVMPrefix}${i}'))
+          id: resourceId('Microsoft.Network/networkInterfaces', format('{0}-if', i == 0 ? name_dmgrVM : '${const_managedVMPrefix}${i}'))
         }
       ]
     }
@@ -655,7 +662,6 @@ resource clusterVMs 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirt
   }
   dependsOn: [
     dmgrVMNetworkInterface
-    dmgrVMNetworkInterfaceNoPubIp
     managedVMNetworkInterfaces
   ]
   tags: _objTagsByResource['${identifier.virtualMachines}']  
@@ -735,9 +741,12 @@ module ihsStartPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   }
 }
 
-resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = if (const_configureIHS && const_newVNet) {
+resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = if (const_configureIHS) {
   name: name_ihsPublicIPAddress
   location: location
+  tags: const_newVNet ? {} : {
+    '${guidTag}': ''
+  }
   properties: {
     publicIPAllocationMethod: 'Dynamic'
     dnsSettings: {
@@ -747,7 +756,7 @@ resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVers
   tags: _objTagsByResource['${identifier.publicIPAddresses}']  
 }
 
-resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_configureIHS && const_newVNet) {
+resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_configureIHS) {
   name: '${name_ihsVM}-if'
   location: location
   properties: {
@@ -760,7 +769,7 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiV
             id: ihsPublicIPAddress.id
           }
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name)
+            id: const_newVNet ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetForCluster.name, vnetForCluster.subnets.clusterSubnet.name) : existingClusterSubnet.id
           }
         }
       }
@@ -771,6 +780,7 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiV
   }
   dependsOn: [
     virtualNetwork
+    existingClusterSubnet
   ]
   tags: _objTagsByResource['${identifier.networkInterfaces}']  
 }
@@ -826,7 +836,7 @@ resource ihsVM 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMa
     networkProfile: {
       networkInterfaces: [
         {
-          id: const_newVNet ? ihsVMNetworkInterface.id : ihsVMNetworkInterfaceNoPubIp.id
+          id: ihsVMNetworkInterface.id
         }
       ]
     }
@@ -887,6 +897,24 @@ module ihsEndPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
   ]
 }
 
+module clusterPostDeployment 'modules/_deployment-scripts/_dsClusterPostDeployment.bicep' = {
+  name: name_clusterPostDeploymentDsName
+  params: {
+    name: name_clusterPostDeploymentDsName
+    location: location
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    identity: obj_uamiForDeploymentScript
+    resourceGroupName: resourceGroup().name
+    guidTag: guidTag
+  }
+  dependsOn: [
+    appgwPostDeployment
+    clusterVMsExtension
+    ihsVMExtension
+  ]
+}
+
 output resourceGroupName string = resourceGroup().name
 output region string = location
 output clusterName string = 'MyCluster'
@@ -896,7 +924,7 @@ output dmgrHostName string = name_dmgrVM
 output dmgrPort string = '8879'
 output virtualNetworkName string = vnetForCluster.name
 output subnetName string = vnetForCluster.subnets.clusterSubnet.name
-output adminSecuredConsole string = uri(format('https://{0}:9043/', const_newVNet ? publicIPAddress.properties.dnsSettings.fqdn : reference('${name_dmgrVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), 'ibm/console/logon.jsp')
-output ihsConsole string = const_configureIHS ? uri(format('http://{0}', const_newVNet ? ihsPublicIPAddress.properties.dnsSettings.fqdn : reference('${name_ihsVM}-no-pub-ip-if').ipConfigurations[0].properties.privateIPAddress), '') : 'N/A'
+output adminSecuredConsole string = uri(format('https://{0}:9043/', const_newVNet ? publicIPAddress.properties.dnsSettings.fqdn : reference('${name_dmgrVM}-if').ipConfigurations[0].properties.privateIPAddress), 'ibm/console/logon.jsp')
+output ihsConsole string = const_configureIHS ? uri(format('http://{0}', const_newVNet ? ihsPublicIPAddress.properties.dnsSettings.fqdn : reference('${name_ihsVM}-if').ipConfigurations[0].properties.privateIPAddress), '') : 'N/A'
 output appGatewayHttpURL string = const_configureAppGw ? uri(format('http://{0}/', appgwDeployment.outputs.appGatewayURL), '/') : 'N/A'
 output appGatewayHttpsURL string = const_configureAppGw ? uri(format('https://{0}/', appgwDeployment.outputs.appGatewaySecuredURL), '/') : 'N/A'
