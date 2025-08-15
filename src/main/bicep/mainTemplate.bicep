@@ -173,6 +173,9 @@ param enablePswlessConnection bool = false
 @description('Managed identity that has access to database')
 param dbIdentity object = {}
 
+@description('${label.tagsLabel}')
+param tagsByResource object = {}
+
 param guidValue string = take(replace(newGuid(), '-', ''), 6)
 param guidTag string = newGuid()
 
@@ -241,6 +244,22 @@ var name_clusterPostDeploymentDsName = format('clusterpostdeploymentds{0}', guid
 var configBase64 = loadFileAsBase64('config.json')
 var config = base64ToJson(configBase64)
 
+var _objTagsByResource = {
+  '${identifier.virtualMachines}': contains(tagsByResource, '${identifier.virtualMachines}') ? tagsByResource['${identifier.virtualMachines}'] : json('{}')
+  '${identifier.virtualMachinesExtensions}': contains(tagsByResource, '${identifier.virtualMachinesExtensions}') ? tagsByResource['${identifier.virtualMachinesExtensions}'] : json('{}')
+  '${identifier.virtualNetworks}': contains(tagsByResource, '${identifier.virtualNetworks}') ? tagsByResource['${identifier.virtualNetworks}'] : json('{}')
+  '${identifier.networkInterfaces}': contains(tagsByResource, '${identifier.networkInterfaces}') ? tagsByResource['${identifier.networkInterfaces}'] : json('{}')
+  '${identifier.networkSecurityGroups}': contains(tagsByResource, '${identifier.networkSecurityGroups}') ? tagsByResource['${identifier.networkSecurityGroups}'] : json('{}')
+  '${identifier.publicIPAddresses}': contains(tagsByResource, '${identifier.publicIPAddresses}') ? tagsByResource['${identifier.publicIPAddresses}'] : json('{}')
+  '${identifier.deploymentScripts}': contains(tagsByResource, '${identifier.deploymentScripts}') ? tagsByResource['${identifier.deploymentScripts}'] : json('{}')
+  '${identifier.storageAccounts}': contains(tagsByResource, '${identifier.storageAccounts}') ? tagsByResource['${identifier.storageAccounts}'] : json('{}')
+  '${identifier.vaults}': contains(tagsByResource, '${identifier.vaults}') ? tagsByResource['${identifier.vaults}'] : json('{}')
+  '${identifier.userAssignedIdentities}': contains(tagsByResource, '${identifier.userAssignedIdentities}') ? tagsByResource['${identifier.userAssignedIdentities}'] : json('{}') 
+  '${identifier.applicationGateways}': contains(tagsByResource, '${identifier.applicationGateways}') ? tagsByResource['${identifier.applicationGateways}'] : json('{}')
+  '${identifier.privateEndpoints}': contains(tagsByResource, '${identifier.privateEndpoints}') ? tagsByResource['${identifier.privateEndpoints}'] : json('{}') 
+
+}
+
 module partnerCenterPid './modules/_pids/_empty.bicep' = {
   name: 'pid-83c32565-42aa-43d9-92e9-9c02289c7fbd-partnercenter'
   params: {
@@ -271,6 +290,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionFor
     name: 'Standard_LRS'
   }
   kind: 'StorageV2'
+  tags: _objTagsByResource['${identifier.storageAccounts}']
 }
 
 resource storageAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@${azure.apiVersionForPrivateEndpoint}' = if (const_configureIHS) {
@@ -372,6 +392,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@${azure.a
       }
     ]
   }
+  tags: _objTagsByResource['${identifier.networkSecurityGroups}']
 }
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@${azure.apiVersionForVirtualNetworks}' = if (const_newVNet) {
@@ -412,6 +433,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@${azure.apiVersionFor
       }
     ]
   }
+  tags: _objTagsByResource['${identifier.virtualNetworks}']  
 }
 
 resource existingVNet 'Microsoft.Network/virtualNetworks@${azure.apiVersionForVirtualNetworks}' existing = if (!const_newVNet) {
@@ -441,6 +463,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersion
       domainNameLabel: concat(toLower(const_dnsLabelPrefix))
     }
   }
+  tags: _objTagsByResource['${identifier.publicIPAddresses}']  
 }
 
 resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = {
@@ -469,6 +492,7 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.api
     virtualNetwork
     existingClusterSubnet
   ]
+  tags: _objTagsByResource['${identifier.networkInterfaces}']  
 }
 
 resource managedVMPublicIPAddresses 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = [for i in range(0, (numberOfNodes - 1)): {
@@ -482,6 +506,8 @@ resource managedVMPublicIPAddresses 'Microsoft.Network/publicIPAddresses@${azure
     dnsSettings: {
       domainNameLabel: concat(toLower('${const_dnsLabelPrefix}${(i + 1)}'))
     }
+  }
+  tags: _objTagsByResource['${identifier.networkInterfaces}']  
   }
 }]
 
@@ -512,6 +538,7 @@ resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@${azure
     existingClusterSubnet
     managedVMPublicIPAddresses
   ]
+  tags: _objTagsByResource['${identifier.networkInterfaces}']    
 }]
 
 module appGatewayStartPid './modules/_pids/_empty.bicep' = if (const_configureAppGw) {
@@ -637,6 +664,7 @@ resource clusterVMs 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirt
     dmgrVMNetworkInterface
     managedVMNetworkInterfaces
   ]
+  tags: _objTagsByResource['${identifier.virtualMachines}']  
 }]
 
 module clusterVMsCreated './modules/_pids/_empty.bicep' = {
@@ -687,6 +715,7 @@ resource clusterVMsExtension 'Microsoft.Compute/virtualMachines/extensions@${azu
     storageAccountFileShare
     clusterVMs
   ]
+  tags: _objTagsByResource['${identifier.virtualMachinesExtensions}']  
 }]
 
 module dbConnectionEndPid './modules/_pids/_empty.bicep' = if (enableDB) {
@@ -724,6 +753,7 @@ resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVers
       domainNameLabel: concat(toLower(const_ihsDnsLabelPrefix))
     }
   }
+  tags: _objTagsByResource['${identifier.publicIPAddresses}']  
 }
 
 resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_configureIHS) {
@@ -752,6 +782,26 @@ resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiV
     virtualNetwork
     existingClusterSubnet
   ]
+  tags: _objTagsByResource['${identifier.networkInterfaces}']  
+}
+
+resource ihsVMNetworkInterfaceNoPubIp 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_configureIHS && !const_newVNet) {
+  name: '${name_ihsVM}-no-pub-ip-if'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: existingClusterSubnet.id
+          }
+        }
+      }
+    ]
+  }
+  tags: _objTagsByResource['${identifier.networkInterfaces}']   
 }
 
 resource ihsVM 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMachines}' = if (const_configureIHS) {
@@ -802,6 +852,7 @@ resource ihsVM 'Microsoft.Compute/virtualMachines@${azure.apiVersionForVirtualMa
     publisher: config.imagePublisher
     product: config.ihsImageOffer
   }
+  tags: _objTagsByResource['${identifier.virtualMachines}']  
 }
 
 module ihsVMCreated './modules/_pids/_empty.bicep' = if (const_configureIHS) {
@@ -834,6 +885,7 @@ resource ihsVMExtension 'Microsoft.Compute/virtualMachines/extensions@${azure.ap
   dependsOn: [
     storageAccountFileShare
   ]
+  tags: _objTagsByResource['${identifier.virtualMachinesExtensions}']  
 }
 
 module ihsEndPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
