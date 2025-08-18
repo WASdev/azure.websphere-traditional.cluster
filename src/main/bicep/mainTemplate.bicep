@@ -454,16 +454,15 @@ resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@${azur
 resource publicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = {
   name: name_publicIPAddress
   location: location
-  tags: const_newVNet ? {} : {
-    '${guidTag}': ''
-  }
   properties: {
     publicIPAllocationMethod: 'Dynamic'
     dnsSettings: {
       domainNameLabel: concat(toLower(const_dnsLabelPrefix))
     }
   }
-  tags: _objTagsByResource['${identifier.publicIPAddresses}']  
+  tags: const_newVNet ? _objTagsByResource['${identifier.publicIPAddresses}'] : union(_objTagsByResource['${identifier.publicIPAddresses}'], {
+    '${guidTag}': ''
+  })
 }
 
 resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = {
@@ -498,17 +497,15 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.api
 resource managedVMPublicIPAddresses 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = [for i in range(0, (numberOfNodes - 1)): {
   name: '${const_managedVMPrefix}${(i + 1)}-ip'
   location: location
-  tags: {
-    '${guidTag}': ''
-  }
   properties: {
     publicIPAllocationMethod: 'Dynamic'
     dnsSettings: {
       domainNameLabel: concat(toLower('${const_dnsLabelPrefix}${(i + 1)}'))
     }
   }
-  tags: _objTagsByResource['${identifier.networkInterfaces}']  
-  }
+  tags: union(_objTagsByResource['${identifier.networkInterfaces}'], {
+    '${guidTag}': ''
+  })
 }]
 
 resource managedVMNetworkInterfaces 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = [for i in range(0, (numberOfNodes - 1)): {
@@ -744,16 +741,15 @@ module ihsStartPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
 resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = if (const_configureIHS) {
   name: name_ihsPublicIPAddress
   location: location
-  tags: const_newVNet ? {} : {
-    '${guidTag}': ''
-  }
   properties: {
     publicIPAllocationMethod: 'Dynamic'
     dnsSettings: {
       domainNameLabel: concat(toLower(const_ihsDnsLabelPrefix))
     }
   }
-  tags: _objTagsByResource['${identifier.publicIPAddresses}']  
+  tags: const_newVNet ? _objTagsByResource['${identifier.publicIPAddresses}'] : union(_objTagsByResource['${identifier.publicIPAddresses}'], {
+    '${guidTag}': ''
+  })
 }
 
 resource ihsVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.apiVersionForNetworkInterfaces}' = if (const_configureIHS) {
