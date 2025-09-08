@@ -371,11 +371,14 @@ jobs:
         run: |
           outputs=$(az deployment group show -n ${{ env.testDeploymentName }} -g ${{ env.testResourceGroup }} --query 'properties.outputs')
           adminSecuredConsole=$(echo $outputs | jq -r '.adminSecuredConsole.value')
+          echo "outputs [$outputs]" 
+          echo "adminSecuredConsole [$adminSecuredConsole]"
           curl ${{ env.curlParameters }} $adminSecuredConsole -k
           if [[ $? -ne 0 ]]; then
             echo "Failed to access ${adminSecuredConsole}."
             exit 1
           fi
+          echo "ihsConsole [$ihsConsole]"
           ihsConsole=$(echo $outputs | jq -r '.ihsConsole.value')
           if [[ $selectLoadBalancer == "ihs" ]]; then
             curl ${{ env.curlParameters }} $ihsConsole
@@ -392,11 +395,13 @@ jobs:
           appGatewayHttpURL=$(echo $outputs | jq -r '.appGatewayHttpURL.value')
           appGatewayHttpsURL=$(echo $outputs | jq -r '.appGatewayHttpsURL.value')
           if [[ $selectLoadBalancer == "appgw" ]]; then
+            echo "appGatewayHttpURL [$appGatewayHttpURL]"
             curl ${{ env.curlParameters }} $appGatewayHttpURL
             if [[ $? -ne 0 ]]; then
               echo "Failed to access ${appGatewayHttpURL}."
               exit 1
             fi
+            echo "appGatewayHttpsURL [$appGatewayHttpsURL]"
             curl ${{ env.curlParameters }} $appGatewayHttpsURL -k
             if [[ $? -ne 0 ]]; then
               echo "Failed to access ${appGatewayHttpsURL}."
