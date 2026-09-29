@@ -83,6 +83,28 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@${azure.apiVersion
   }
 }
 
+resource wafPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@${azure.apiVersionForApplicationGatewayWebApplicationFirewallPolicies}' = {
+  name: 'wafPolicy-${uniqueString(resourceGroup().id)}'
+  location: location
+  properties: {
+    policySettings: {
+      fileUploadLimitInMb: 100
+      state: 'Enabled'
+      mode: 'Prevention'
+      requestBodyCheck: true
+      maxRequestBodySizeInKb: 128
+    }
+    managedRules: {
+      managedRuleSets: [
+        {
+          ruleSetType: 'OWASP'
+          ruleSetVersion: '3.2'
+        }
+      ]
+    }
+  }
+}
+
 resource wafv2AppGateway 'Microsoft.Network/applicationGateways@${azure.apiVersionForApplicationGateways}' = {
   name: name_appGateway
   location: location
@@ -90,6 +112,9 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@${azure.apiVersi
     sku: {
       name: 'WAF_v2'
       tier: 'WAF_v2'
+    }
+    firewallPolicy: {
+      id: wafPolicy.id
     }
     sslCertificates: [
       {
@@ -286,12 +311,6 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@${azure.apiVersi
         }
       }
     ]
-    webApplicationFirewallConfiguration: {
-      enabled: true
-      firewallMode: 'Prevention'
-      ruleSetType: 'OWASP'
-      ruleSetVersion: '3.0'
-    }
     enableHttp2: false
     autoscaleConfiguration: {
       minCapacity: 2
