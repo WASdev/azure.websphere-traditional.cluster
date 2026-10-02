@@ -351,7 +351,7 @@ jobs:
             -DuseTrial=${useTrial} \
             -DibmUserId=${ibmUserId} \
             -DibmUserPwd=${ibmUserPwd} \
-            -DnumberOfNodes=3 -DvmSize=Standard_D2_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
+            -DnumberOfNodes=3 -DvmSize=Standard_D2s_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
             -DadminUsername=${{ env.vmAdminId }} -DadminPasswordOrKey=${{ env.vmAdminPassword }} \
             -DauthenticationType=password -DwasUsername=${{ env.vmAdminId }} -DwasPassword=${{ env.vmAdminPassword }} \
             -DselectLoadBalancer=${selectLoadBalancer} -DenableCookieBasedAffinity=true -DihsVmSize=Standard_D2_v3 -DihsVMPrefix=ihs -DihsDnsLabelPrefix=ihs \
