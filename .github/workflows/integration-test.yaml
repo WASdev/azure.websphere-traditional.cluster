@@ -354,7 +354,7 @@ jobs:
             -DnumberOfNodes=3 -DvmSize=Standard_D2s_v3 -DdmgrVMPrefix=dmgr -DmanagedVMPrefix=managed -DdnsLabelPrefix=wasndcluster \
             -DadminUsername=${{ env.vmAdminId }} -DadminPasswordOrKey=${{ env.vmAdminPassword }} \
             -DauthenticationType=password -DwasUsername=${{ env.vmAdminId }} -DwasPassword=${{ env.vmAdminPassword }} \
-            -DselectLoadBalancer=${selectLoadBalancer} -DenableCookieBasedAffinity=true -DihsVmSize=Standard_D2_v3 -DihsVMPrefix=ihs -DihsDnsLabelPrefix=ihs \
+            -DselectLoadBalancer=${selectLoadBalancer} -DenableCookieBasedAffinity=true -DihsVmSize=Standard_D2s_v3 -DihsVMPrefix=ihs -DihsDnsLabelPrefix=ihs \
             -DihsUnixUsername=${{ env.vmAdminId }} -DihsUnixPasswordOrKey=${{ env.vmAdminPassword }} \
             -DihsAuthenticationType=password -DihsAdminUsername=${{ env.vmAdminId }} -DihsAdminPassword=${{ env.vmAdminPassword }} \
             -DenableDB=${enableDB} -DdatabaseType=${databaseType} -DjdbcDataSourceJNDIName=jdbc/WebSphereCafeDB -DdsConnectionURL=${dsConnectionURL} -DdbUser=${dbUser} -DdbPassword=${{ env.dbPassword }} \
