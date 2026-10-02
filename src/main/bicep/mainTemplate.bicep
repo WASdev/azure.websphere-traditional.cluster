@@ -454,8 +454,11 @@ resource existingClusterSubnet 'Microsoft.Network/virtualNetworks/subnets@${azur
 resource publicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = {
   name: name_publicIPAddress
   location: location
+  sku: {
+    name: 'Standard'
+  }
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Static'
     dnsSettings: {
       domainNameLabel: concat(toLower(const_dnsLabelPrefix))
     }
@@ -497,8 +500,11 @@ resource dmgrVMNetworkInterface 'Microsoft.Network/networkInterfaces@${azure.api
 resource managedVMPublicIPAddresses 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = [for i in range(0, (numberOfNodes - 1)): {
   name: '${const_managedVMPrefix}${(i + 1)}-ip'
   location: location
+  sku: {
+    name: 'Standard'
+  }
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Static'
     dnsSettings: {
       domainNameLabel: concat(toLower('${const_dnsLabelPrefix}${(i + 1)}'))
     }
@@ -741,8 +747,11 @@ module ihsStartPid './modules/_pids/_empty.bicep' = if (const_configureIHS) {
 resource ihsPublicIPAddress 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = if (const_configureIHS) {
   name: name_ihsPublicIPAddress
   location: location
+  sku: {
+    name: 'Standard'
+  }
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Static'
     dnsSettings: {
       domainNameLabel: concat(toLower(const_ihsDnsLabelPrefix))
     }
